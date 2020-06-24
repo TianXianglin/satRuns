@@ -260,13 +260,9 @@ prep.climate.f = function(dat, data.sample, startingYear, nYears){
 createDT <- function(climate, management,variable, layer,startingYear){
   
   files <- list.files(path= "output/")#,pattern = paste0("year",startingYear,"_"))
-  
-  # files2 <- intersect(list.files(path= "output/", pattern = climate), list.files(path= "output/",pattern = management))
-  # files=intersect(files,files2)
-  
+  startV <- data.table()
   for (ij in variable) assign(varNames[ij],data.table())
-  # segID <- areas <-numeric(0)
-  
+
   for(i in 1:length(files)){
     sampleID <- paste0("sample",i,".")
     
@@ -274,6 +270,7 @@ createDT <- function(climate, management,variable, layer,startingYear){
     
     load(paste0("output/",fileX))
     
+    if(exists("v0")) startV <- rbind(startV,v0)
     margin= 1:2#(length(dim(out$annual[,,variable,]))-1)
     if(layer=="tot"){
       for (ij in variable){ 
@@ -301,6 +298,7 @@ createDT <- function(climate, management,variable, layer,startingYear){
   
   for(ij in variable) save(list=varNames[ij],file=paste0("outDT/",varNames[ij],"_",management,"_",climate,
                                                          "StartYear",startingYear,"layer",layer,".rdata"))
+  if((dim(startV)[1]) > 0) save(startV,file=paste0("outDT/startV_StartYear",startingYear,"layertot.rdata"))
 }
 
 
@@ -330,7 +328,7 @@ createTifFromDT <- function(climate, management, yearOut, varX, layerDT, stYear,
   crs(rastX) <- crsX
   
   rastName <- paste0("outRast/",climate,"_",management,"_var",varNames[varX],
-                     "_spec",layerDT,"_yearStart",stYear,".tif")
+                     "_spec",layerDT,"_yearOut",yearOut,".tif")
   writeRaster(rastX,filename = rastName,overwrite=T)
 }
 

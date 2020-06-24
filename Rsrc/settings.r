@@ -73,11 +73,11 @@ initN <- 2200
 initBA <- pi*(initDBH/200)^2*initN
 
 #####settings for data extraction
-varDT <- c(44,30)   ####variables to extract in DT
+varDT <- c(11:13,30)   ####variables to extract in DT
 layerDT <- "tot" ###layerID to report in data.tables, if layerDT==tot the totals of all layers is provided
 
 #####settings for raster creation
-varRast <- c(44,30)   ####variables to extract in DT
-yearOut <- startingYear + 1:3
+varRast <- varDT  #c(44,30)   ####variables to extract in DT
+yearOut <- c(2019)
 
 #####end Settings####
