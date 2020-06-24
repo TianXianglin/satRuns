@@ -10,11 +10,13 @@ crsX <- crs(raster(baRast))
 clims <- weather
 mans <- harvscen
 
-
-for(varX in varRast){
-  createTifFromDT(clims, mans, yearOut, varX, layerDT, startingYear,XYsegID,crsX = crsX)
-  print(varNames[varX])
+for(ij in yearOut){
+  for(varX in varRast){
+    createTifFromDT(clims, mans, ij, varX, layerDT, startingYear,XYsegID,crsX = crsX)
+    print(varNames[varX])
+  }
 }
+
 
 
 if(TRUE){

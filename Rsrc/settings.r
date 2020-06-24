@@ -78,6 +78,6 @@ layerDT <- "tot" ###layerID to report in data.tables, if layerDT==tot the totals
 
 #####settings for raster creation
 varRast <- varDT  #c(44,30)   ####variables to extract in DT
-yearOut <- c(2019)
+yearOut <- c(2019,2024)
 
 #####end Settings####
