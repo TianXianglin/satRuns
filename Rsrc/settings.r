@@ -29,8 +29,8 @@ climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.
 # climIDpath <- "/scratch/project_2000994/PREBASruns/metadata/" ####on CSC
 
 
-startingYear <- 2016
-yearEnd <- 2024
+startingYear <- 2016  #2019
+yearEnd <- 2019     #2024
 nYears <-  yearEnd - startingYear ## number of simulation years
 domSPrun = 0.
 
@@ -78,6 +78,6 @@ layerDT <- "tot" ###layerID to report in data.tables, if layerDT==tot the totals
 
 #####settings for raster creation
 varRast <- varDT  #c(44,30)   ####variables to extract in DT
-yearOut <- c(2019,2024)
+yearOut <- yearEnd#c(2019,2024)
 
 #####end Settings####
