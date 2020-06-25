@@ -1,9 +1,9 @@
-library(reshape2)
-library(plyr)
-library("raster")
-library(data.table)
-require(sm)
-require(rgdal)
+# library(reshape2)
+# library(plyr)
+# library("raster")
+# library(data.table)
+# require(sm)
+# require(rgdal)
 
 
 
@@ -11,9 +11,9 @@ require(rgdal)
 source("Rsrc/settings.r")
 source("Rsrc/functions.r")
 
-###check prebas version and install if needed
-devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
-require(Rprebasso)
+# ###check prebas version and install if needed
+# devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
+# require(Rprebasso)
 
 
 setwd(generalPath)

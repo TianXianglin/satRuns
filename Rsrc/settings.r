@@ -10,12 +10,26 @@ maxSitesRun <- 20000
 maxSitesRunTest <- 1000
 saveVars <- c(1,11:13,17,30,43,44) ####select variables to save
 
-
 ###library path in CSC project_2000994
 if(CSCrun){
   .libPaths(c("/projappl/project_2000994/project_rpackages", .libPaths()))
   libpath <- .libPaths()[1]
 }
+
+##load libraries
+library(reshape2)
+library(plyr)
+library(raster)
+library(data.table)
+require(sm)
+require(rgdal)
+library(raster)
+library(rgdal)
+
+
+###check prebas version and install if needed
+devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
+require(Rprebasso)
 
 ####indicate rasterPath and climID path
 generalPath <- "C:/Users/minunno/Documents/research/assessCarbon/data/Finland/AC_training_FI_34VEQ/"

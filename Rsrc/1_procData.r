@@ -1,6 +1,4 @@
-library(raster)
-library(rgdal)
-library(data.table)
+
 #####Run settings####
 source("Rsrc/settings.r")
 setwd(generalPath)
