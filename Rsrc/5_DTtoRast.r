@@ -24,7 +24,7 @@ for(ij in yearOut){
 
 
 if(TRUE){
-  fileDT=paste0("outDT/",startingYear,"/","startV_layertot.rdata")
+  fileDT=paste0("outDT/",startingYear,"/","startV_layerall.rdata")
   load(fileDT)
   setkey(XYsegID,segID)
   setkey(startV,segID)
@@ -36,7 +36,7 @@ if(TRUE){
   rastX <- rasterFromXYZ(outXY[,c("x","y","value"),with=F])
   crs(rastX) <- crsX
   
-  rastName <- paste0("outRast/",startingYear,"/","startV_startYear",startingYear,"_layertot.tif")
+  rastName <- paste0("outRast/",startingYear,"/","startV_startYear",startingYear,"_layerall.tif")
   writeRaster(rastX,filename = rastName,overwrite=T)
   
 }

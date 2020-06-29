@@ -261,7 +261,7 @@ prep.climate.f = function(dat, data.sample, startingYear, nYears){
 
 
 ##function to compile all data and create data.table 
-createDT <- function(climate, management,variable, layer,startingYear){
+createDT <- function(climate, management,variable, layer,startingYear,funX){
   
   files <- list.files(path= paste0("output/",startingYear,"/"))#,pattern = paste0("year",startingYear,"_"))
   startV <- data.table()
@@ -276,12 +276,16 @@ createDT <- function(climate, management,variable, layer,startingYear){
     
     if(exists("v0")) startV <- rbind(startV,v0)
     margin= 1:2#(length(dim(out$annual[,,variable,]))-1)
-    if(layer=="tot"){
+    if(layer=="all"){
+      ijX <- 0
       for (ij in variable){ 
+        ijX = ijX+1
         if(varNames[ij] %in% dimnames(out)$varX){
           varX <- which(dimnames(out)$varX==varNames[ij])
-          assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
-                                               apply(out[,,varX,],margin,sum))))
+          if(funX[ijX]=="sum") assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
+                                               apply(out[,,varX,],margin,sum,na.rm=T))))
+          if(funX[ijX]=="mean") assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
+                                                               apply(out[,,varX,],margin,mean,na.rm=T))))
         }else{
           print(paste(varNames[ij],"not saved"))
         }
@@ -302,7 +306,7 @@ createDT <- function(climate, management,variable, layer,startingYear){
   
   for(ij in variable) save(list=varNames[ij],file=paste0("outDT/",startingYear,"/",varNames[ij],"_",management,"_",climate,
                                                          "layer",layer,".rdata"))
-  if((dim(startV)[1]) > 0) save(startV,file=paste0("outDT/",startingYear,"/","startV_layertot.rdata"))
+  if((dim(startV)[1]) > 0) save(startV,file=paste0("outDT/",startingYear,"/","startV_layerall.rdata"))
 }
 
 

@@ -14,13 +14,14 @@ for(ij in yearOut){
     rastName <- paste0("outRast/",startingYear,"/",clims,"_",mans,"_var",varNames[varRast[varX]],
                        "_spec",layerDT,"_yearStart",startingYear,"_yearOut",ij,".tif")
     rastX <- raster(rastName)
-    print(length(which(!is.na(getValues(rastX)))))
-    print(length(which(getValues(rastX)>2000)))
+    # print(length(which(!is.na(getValues(rastX)))))
+    # print(length(which(getValues(rastX)>maxX[varX])))
     rastX[rastX < minX[varX]] <- NA
     rastX[rastX > maxX[varX]] <- NA
-    print(length(which(!is.na(getValues(rastX)))))
+    # print(length(which(!is.na(getValues(rastX)))))
     rastNameCleaned <- paste0("outRast/",startingYear,"/",clims,"_",mans,"_var",varNames[varRast[varX]],
                        "_spec",layerDT,"_yearStart",startingYear,"_yearOut",ij,"_cleaned.tif")
+    writeRaster(rastX,filename = rastNameCleaned,overwrite=T)
   }
   
   

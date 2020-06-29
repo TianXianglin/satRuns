@@ -88,7 +88,8 @@ initBA <- pi*(initDBH/200)^2*initN
 
 #####settings for data extraction
 varDT <- c(11:13,30)   ####variables to extract in DT
-layerDT <- "tot" ###layerID to report in data.tables, if layerDT==tot the totals of all layers is provided
+extrFun <- c("mean","mean","sum","sum")
+layerDT <- "all" ###layerID to report in data.tables, if layerDT==all the all layers are considered as sum or mean according to extrFun
 
 #####settings for raster creation
 varRast <- varDT  #c(44,30)   ####variables to extract in DT

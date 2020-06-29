@@ -13,11 +13,11 @@ if(!dir.exists(paste0("outDT/",startingYear))) {
   clims <- weather
   mans <- harvscen
   # r_no <- 12
-  # layerDT <- "tot" #1,2,3
+  # layerDT <- "all" #1,2,3
   # startingYear <- c(2014,2019)
   for(stYear in startingYear){
     print(stYear)
-    createDT(clims,"NoHarv",varDT,layerDT,stYear)
+    createDT(clims,"NoHarv",varDT,layerDT,stYear,extrFun)
   }
   
   
@@ -27,7 +27,7 @@ if(!dir.exists(paste0("outDT/",startingYear))) {
   # for(stYear in startingYear){
   #   for(vars in c(1:3,7,8,12:15)){
   #     varX <- varNames[varDT[vars]]
-  #     fileX=paste0("outDT/",varX,"_",mans,"_",clims,"StartYear",stYear,"Sptot.rdata")
+  #     fileX=paste0("outDT/",varX,"_",mans,"_",clims,"StartYear",stYear,"Spall.rdata")
   #     load(fileX)
   #     siteNeg <- unique(which(get(varX)<0,arr.ind=T)[,1])
   #     siteNA <- unique(which(is.na(get(varX)),arr.ind=T)[,1])
@@ -39,7 +39,7 @@ if(!dir.exists(paste0("outDT/",startingYear))) {
   #   sitesX <- as.integer(sitesX)
   #   for(vars in 1:length(varDT)){
   #     varX <- varNames[varDT[vars]]
-  #     fileX=paste0("outputDT/",varX,"_",mans,"_",clims,"StartYear",stYear,"Sptot.rdata")
+  #     fileX=paste0("outputDT/",varX,"_",mans,"_",clims,"StartYear",stYear,"Spall.rdata")
   #     load(fileX)
   #     set(get(varX),i=sitesX,j=1:3,value = NA)
   #     save(list=varX,file = fileX)
