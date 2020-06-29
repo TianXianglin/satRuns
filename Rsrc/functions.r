@@ -259,7 +259,7 @@ prep.climate.f = function(dat, data.sample, startingYear, nYears){
 ##function to compile all data and create data.table 
 createDT <- function(climate, management,variable, layer,startingYear){
   
-  files <- list.files(path= "output/")#,pattern = paste0("year",startingYear,"_"))
+  files <- list.files(path= paste0("output/",startingYear,"/"))#,pattern = paste0("year",startingYear,"_"))
   startV <- data.table()
   for (ij in variable) assign(varNames[ij],data.table())
 
@@ -268,7 +268,7 @@ createDT <- function(climate, management,variable, layer,startingYear){
     
     fileX <- files[grep(sampleID,files,fixed = T)]
     
-    load(paste0("output/",fileX))
+    load(paste0("output/",startingYear,"/",fileX))
     
     if(exists("v0")) startV <- rbind(startV,v0)
     margin= 1:2#(length(dim(out$annual[,,variable,]))-1)
@@ -296,17 +296,17 @@ createDT <- function(climate, management,variable, layer,startingYear){
     print(i)
   }
   
-  for(ij in variable) save(list=varNames[ij],file=paste0("outDT/",varNames[ij],"_",management,"_",climate,
-                                                         "StartYear",startingYear,"layer",layer,".rdata"))
-  if((dim(startV)[1]) > 0) save(startV,file=paste0("outDT/startV_StartYear",startingYear,"layertot.rdata"))
+  for(ij in variable) save(list=varNames[ij],file=paste0("outDT/",startingYear,"/",varNames[ij],"_",management,"_",climate,
+                                                         "layer",layer,".rdata"))
+  if((dim(startV)[1]) > 0) save(startV,file=paste0("outDT/",startingYear,"/","startV_layertot.rdata"))
 }
 
 
 # this function create raster in tif format from data.tables selecting one year or the average of a time priod if yearOut is a vector of years
 createTifFromDT <- function(climate, management, yearOut, varX, layerDT, stYear,XYsegID,crsX=NA){
   simYear <- yearOut - stYear
-  fileDT=paste0("outDT/",varNames[varX],"_",management,"_",climate,
-                "StartYear",startingYear,"layer",layerDT,".rdata")
+  fileDT=paste0("outDT/",stYear,"/",varNames[varX],"_",management,"_",climate,
+                "layer",layerDT,".rdata")
   load(fileDT)
   
   outX <- t(get(varNames[varX]))
@@ -327,8 +327,8 @@ createTifFromDT <- function(climate, management, yearOut, varX, layerDT, stYear,
   rastX <- rasterFromXYZ(outXY[,c("x","y",varNames[varX]),with=F])
   crs(rastX) <- crsX
   
-  rastName <- paste0("outRast/",climate,"_",management,"_var",varNames[varX],
-                     "_spec",layerDT,"_yearOut",yearOut,".tif")
+  rastName <- paste0("outRast/",stYear,"/",climate,"_",management,"_var",varNames[varX],
+                     "_spec",layerDT,"_yearStart",stYear,"_yearOut",yearOut,".tif")
   writeRaster(rastX,filename = rastName,overwrite=T)
 }
 

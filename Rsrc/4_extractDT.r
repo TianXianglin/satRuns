@@ -1,9 +1,14 @@
 source("Rsrc/settings.r")
 source("Rsrc/functions.r")
+
 setwd(generalPath)
 if(!dir.exists("outDT")) {
   dir.create("outDT")
 }
+if(!dir.exists(paste0("outDT/",startingYear))) {
+  dir.create(paste0("outDT/",startingYear))
+}
+
 # for(clims in weather){
   clims <- weather
   mans <- harvscen

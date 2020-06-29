@@ -1,24 +1,14 @@
-# library(reshape2)
-# library(plyr)
-# library("raster")
-# library(data.table)
-# require(sm)
-# require(rgdal)
-
-
-
 ### Run settings & functions
 source("Rsrc/settings.r")
 source("Rsrc/functions.r")
 
-# ###check prebas version and install if needed
-# devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
-# require(Rprebasso)
-
-
+###check and create output directories
 setwd(generalPath)
 if(!dir.exists("initPrebas")) {
   dir.create("initPrebas")
+}
+if(!dir.exists(paste0("initPrebas/",startingYear))) {
+  dir.create(paste0("initPrebas/",startingYear))
 }
 
 load(paste0(procDataPath,startingYear,"/samples.rdata"))
@@ -80,7 +70,7 @@ for (rcpfile in weather) { ## ---------------------------------------------
                                        startingYear = startingYear,domSPrun=domSPrun)
     
     
-    save(initPrebas,file=paste0(initPrebasPath,rcpfile,"_sample",sampleID,".rdata"))
+    save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",rcpfile,"_sample",sampleID,".rdata"))
     rm(initPrebas); gc()
     print(sampleID)
   }

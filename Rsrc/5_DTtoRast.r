@@ -4,6 +4,10 @@ setwd(generalPath)
 if(!dir.exists("outRast")) {
   dir.create("outRast")
 }
+if(!dir.exists(paste0("outRast/",startingYear))) {
+  dir.create(paste0("outRast/",startingYear))
+}
+
 load(paste0(procDataPath,startingYear,"/XYsegID.rdata"))
 crsX <- crs(raster(baRast))
 
@@ -20,7 +24,7 @@ for(ij in yearOut){
 
 
 if(TRUE){
-  fileDT=paste0("outDT/startV_","StartYear",startingYear,"layertot.rdata")
+  fileDT=paste0("outDT/",startingYear,"/","startV_layertot.rdata")
   load(fileDT)
   setkey(XYsegID,segID)
   setkey(startV,segID)
@@ -32,7 +36,7 @@ if(TRUE){
   rastX <- rasterFromXYZ(outXY[,c("x","y","value"),with=F])
   crs(rastX) <- crsX
   
-  rastName <- paste0("outRast/startV_spectot_yearStart",startingYear,".tif")
+  rastName <- paste0("outRast/",startingYear,"/","startV_startYear",startingYear,"_layertot.tif")
   writeRaster(rastX,filename = rastName,overwrite=T)
   
 }
