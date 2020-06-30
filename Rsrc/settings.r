@@ -9,6 +9,7 @@ fracTest <- 0.2 ###fraction of test area
 maxSitesRun <- 20000
 maxSitesRunTest <- 1000
 saveVars <- c(1,11:13,17,30,43,44) ####select variables to save
+varHD <- FALSE #### if true will vary H and D of pine and spruce using siteType
 
 ###library path in CSC project_2000994
 if(CSCrun){
