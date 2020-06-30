@@ -62,7 +62,7 @@ for (rcpfile in weather) { ## ---------------------------------------------
       data.sample$climID <- mapvalues(data.sample$climID,replX[[1]],replX[[2]])
     }
     
-    clim = prep.climate.f(dat, data.sample, startingYear, nYears)
+    clim = prep.climate.f(dat, data.sample, startingYear, nYears,startYearWeather)
     
     # Region = nfiareas[ID==r_no, Region]
     
