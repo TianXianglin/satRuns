@@ -4,31 +4,48 @@ vPREBAS <- "v0.2.x"   #### choose PREBAS verson to run the model  "master"
 
 #####Settings####
 testRun = T ####set to TRUE to test the code on a small raster proportion
+CSCrun = F ### set to TRUE if you are running on CSC
 fracTest <- 0.2 ###fraction of test area
 maxSitesRun <- 20000
 maxSitesRunTest <- 1000
 saveVars <- c(1,11:13,17,30,43,44) ####select variables to save
-
+varHD <- FALSE #### if true will vary H and D of pine and spruce using siteType
 
 ###library path in CSC project_2000994
-if(!testRun){
+if(CSCrun){
   .libPaths(c("/projappl/project_2000994/project_rpackages", .libPaths()))
   libpath <- .libPaths()[1]
 }
 
+##load libraries
+library(reshape2)
+library(plyr)
+library(raster)
+library(data.table)
+require(sm)
+require(rgdal)
+library(raster)
+library(rgdal)
+
+
+###check prebas version and install if needed
+devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
+require(Rprebasso)
+
 ####indicate rasterPath and climID path
 generalPath <- "C:/Users/minunno/Documents/research/assessCarbon/data/Finland/AC_training_FI_34VEQ/"
-climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.tif"
 rasterPath <- paste0(generalPath,"rasters/")
 procDataPath <- paste0(generalPath,"procData/")
 outPath <- paste0(generalPath,"output/")
 initPrebasPath <- paste0(generalPath,"initPrebas/")
-# climatepath = "/scratch/project_2000994/RCP/" ####on CSC
 climatepath = "C:/Users/minunno/Documents/research/extarctWeather/inputs/" #### local fm
+# climatepath = "/scratch/project_2000994/RCP/" ####on CSC
+climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.tif"
+# climIDpath <- "/scratch/project_2000994/PREBASruns/metadata/" ####on CSC
 
-
-startingYear <- 2016
-yearEnd <- 2024
+startYearWeather <- 1971 ###1971 for Finnish weather dataBase
+startingYear <- 2016  #2019
+yearEnd <- 2019     #2024
 nYears <-  yearEnd - startingYear ## number of simulation years
 domSPrun = 0.
 
@@ -71,11 +88,17 @@ initN <- 2200
 initBA <- pi*(initDBH/200)^2*initN
 
 #####settings for data extraction
-varDT <- c(44,30)   ####variables to extract in DT
-layerDT <- "tot" ###layerID to report in data.tables, if layerDT==tot the totals of all layers is provided
+varDT <- c(11:13,30)   ####variables to extract in DT
+extrFun <- c("mean","mean","sum","sum")
+layerDT <- "all" ###layerID to report in data.tables, if layerDT==all the all layers are considered as sum or mean according to extrFun
 
 #####settings for raster creation
-varRast <- c(44,30)   ####variables to extract in DT
-yearOut <- startingYear + 1:3
+varRast <- varDT  #c(44,30)   ####variables to extract in DT
+yearOut <- yearEnd#c(2019,2024)
+#####filter model output raster
+minX <- c(0,0,0,0)
+maxX <- c(40,40,60,1000)
+
 
 #####end Settings####
+

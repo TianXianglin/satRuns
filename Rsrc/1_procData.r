@@ -1,6 +1,4 @@
-library(raster)
-library(rgdal)
-library(data.table)
+
 #####Run settings####
 source("Rsrc/settings.r")
 setwd(generalPath)
@@ -133,9 +131,29 @@ XYsegID <- data.all[,.(x,y,segID)]
 #   # sampleX[,id:=climID]
 # }
   
+
+
+#### Begin of uniqueData referencing manipulation, 2020-07-01
 nSamples <- ceiling(dim(uniqueData)[1]/maxSitesRun)
 set.seed(1)
-samples <- split(uniqueData, sample(1:nSamples, nrow(uniqueData), replace=T))
+sampleset <- sample(1:nSamples, nrow(uniqueData),  replace=T)
+samples <- split(uniqueData, sampleset) # took out sampleset so it can be directly used in uniquedata referencing
+
+#adding sampleID and sampleRow (= row within sample)
+
+uniqueData$sampleID <- sampleset # add sampleID
+sample_ref <- data.table(segID=numeric(), sampleRow=numeric()) # empty DT to accumulate
+
+for (i in 1:nSamples){
+  sampleRow <- which(samples[[i]]$segID==uniqueData$segID[uniqueData$sampleID==i])
+  segID <- uniqueData$segID[uniqueData$sampleID==i]
+  sample_ref<- rbind(sample_ref, data.table(segID, sampleRow))
+}
+uniqueData <- join(uniqueData, sample_ref, by="segID")
+
+
+#### End of uniqueData referencing manipulation, 2020-07-01
+
 
 segID <- numeric(0)
 for(i in 1:nSamples){
