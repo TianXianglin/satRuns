@@ -112,6 +112,8 @@ data.all[, npix:=.N, segID]
 # uniqueData <- data.table()
 ####find unique initial conditions
 uniqueData <- unique(data.all[clCut==0,.(ba,blp,dbh,h,pineP,spruceP,siteType,N,climID,segID,npix)])
+uniqueData[,uniqueKey:=1:nrow(uniqueData)]
+setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
 range(uniqueData$N)
 uniqueData[,area:=npix*resX^2/10000]
@@ -137,11 +139,9 @@ set.seed(1)
 sampleset <- sample(1:nSamples, nrow(uniqueData),  replace=T)
 samples <- split(uniqueData, sampleset) 
 
-# adding sampleID, sampleRow (= row within sample) and uniqueKey to uniqueData
+# adding sampleID, sampleRow (= row within sample) 
 uniqueData[,sampleID:=sampleset]
 uniqueData[,sampleRow:=1:length(h),by=sampleID]
-uniqueData[,uniqueKey:=1:nrow(uniqueData)]
-setkey(uniqueData, uniqueKey)
 
 segID <- numeric(0)
 for(i in 1:nSamples){
