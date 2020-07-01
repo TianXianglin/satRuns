@@ -131,11 +131,11 @@ XYsegID <- data.all[,.(x,y,segID)]
 #   # sampleX[,id:=climID]
 # }
   
-nSamples <- ceiling(dim(uniqueData)[1]/maxSitesRun)
-set.seed(1)
+
 
 #### Begin of uniqueData referencing manipulation, 2020-07-01
-
+nSamples <- ceiling(dim(uniqueData)[1]/maxSitesRun)
+set.seed(1)
 sampleset <- sample(1:nSamples, nrow(uniqueData),  replace=T)
 samples <- split(uniqueData, sampleset) # took out sampleset so it can be directly used in uniquedata referencing
 
@@ -151,8 +151,6 @@ for (i in 1:nSamples){
 }
 uniqueData <- join(uniqueData, sample_ref, by="segID")
 
-uniqueData[segID==4242] #checking: check sampleID and sampleRow for some random segID 
-samples[[9]][109] #enter sampleID and sampleRow from above, should represent same unique value set
 
 #### End of uniqueData referencing manipulation, 2020-07-01
 
