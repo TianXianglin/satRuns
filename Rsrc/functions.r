@@ -284,8 +284,21 @@ createDT <- function(climate, management,variable, layer,startingYear,funX){
           varX <- which(dimnames(out)$varX==varNames[ij])
           if(funX[ijX]=="sum") assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
                                                apply(out[,,varX,],margin,sum,na.rm=T))))
-          if(funX[ijX]=="mean") assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
-                                                               apply(out[,,varX,],margin,mean,na.rm=T))))
+          
+          if(funX[ijX]=="mean"){
+            BAind <- which(saveVars==13)
+            if(length(BAind)<1){
+              print(paste("BA not saved!! for",varNames[saveVars[varX]],"aritmetic mean was used."))
+                    assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
+                               apply(out[,,varX,],margin,mean,na.rm=T))))
+            }else{
+              sumBA <- apply(out[,,BAind,],1:2,sum,na.rm=T)
+              sumBAs <- array(sumBA,dim = dim(out[,,BAind,]))
+              fracBA <- out[,,BAind,]/sumBAs
+              wgdVar <- out[,,varX,] * fracBA
+              assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
+                                                   apply(wgdVar,margin,sum,na.rm=T))))
+          } }
         }else{
           print(paste(varNames[ij],"not saved"))
         }

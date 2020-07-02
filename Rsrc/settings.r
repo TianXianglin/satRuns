@@ -97,7 +97,7 @@ varRast <- varDT  #c(44,30)   ####variables to extract in DT
 yearOut <- yearEnd#c(2019,2024)
 #####filter model output raster
 minX <- c(0,0,0,0)
-maxX <- c(40,40,60,1000)
+maxX <- c(70,40,60,1000)
 
 
 #####end Settings####
