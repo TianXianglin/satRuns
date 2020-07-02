@@ -112,6 +112,8 @@ data.all[, npix:=.N, segID]
 # uniqueData <- data.table()
 ####find unique initial conditions
 uniqueData <- unique(data.all[clCut==0,.(ba,blp,dbh,h,pineP,spruceP,siteType,N,climID,segID,npix)])
+uniqueData[,uniqueKey:=1:nrow(uniqueData)]
+setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
 range(uniqueData$N)
 uniqueData[,area:=npix*resX^2/10000]
@@ -132,28 +134,14 @@ XYsegID <- data.all[,.(x,y,segID)]
 # }
   
 
-
-#### Begin of uniqueData referencing manipulation, 2020-07-01
 nSamples <- ceiling(dim(uniqueData)[1]/maxSitesRun)
 set.seed(1)
 sampleset <- sample(1:nSamples, nrow(uniqueData),  replace=T)
-samples <- split(uniqueData, sampleset) # took out sampleset so it can be directly used in uniquedata referencing
+samples <- split(uniqueData, sampleset) 
 
-#adding sampleID and sampleRow (= row within sample)
-
-uniqueData$sampleID <- sampleset # add sampleID
-sample_ref <- data.table(segID=numeric(), sampleRow=numeric()) # empty DT to accumulate
-
-for (i in 1:nSamples){
-  sampleRow <- which(samples[[i]]$segID==uniqueData$segID[uniqueData$sampleID==i])
-  segID <- uniqueData$segID[uniqueData$sampleID==i]
-  sample_ref<- rbind(sample_ref, data.table(segID, sampleRow))
-}
-uniqueData <- join(uniqueData, sample_ref, by="segID")
-
-
-#### End of uniqueData referencing manipulation, 2020-07-01
-
+# adding sampleID, sampleRow (= row within sample) 
+uniqueData[,sampleID:=sampleset]
+uniqueData[,sampleRow:=1:length(h),by=sampleID]
 
 segID <- numeric(0)
 for(i in 1:nSamples){
