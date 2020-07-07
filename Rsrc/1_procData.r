@@ -22,12 +22,12 @@ if(testRun){
   maxSitesRun <- maxSitesRunTest
 }
 
-climID <- raster(climIDpath)
-climIDx <- crop(climID,rastX)
+# climID <- raster(climIDpath)
+# climIDx <- crop(climID,rastX)
 # plot(climIDx)
 # plot(rastX,add=T)
-climIDs <- resample(climIDx,rastX,method="ngb")
-writeRaster(climIDs,paste0(rasterPath,"climIDs.tif"),overwrite=T)
+# climIDs <- resample(climIDx,rastX,method="ngb")
+# writeRaster(climIDs,paste0(rasterPath,"climIDs.tif"),overwrite=T)
 # climIDs <- raster(paste0(rastersPath,"climIDs.tif"))
 rm(rastX)
 gc()
@@ -55,7 +55,8 @@ for(i in 1:length(fileNames)){
 }
 
 ###attach weather ID
-dataX <- data.table(rasterToPoints(climIDs))
+data.all$climID <- extract(climID,data.all[,.(x,y)])
+# dataX <- data.table(rasterToPoints(climIDs))
 data.all <- merge(data.all,dataX)
 setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType","climID"))
 
