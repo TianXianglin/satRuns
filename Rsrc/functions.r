@@ -37,7 +37,7 @@ create_prebas_input.f = function(r_no, clim, data.sample, nYears, startingYear=0
   areas <- data.sample$area
   
   initVar[,1,] <- as.numeric(rep(1:3,each=nSites))
-  initVar[,2,] <- 1.  # round(as.numeric(data.sample[,age]))  ##### set to 1 because we do not know age
+  initVar[,2,] <- as.numeric(data.sample[,h])*3.3  # round(as.numeric(data.sample[,age]))  ##### set to 1 because we do not know age
   initVar[,3,] <- as.numeric(data.sample[,h])
   # initVar[,3,][which(initVar[,3,]<1.5)] <- 1.5  ####if H < 1.5 set to 1.5
   
