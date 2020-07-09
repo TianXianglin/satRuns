@@ -22,7 +22,7 @@ if(testRun){
   maxSitesRun <- maxSitesRunTest
 }
 
-# climID <- raster(climIDpath)
+climID <- raster(climIDpath)
 # climIDx <- crop(climID,rastX)
 # plot(climIDx)
 # plot(rastX,add=T)
@@ -57,7 +57,7 @@ for(i in 1:length(fileNames)){
 ###attach weather ID
 data.all$climID <- extract(climID,data.all[,.(x,y)])
 # dataX <- data.table(rasterToPoints(climIDs))
-data.all <- merge(data.all,dataX)
+# data.all <- merge(data.all,dataX)
 setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType","climID"))
 
 ##filter data 
