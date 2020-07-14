@@ -40,7 +40,9 @@ fileNames <- c(baRast,
                 hRast,
                 pinePerRast,
                 sprucePerRast,
-                siteTypeRast)
+                siteTypeRast,
+               siteTypeRast2,
+               vRast2)
 
 for(i in 1:length(fileNames)){
   rastX <- raster(fileNames[i])
@@ -58,27 +60,31 @@ for(i in 1:length(fileNames)){
 data.all$climID <- extract(climID,data.all[,.(x,y)])
 # dataX <- data.table(rasterToPoints(climIDs))
 # data.all <- merge(data.all,dataX)
-setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType","climID"))
+setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType","siteType2","v2","climID"))
 
 ##filter data 
 data.all <- data.all[!ba %in% baNA]
 data.all <- data.all[!blp %in% blPerNA]
 data.all <- data.all[!dbh %in% dbhNA]
 data.all <- data.all[!v %in% vNA]
+data.all <- data.all[!v2 %in% vNA]
 data.all <- data.all[!h %in% hNA]
 data.all <- data.all[!pineP %in% pinePerNA]
 data.all <- data.all[!spruceP %in% sprucePerNA]
 data.all <- data.all[!siteType %in% siteTypeNA]
+data.all <- data.all[!siteType2 %in% siteTypeNA]
 
 ####convert data to prebas units
 data.all <- data.all[, ba := ba * baConv]
 data.all <- data.all[, blp := blp * blPerConv]
 data.all <- data.all[, dbh := dbh * dbhConv]
 data.all <- data.all[, v := v * vConv]
+data.all <- data.all[, v2 := v2 * vConv]
 data.all <- data.all[, h := h * hConv]
 data.all <- data.all[, pineP := pineP * pinePerConv]
 data.all <- data.all[, spruceP := spruceP * sprucePerConv]
 data.all <- data.all[, siteType := siteType * siteTypeConv]
+data.all <- data.all[, siteType2 := siteType2 * siteTypeConv]
 
 ####group pixels by same values
 data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, siteType, climID)]

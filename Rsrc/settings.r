@@ -45,6 +45,7 @@ climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.
 
 startYearWeather <- 1971 ###1971 for Finnish weather dataBase
 startingYear <- 2016  #2019
+year2 <- 2019
 yearEnd <- 2019     #2024
 nYears <-  yearEnd - startingYear ## number of simulation years
 domSPrun = 0.
@@ -69,6 +70,8 @@ hRast <- paste0(rasterPath,"FI_34VEQ-2016_HGT_10M_1CHS_16BITS.tif")
 pinePerRast <- paste0(rasterPath,"FI_34VEQ-2016_P_pine_10M_1CHS_8BITS.tif")
 sprucePerRast <- paste0(rasterPath,"FI_34VEQ-2016_P_spruce_10M_1CHS_8BITS.tif")
 siteTypeRast <- paste0(rasterPath,"FI_34VEQ-2016_SITE_10M_1CHS_8BITS.tif")
+siteTypeRast2 <- paste0(rasterPath,"FI_34VEQ-2019_SITE_10M_1CHS_8BITS.tif")
+vRast2 <- paste0(rasterPath,"FI_34VEQ-2019_GSV_10M_1CHS_16BITS.tif")
 
 ####set values for NAs and convert factor for prebas units
 baNA <- c(253:255); baConv<- 1
