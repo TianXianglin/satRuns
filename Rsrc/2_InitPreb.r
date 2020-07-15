@@ -10,8 +10,12 @@ if(!dir.exists("initPrebas")) {
 if(!dir.exists(paste0("initPrebas/",startingYear))) {
   dir.create(paste0("initPrebas/",startingYear))
 }
+if(stXruns){
+  load(paste0(procDataPath,startingYear,"/samples_STx.rdata"))
+}else{
+  load(paste0(procDataPath,startingYear,"/samples.rdata"))  
+}
 
-load(paste0(procDataPath,startingYear,"/samples.rdata"))
 nSamples <- length(samples)
 sampleIDs <- 1:nSamples
 
@@ -69,8 +73,16 @@ for (rcpfile in weather) { ## ---------------------------------------------
     initPrebas = create_prebas_input.f(r_no, clim, data.sample, nYears = nYears,
                                        startingYear = startingYear,domSPrun=domSPrun)
     
+    if(stXruns){
+      if(siteTypeX!=year2) initPrebas$siteInfo[,3] <- siteTypeX
+      save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",
+                  rcpfile,"_sample",sampleID,"siteType",siteTypeX,".rdata"))
+    }else{
+      save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",
+                  rcpfile,"_sample",sampleID,".rdata"))
+    }
     
-    save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",rcpfile,"_sample",sampleID,".rdata"))
+    # save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",rcpfile,"_sample",sampleID,".rdata"))
     rm(initPrebas); gc()
     print(sampleID)
   }

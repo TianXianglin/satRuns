@@ -60,7 +60,7 @@ for(i in 1:length(fileNames)){
 data.all$climID <- extract(climID,data.all[,.(x,y)])
 # dataX <- data.table(rasterToPoints(climIDs))
 # data.all <- merge(data.all,dataX)
-setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType","siteType2","v2","climID"))
+setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType1","siteType2","v2","climID"))
 
 ##filter data 
 data.all <- data.all[!ba %in% baNA]
@@ -71,7 +71,7 @@ data.all <- data.all[!v2 %in% vNA]
 data.all <- data.all[!h %in% hNA]
 data.all <- data.all[!pineP %in% pinePerNA]
 data.all <- data.all[!spruceP %in% sprucePerNA]
-data.all <- data.all[!siteType %in% siteTypeNA]
+data.all <- data.all[!siteType1 %in% siteTypeNA]
 data.all <- data.all[!siteType2 %in% siteTypeNA]
 
 ####convert data to prebas units
@@ -83,15 +83,14 @@ data.all <- data.all[, v2 := v2 * vConv]
 data.all <- data.all[, h := h * hConv]
 data.all <- data.all[, pineP := pineP * pinePerConv]
 data.all <- data.all[, spruceP := spruceP * sprucePerConv]
-data.all <- data.all[, siteType := siteType * siteTypeConv]
+data.all <- data.all[, siteType1 := siteType1 * siteTypeConv]
 data.all <- data.all[, siteType2 := siteType2 * siteTypeConv]
 
-####group pixels by same values
-data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, siteType, climID)]
-data.all[,clCut:=0]
+data.all[,siteType:=siteType2]  ####!!!!#### automate this and set in settings which is the most reliable site type
 
 #####I'm excluding from the runs the areas that have been clearcutted and have ba=0 
 # data.all[h==0. & dbh==0 & ba==0,clCut:=1]
+data.all[,clCut:=0]
 data.all[ba==0,clCut:=1]
 
 ###calculate tree density
@@ -113,12 +112,23 @@ data.all[pineP == 0 & spruceP == 0 & blp ==0 & siteType ==1, blp:=1  ]
 data.all[pineP == 0 & spruceP == 0 & blp ==0 & siteType <= 3 & siteType > 1, spruceP:=1  ]
 data.all[pineP == 0 & spruceP == 0 & blp ==0 & siteType >= 4, pineP:=1  ]
 
+###!!!!!!!!!!!!########careful with this part##########!!!!!!!!#########
+
+####calculate dV
+data.all[,dV := v2-v]
+data.all[,dVy := (v2-v)/(year2 - startingYear)]
+
+####group pixels by same values
+data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, siteType, climID,dVy)]
+data.all[clCut==1 ,hist(dVy)]
+
+
 ####Count segID pix
 data.all[, npix:=.N, segID]
 
 # uniqueData <- data.table()
 ####find unique initial conditions
-uniqueData <- unique(data.all[clCut==0,.(ba,blp,dbh,h,pineP,spruceP,siteType,N,climID,segID,npix)])
+uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,siteType,N,climID,segID,npix)])
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
@@ -128,6 +138,7 @@ uniqueData[,area:=npix*resX^2/10000]
 ###assign ID to similar pixels
 XYsegID <- data.all[,.(x,y,segID)]
 
+###!!!!!!!!!!!!########end careful with this part##########!!!!!!!!#########
 
 # nSamples <- ceiling(dim(uniqueData)[1]/20000)
 # sampleID <- 1
@@ -157,10 +168,10 @@ for(i in 1:nSamples){
 }
 
 
-save(data.all,file=paste0(procDataPath,startingYear,"/allData.rdata"))         ### All data
-save(uniqueData,file=paste0(procDataPath,startingYear,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
-save(samples,file=paste0(procDataPath,startingYear,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
-save(XYsegID,segID,file=paste0(procDataPath,startingYear,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
+save(data.all,file=paste0(procDataPath,startingYear,"/allData_STx.rdata"))         ### All data
+save(uniqueData,file=paste0(procDataPath,startingYear,"/uniqueData_STx.rdata"))    ### unique pixel combination to run in PREBAS
+save(samples,file=paste0(procDataPath,startingYear,"/samples_STx.rdata"))    ### unique pixel combination to run in PREBAS
+save(XYsegID,segID,file=paste0(procDataPath,startingYear,"/XYsegID_STx.rdata"))    ### Coordinates and segID of all pixels
 
 
 
