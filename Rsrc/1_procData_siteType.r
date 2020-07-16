@@ -2,14 +2,10 @@
 #####Run settings####
 source("Rsrc/settings.r")
 setwd(generalPath)
-if(!dir.exists("procData")) {
-  dir.create("procData")
+mkfldr <- paste0("procData/",paste0("init",startingYear,"/st",siteTypeX))
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
-if(!dir.exists(paste0("procData/",startingYear))) {
-  dir.create(paste0("procData/",startingYear))
-}
-
-
 
 
 ###extract CurrClim IDs
@@ -41,8 +37,8 @@ fileNames <- c(baRast,
                 pinePerRast,
                 sprucePerRast,
                 siteTypeRast,
-               siteTypeRast2,
-               vRast2)
+                siteTypeRast2,
+                vRast2)
 
 for(i in 1:length(fileNames)){
   rastX <- raster(fileNames[i])
@@ -86,7 +82,11 @@ data.all <- data.all[, spruceP := spruceP * sprucePerConv]
 data.all <- data.all[, siteType1 := siteType1 * siteTypeConv]
 data.all <- data.all[, siteType2 := siteType2 * siteTypeConv]
 
-data.all[,siteType:=siteType2]  ####!!!!#### automate this and set in settings which is the most reliable site type
+if(siteTypeX==year2){
+  data.all[,siteType:=siteType2]  
+}else{
+  data.all[,siteType:=siteTypeX]  
+}
 
 #####I'm excluding from the runs the areas that have been clearcutted and have ba=0 
 # data.all[h==0. & dbh==0 & ba==0,clCut:=1]
@@ -167,11 +167,10 @@ for(i in 1:nSamples){
   segID <- c(segID,sampleX$segID)
 }
 
-
-save(data.all,file=paste0(procDataPath,startingYear,"/allData_STx.rdata"))         ### All data
-save(uniqueData,file=paste0(procDataPath,startingYear,"/uniqueData_STx.rdata"))    ### unique pixel combination to run in PREBAS
-save(samples,file=paste0(procDataPath,startingYear,"/samples_STx.rdata"))    ### unique pixel combination to run in PREBAS
-save(XYsegID,segID,file=paste0(procDataPath,startingYear,"/XYsegID_STx.rdata"))    ### Coordinates and segID of all pixels
+save(data.all,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/allData.rdata"))         ### All data
+save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
+save(samples,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
+save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
 
 
 

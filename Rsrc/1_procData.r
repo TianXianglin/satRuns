@@ -1,15 +1,15 @@
 
 #####Run settings####
 source("Rsrc/settings.r")
+if(startingYear!= siteTypeX){
+  siteTypeX = startingYear
+  warning("siteTypeX changed to startingYear")
+} 
 setwd(generalPath)
-if(!dir.exists("procData")) {
-  dir.create("procData")
+mkfldr <- paste0("procData/",paste0("init",startingYear,"/st",siteTypeX))
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
-if(!dir.exists(paste0("procData/",startingYear))) {
-  dir.create(paste0("procData/",startingYear))
-}
-
-
 
 
 ###extract CurrClim IDs
@@ -151,10 +151,10 @@ for(i in 1:nSamples){
 }
 
 
-save(data.all,file=paste0(procDataPath,startingYear,"/allData.rdata"))         ### All data
-save(uniqueData,file=paste0(procDataPath,startingYear,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
-save(samples,file=paste0(procDataPath,startingYear,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
-save(XYsegID,segID,file=paste0(procDataPath,startingYear,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
+save(data.all,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/allData.rdata"))         ### All data
+save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
+save(samples,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
+save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
 
 
 

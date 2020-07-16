@@ -1,14 +1,13 @@
 source("Rsrc/settings.r")
 source("Rsrc/functions.r")
-setwd(generalPath)
-if(!dir.exists("outRast")) {
-  dir.create("outRast")
-}
-if(!dir.exists(paste0("outRast/",startingYear))) {
-  dir.create(paste0("outRast/",startingYear))
-}
 
-load(paste0(procDataPath,startingYear,"/XYsegID.rdata"))
+setwd(generalPath)
+mkfldr <- paste0("outRast/","init",startingYear,"/st",siteTypeX)
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
+}
+ 
+load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))  
 crsX <- crs(raster(baRast))
 
 clims <- weather
@@ -23,8 +22,8 @@ for(ij in yearOut){
 
 
 
-if(TRUE){
-  fileDT=paste0("outDT/",startingYear,"/","startV_layerall.rdata")
+if(startingYear==siteTypeX){
+  fileDT=paste0("outDT/","init",startingYear,"/","startV_layerall.rdata")
   load(fileDT)
   setkey(XYsegID,segID)
   setkey(startV,segID)
@@ -36,7 +35,7 @@ if(TRUE){
   rastX <- rasterFromXYZ(outXY[,c("x","y","value"),with=F])
   crs(rastX) <- crsX
   
-  rastName <- paste0("outRast/",startingYear,"/","startV_startYear",startingYear,"_layerall.tif")
+  rastName <- paste0("outRast/","init",startingYear,"/","startV_startYear",startingYear,"_layerall.tif")
   writeRaster(rastX,filename = rastName,overwrite=T)
   
 }

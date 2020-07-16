@@ -2,15 +2,16 @@
 ### Run settings
 source("Rsrc/settings.r")
 setwd(generalPath)
-if(!dir.exists("output")) {
-  dir.create("output")
-}
-if(!dir.exists(paste0("output/",startingYear))) {
-  dir.create(paste0("output/",startingYear))
+###check and create output directories
+setwd(generalPath)
+mkfldr <- paste0("output/","init",startingYear,"/st",siteTypeX)
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
 ###load Processed data
-load(paste0(procDataPath,startingYear,"/samples.rdata"))
+load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))
+
 nSamples <- length(samples)
 sampleIDs <- 1:nSamples
 rm(samples); gc()
@@ -27,11 +28,18 @@ for (rcpfile in weather) { ## ---------------------------------------------
 
   for(sampleID in sampleIDs){
 
-    load(paste0(initPrebasPath,startingYear,"/",rcpfile,"_sample",sampleID,".rdata"))
+    file2load <- paste0(initPrebasPath,"init",startingYear,"/",
+                       "st",siteTypeX,"/",
+                       rcpfile,"_sample",sampleID,".rdata")
+    load(file2load)
+    
     out <- multiPrebas(initPrebas)$multiOut[,,saveVars,,1]
     dimnames(out) <- list(sites=NULL,years=NULL,varX=varNames[saveVars],layer=1:3)
     v0 <- data.table(segID=initPrebas$siteInfo[,1],value=apply(initPrebas$multiOut[,1,30,,1],1,sum))
-    save(out,v0,file=paste0(outPath,startingYear,"/",rcpfile,"_sample",sampleID,".rdata"))
+    file2save <- paste0(outPath,"init",startingYear,"/",
+                        "st",siteTypeX,"/",
+                        rcpfile,"_sample",sampleID,".rdata")
+    save(out,v0,file=file2save)
     rm(initPrebas,out,v0); gc()
     print(sampleID)
   }

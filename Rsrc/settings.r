@@ -84,8 +84,8 @@ sprucePerNA <- c(253:255); sprucePerConv <- 1
 siteTypeNA <- c(254:255); siteTypeConv <- 1
 
 ####settings for sitetype estimation
-stXruns <- FALSE
-siteTypeX <- year2
+stXruns <- TRUE
+siteTypeX <- startingYear #year2 #startingYear #1:5
 
 ####thresholds for variables to reset stand from plantation
 maxDens <- 10000
