@@ -30,7 +30,7 @@
 # save(data2016,data2019,file = "C:/Users/minunno/Documents/research/assessCarbon/data/trainingSites/traningSites.rdata")
 
 
-load("C:/Users/minunno/Documents/research/assessCarbon/data/trainingSites/traningSites.rdata")
+load("data/trainingSites/traningSites.rdata")
 data2016$year <- 2016
 data2019$year <- 2019
 dataAll <- rbind(data2016,data2019)
