@@ -45,7 +45,7 @@ climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.
 
 startYearWeather <- 1971 ###1971 for Finnish weather dataBase
 startingYear <- 2016  #2019
-year2 <- 2019
+year2 <- 2019 ###year of the second measurement
 yearEnd <- 2019     #2024
 nYears <-  yearEnd - startingYear ## number of simulation years
 domSPrun = 0.
@@ -85,7 +85,7 @@ siteTypeNA <- c(254:255); siteTypeConv <- 1
 
 ####settings for sitetype estimation
 stXruns <- TRUE
-siteTypeX <- startingYear #year2 #startingYear #1:5
+siteTypeX <- year2 #startingYear #year2 #startingYear #1:5
 
 ####thresholds for variables to reset stand from plantation
 maxDens <- 10000

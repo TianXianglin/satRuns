@@ -119,8 +119,8 @@ data.all[,dV := v2-v]
 data.all[,dVy := (v2-v)/(year2 - startingYear)]
 
 ####group pixels by same values
-data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, siteType, climID,dVy)]
-data.all[clCut==1 ,hist(dVy)]
+data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, siteType, climID,dVy,v2)]
+# data.all[clCut==1 ,hist(dVy)]
 
 
 ####Count segID pix
@@ -128,7 +128,8 @@ data.all[, npix:=.N, segID]
 
 # uniqueData <- data.table()
 ####find unique initial conditions
-uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,siteType,N,climID,segID,npix)])
+uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,
+                                                  siteType,N,climID,segID,npix,dVy,v2)])
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
