@@ -4,14 +4,13 @@ source("Rsrc/functions.r")
 
 ###check and create output directories
 setwd(generalPath)
-if(!dir.exists("initPrebas")) {
-  dir.create("initPrebas")
-}
-if(!dir.exists(paste0("initPrebas/",startingYear))) {
-  dir.create(paste0("initPrebas/",startingYear))
+mkfldr <- paste0("initPrebas/","init",startingYear,"/st",siteTypeX)
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
-load(paste0(procDataPath,startingYear,"/samples.rdata"))
+load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))  
+
 nSamples <- length(samples)
 sampleIDs <- 1:nSamples
 
@@ -69,8 +68,16 @@ for (rcpfile in weather) { ## ---------------------------------------------
     initPrebas = create_prebas_input.f(r_no, clim, data.sample, nYears = nYears,
                                        startingYear = startingYear,domSPrun=domSPrun)
     
+    # if(stXruns){
+      save(initPrebas,file=paste0(initPrebasPath,"init",startingYear,"/",
+                                  "st",siteTypeX,"/",
+                  rcpfile,"_sample",sampleID,".rdata"))
+    # }else{
+      # save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",
+                  # rcpfile,"_sample",sampleID,".rdata"))
+    # }
     
-    save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",rcpfile,"_sample",sampleID,".rdata"))
+    # save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",rcpfile,"_sample",sampleID,".rdata"))
     rm(initPrebas); gc()
     print(sampleID)
   }

@@ -2,11 +2,9 @@ source("Rsrc/settings.r")
 source("Rsrc/functions.r")
 
 setwd(generalPath)
-if(!dir.exists("outDT")) {
-  dir.create("outDT")
-}
-if(!dir.exists(paste0("outDT/",startingYear))) {
-  dir.create(paste0("outDT/",startingYear))
+mkfldr <- paste0("outDT/","init",startingYear,"/st",siteTypeX)
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
 # for(clims in weather){
@@ -17,7 +15,7 @@ if(!dir.exists(paste0("outDT/",startingYear))) {
   # startingYear <- c(2014,2019)
   for(stYear in startingYear){
     print(stYear)
-    createDT(clims,"NoHarv",varDT,layerDT,stYear,extrFun)
+    createDT(clims,"NoHarv",varDT,layerDT,stYear,extrFun,siteTypeX)
   }
   
   

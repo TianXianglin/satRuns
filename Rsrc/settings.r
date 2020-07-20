@@ -45,6 +45,7 @@ climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.
 
 startYearWeather <- 1971 ###1971 for Finnish weather dataBase
 startingYear <- 2016  #2019
+year2 <- 2019 ###year of the second measurement
 yearEnd <- 2019     #2024
 nYears <-  yearEnd - startingYear ## number of simulation years
 domSPrun = 0.
@@ -69,6 +70,8 @@ hRast <- paste0(rasterPath,"FI_34VEQ-2016_HGT_10M_1CHS_16BITS.tif")
 pinePerRast <- paste0(rasterPath,"FI_34VEQ-2016_P_pine_10M_1CHS_8BITS.tif")
 sprucePerRast <- paste0(rasterPath,"FI_34VEQ-2016_P_spruce_10M_1CHS_8BITS.tif")
 siteTypeRast <- paste0(rasterPath,"FI_34VEQ-2016_SITE_10M_1CHS_8BITS.tif")
+siteTypeRast2 <- paste0(rasterPath,"FI_34VEQ-2019_SITE_10M_1CHS_8BITS.tif")
+vRast2 <- paste0(rasterPath,"FI_34VEQ-2019_GSV_10M_1CHS_16BITS.tif")
 
 ####set values for NAs and convert factor for prebas units
 baNA <- c(253:255); baConv<- 1
@@ -79,6 +82,10 @@ hNA <- c(65533:65535); hConv <- 0.1
 pinePerNA <- c(253:255); pinePerConv <- 1
 sprucePerNA <- c(253:255); sprucePerConv <- 1
 siteTypeNA <- c(254:255); siteTypeConv <- 1
+
+####settings for sitetype estimation
+stXruns <- TRUE
+siteTypeX <- year2 #startingYear #year2 #startingYear #1:5
 
 ####thresholds for variables to reset stand from plantation
 maxDens <- 10000
@@ -97,7 +104,7 @@ varRast <- varDT  #c(44,30)   ####variables to extract in DT
 yearOut <- yearEnd#c(2019,2024)
 #####filter model output raster
 minX <- c(0,0,0,0)
-maxX <- c(40,40,60,1000)
+maxX <- c(70,40,60,1000)
 
 
 #####end Settings####
