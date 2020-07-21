@@ -1,36 +1,6 @@
-# data2019 <- data.table(read.table("clipboard",header=T))
-# data2019_2 <- data.table(read.table("clipboard",header=T))
-# data2019_3 <- data.table(read.table("clipboard",header=T))
-# data2019_2[,c("XCOORD","YCOORD"):=NULL]
-# data2019_3[,c("XCOORD","YCOORD"):=NULL]
-# 
-# data2016 <- data.table(read.table("clipboard",header=T))
-# data2016_2 <- data.table(read.table("clipboard",header=T))
-# data2016_3 <- data.table(read.table("clipboard",header=T))
-# data2016_2[,c("XCOORD","YCOORD"):=NULL]
-# data2016_3[,c("XCOORD","YCOORD"):=NULL]
-# 
-# 
-# 
-#   
-# setkey(data2016,PLOTID,S2Tile)
-# setkey(data2016_2,PLOTID,S2Tile)
-# setkey(data2016_3,PLOTID,S2Tile)
-# setkey(data2019,PLOTID,S2Tile)
-# setkey(data2019_2,PLOTID,S2Tile)
-# setkey(data2019_3,PLOTID,S2Tile)
-# 
-# 
-# data2019 <- merge(data2019,data2019_2)
-# data2019 <- merge(data2019,data2019_3)
-# 
-# data2016 <- merge(data2016,data2016_2)
-# data2016 <- merge(data2016,data2016_3)
+library(data.table)
 
-# save(data2016,data2019,file = "C:/Users/minunno/Documents/research/assessCarbon/data/trainingSites/traningSites.rdata")
-
-
-load("data/trainingSites/traningSites.rdata")
+load("data/traningSites.rdata")
 data2016$year <- 2016
 data2019$year <- 2019
 dataAll <- rbind(data2016,data2019)
