@@ -85,7 +85,7 @@ siteTypeNA <- c(254:255); siteTypeConv <- 1
 
 ####settings for sitetype estimation
 stXruns <- TRUE
-siteTypeX <- year2 #startingYear #year2 #startingYear #1:5
+siteTypeX <- startingYear #startingYear #year2 #startingYear #1:5
 
 ####thresholds for variables to reset stand from plantation
 maxDens <- 10000
