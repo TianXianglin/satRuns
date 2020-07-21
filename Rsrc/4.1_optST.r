@@ -15,7 +15,20 @@ dataX <- data.table(cbind(initPrebas$multiInitVar[,3:5,1],initPrebas$multiInitVa
                           initPrebas$multiInitVar[,5,3],initPrebas$siteInfo[,3],Vmod2019))
 setnames(dataX,c("H","D","BAp","BAsp","BAb","st","Vmod"))
 
-lmod <- lm(Vmod~H+D+BAp+BAsp+BAb+st,data=dataX)  ###Xianglin!!!!
+## lmod <- lm(Vmod~H+D+BAp+BAsp+BAb+st,data=dataX)  ###Xianglin!!!!
+#### Here we use stepwise regression to construct an emulator for volume prediction
+library(MASS)
+dataX$lnVmod<-log(dataX$Vmod)
+dataX$st<-as.factor(dataX$st)
+dataX$lnBAp<-log(dataX$BAp+1)
+dataX$lnBAsp<-log(dataX$BAsp+1)
+dataX$lnBAb<-log(dataX$BAb+1)
+full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
+step.model <- stepAIC(full.model, direction = "both",
+                        trace = FALSE)
+#summary(step.model)
+#sd(exp(predict(step.model))-dataX$Vmod)
+#### 
 
 load("procData/init2016/st2019/uniqueData.rdata")
 load("outDT/init2016/st2019/V_NoHarv_CurrClimlayerall.rdata")
