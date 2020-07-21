@@ -22,7 +22,7 @@ if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTy
 ## lmod <- lm(Vmod~H+D+BAp+BAsp+BAb+st,data=dataX)  ###Xianglin!!!!
 #### Here we use stepwise regression to construct an emulator for volume prediction
 dataX$lnVmod<-log(dataX$Vmod)
-dataX$st<-dataX$st
+dataX$st<-dataX$st   ##!!!!Xianglin
 dataX$lnBAp<-log(dataX$BAp+1)
 dataX$lnBAsp<-log(dataX$BAsp+1)
 dataX$lnBAb<-log(dataX$BAb+1)
@@ -84,7 +84,7 @@ pSTx <- function(segIDx,nSample){
   sampleX[,segID:=segIDx$segID]
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
-  # sampleX$st<-factor(sampleX$st,levels = 1:5)
+  # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
   sampleX$lnBAp<-log(sampleX$BAp+1)
   sampleX$lnBAsp<-log(sampleX$BAsp+1)
   sampleX$lnBAb<-log(sampleX$BAb+1)
