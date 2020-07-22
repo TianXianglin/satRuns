@@ -87,6 +87,10 @@ if(siteTypeX==year2){
 }else{
   data.all[,siteType:=siteType1]  
 }
+data.all[siteType>5,siteType:=5]
+data.all[siteType1>5,siteType1:=5]
+data.all[siteType2>5,siteType2:=5]
+
 
 #####I'm excluding from the runs the areas that have been clearcutted and have ba=0 
 # data.all[h==0. & dbh==0 & ba==0,clCut:=1]
