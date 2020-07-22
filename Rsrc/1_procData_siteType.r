@@ -85,7 +85,7 @@ data.all <- data.all[, siteType2 := siteType2 * siteTypeConv]
 if(siteTypeX==year2){
   data.all[,siteType:=siteType2]  
 }else{
-  data.all[,siteType:=siteTypeX]  
+  data.all[,siteType:=siteType1]  
 }
 
 #####I'm excluding from the runs the areas that have been clearcutted and have ba=0 
