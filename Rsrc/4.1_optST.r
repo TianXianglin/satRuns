@@ -24,14 +24,18 @@ dataX <- data.table(cbind(initPrebas$multiInitVar[,3:5,1],initPrebas$multiInitVa
 setnames(dataX,c("H","D","BAp","BAsp","BAb","st","Vmod"))
 if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTypes of the tile are in the sample")
 
-## lmod <- lm(Vmod~H+D+BAp+BAsp+BAb+st,data=dataX)  ###Xianglin!!!!
 #### Here we use stepwise regression to construct an emulator for volume prediction
 dataX$lnVmod<-log(dataX$Vmod)
-dataX$st<-dataX$st   ##!!!!Xianglin
+dataX$alpha<-NA
+dataX$alpha[dataX$st==1]<- mean(pCROB['alfar1',1:3])
+dataX$alpha[dataX$st==2]<- mean(pCROB['alfar2',1:3])
+dataX$alpha[dataX$st==3]<- mean(pCROB['alfar3',1:3])
+dataX$alpha[dataX$st==4]<- mean(pCROB['alfar4',1:3])
+dataX$alpha[dataX$st==5]<- mean(pCROB['alfar5',1:3])
 dataX$lnBAp<-log(dataX$BAp+1)
 dataX$lnBAsp<-log(dataX$BAsp+1)
 dataX$lnBAb<-log(dataX$BAb+1)
-full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
+full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st+alpha,data=dataX)
 step.model <- stepAIC(full.model, direction = "both",
                         trace = FALSE)
 #summary(step.model)
@@ -90,20 +94,25 @@ pSTx <- function(segIDx,nSample){
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
   # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
+  sampleX$alpha<-0
   sampleX$lnBAp<-log(sampleX$BAp+1)
   sampleX$lnBAsp<-log(sampleX$BAsp+1)
   sampleX$lnBAb<-log(sampleX$BAb+1)
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
-  
   sampleX$st <- 1
+  sampleX$alpha<-0.2833333 #mean(pCROB['alfar1',1:3])
   sampleX[,VsurST1 := exp(predict(step.model,newdata=sampleX))]
   sampleX$st <- 2
+  sampleX$alpha<-0.4066667 #mean(pCROB['alfar2',1:3])
   sampleX[,VsurST2 := exp(predict(step.model,newdata=sampleX))]
   sampleX$st <- 3
+  sampleX$alpha<-0.4966667 #mean(pCROB['alfar3',1:3])
   sampleX[,VsurST3 := exp(predict(step.model,newdata=sampleX))]
   sampleX$st <- 4
+  sampleX$alpha<-0.6233333 #mean(pCROB['alfar4',1:3])
   sampleX[,VsurST4 := exp(predict(step.model,newdata=sampleX))]
   sampleX$st <- 5
+  sampleX$alpha<-0.7866667 #mean(pCROB['alfar5',1:3])
   sampleX[,VsurST5 := exp(predict(step.model,newdata=sampleX))]
   
   pst1 <- mean(dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
