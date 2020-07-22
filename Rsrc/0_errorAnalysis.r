@@ -66,3 +66,37 @@ errData$t35VLJ <- calError(dataAll[S2Tile == "35VLJ"])
 errData$t35VNL <- calError(dataAll[S2Tile == "35VNL"])
 errData$t34VEQ <- calError(dataAll[S2Tile == "34VEQ"])
 errData$t35WMN <- calError(dataAll[S2Tile == "35WMN"])
+
+
+#### Probit regression between sitetype.ref and sitetype.est 
+summary(dataAll)
+dataAll[Class.est>5,Class.est:=5]
+dataAll[Class.ref>5,Class.ref:=5]
+dataAll$alpha<-NA
+dataAll$alpha[dataAll$Class.est==1]<- 0.2833333 #mean(pCROB['alfar1',1:3])
+dataAll$alpha[dataAll$Class.est==2]<- 0.4066667 #mean(pCROB['alfar2',1:3])
+dataAll$alpha[dataAll$Class.est==3]<- 0.4966667 #mean(pCROB['alfar3',1:3])
+dataAll$alpha[dataAll$Class.est==4]<- 0.6233333 #mean(pCROB['alfar4',1:3])
+dataAll$alpha[dataAll$Class.est==5]<- 0.7866667 #mean(pCROB['alfar5',1:3])
+
+dataAll$Class.est.f<-factor(dataAll$Class.est,levels = 1:5)
+dataAll$Class.ref.f<-factor(dataAll$Class.ref,levels = 1:5)
+
+full.probit<-polr(Class.ref.f ~ Class.est+alpha+H.est+D.est+G.est,data=dataAll ,method='probit')
+step.probit <- stepAIC(full.probit, direction = "both",
+                      trace = FALSE)
+predict(step.probit,type='p')
+
+save(step.probit,file = 'data/stProbit.rdata')
+
+#### logistic regression to predict the pure forests
+dataAll$max.pro.ref<-apply(dataAll[, c('PINE.mea','SPRUCE.mea','BL.mea')], 1, max)
+dataAll$max.pro.est<-apply(dataAll[, c('PINE.est','SPRUCE.est','BL.est')], 1, max)
+dataAll$pure.ref<-F
+dataAll$pure.ref[dataAll$max.pro.ref>=100]<-T
+# dataAll$pure.ref<-as.factor(dataAll$pure.ref)
+logistic.model<-glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+                 data = dataAll)
+summary(logistic.model)
+plot(dataAll$max.pro.est,predict(logistic.model,type="response"))
+save(logistic.model,file = 'data/logisticPureF.rdata')
