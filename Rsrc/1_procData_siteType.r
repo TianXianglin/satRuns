@@ -85,7 +85,7 @@ data.all <- data.all[, siteType2 := siteType2 * siteTypeConv]
 if(siteTypeX==year2){
   data.all[,siteType:=siteType2]  
 }else{
-  data.all[,siteType:=siteTypeX]  
+  data.all[,siteType:=siteType1]  
 }
 data.all[siteType>5,siteType:=5]
 data.all[siteType1>5,siteType1:=5]
