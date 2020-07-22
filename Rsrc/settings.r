@@ -7,7 +7,7 @@ testRun = T ####set to TRUE to test the code on a small raster proportion
 CSCrun = F ### set to TRUE if you are running on CSC
 fracTest <- 0.2 ###fraction of test area
 maxSitesRun <- 20000
-maxSitesRunTest <- 1000
+maxSitesRunTest <- 20000
 saveVars <- c(1,11:13,17,30,43,44) ####select variables to save
 varHD <- FALSE #### if true will vary H and D of pine and spruce using siteType
 
