@@ -37,8 +37,8 @@ step.model <- stepAIC(full.model, direction = "both",
 #sd(exp(predict(step.model))-dataX$Vmod)
 #### 
 
-Vmod3 <- data.table(cbind(segID,V[,3]))
-setnames(Vmod3,c("segID","Vpreb3y"))
+# Vmod3 <- data.table(cbind(segID,V[,3]))
+# setnames(Vmod3,c("segID","Vpreb3y"))
 
 uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
 uniqueData[,BAsp:= (ba * spruceP/(pineP+spruceP+blp))]
@@ -56,6 +56,7 @@ dataSurV[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 fixBAper <- function(BApers){
   minBA <- min(BApers)
   if(minBA<0) BApers <- BApers - minBA
+  BApers <- BApers/sum(BApers)*100
   return(BApers)
 }
 
@@ -75,10 +76,35 @@ pSTx <- function(segIDx,nSample){
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+if(nrow(sampleX)<nSample){
+  sample1 <- sampleX
+  set.seed(1234)
+  sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+  # segIDx <- dataSurV[segID==2]
+  sampleX <- data.table()
+  sampleX$H <- segIDx$H + sampleError$H
+  sampleX$D <- segIDx$D + sampleError$D
+  sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX <- sampleX[H>1.5]
+  sampleX <- sampleX[D>0.5]
+  sampleX <- sampleX[BAtot>0.045]
+  sampleX <- rbind(sample1,sampleX)
+  sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+}
   
   sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
             as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
           by = seq_len(nrow(sampleX))]
+  
+  max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
+  set.seed(123)
+  sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
+  if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
+  if(max.pro.est==2) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,100,0)]
+  if(max.pro.est==3) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,0,100)]
   
   sampleX[,BAp:=BApPer*BAtot/100]
   sampleX[,BAsp:=BAspPer*BAtot/100]
@@ -129,6 +155,8 @@ system.time(for(i in 1:200){
   stProbs[i,] <- pSTx(dataSurV[i],nSample)
   if (i %% 100 == 0) { print(i) }
 } )
+stProbs <- data.table(stProbs)
+test <- predict(step.probit,type='p',newData=dataSurV[1:200])   ### needs to be changed . We need to calculate with 2016 and 2019 data 
 
 # system.time(ll <- dataSurV[1:200, pSTx(.SDcol,nSample),by=segID])
 

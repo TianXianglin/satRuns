@@ -55,8 +55,9 @@ dataAll$alpha[dataAll$Class.est==5]<- 0.7866667 #mean(pCROB['alfar5',1:3])
 
 dataAll$Class.est.f<-factor(dataAll$Class.est,levels = 1:5)
 dataAll$Class.ref.f<-factor(dataAll$Class.ref,levels = 1:5)
-
-full.probit<-polr(Class.ref.f ~ Class.est+alpha+H.est+D.est+G.est,data=dataAll ,method='probit')
+dataAllNew <- dataAll[,.(Class.ref.f, Class.est,H.est,D.est,G.est,PINE.est, SPRUCE.est, BL.est)]
+setnames(dataAllNew,c("st.mea.f","st", "H", "D", "BAtot","BApPer","BAspPer","BAbPer"))
+full.probit<-polr(st.mea.f ~ st+H+D+BAtot+BApPer+BAspPer+BAbPer,data=dataAllNew ,method='probit')
 step.probit <- stepAIC(full.probit, direction = "both",
                       trace = FALSE)
 predict(step.probit,type='p')
