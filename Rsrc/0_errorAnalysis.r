@@ -1,5 +1,10 @@
 library(data.table)
 
+mkfldr <- paste0("surErrMods/")
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
+}
+
 load("data/traningSites.rdata")
 data2016$year <- 2016
 data2019$year <- 2019
@@ -60,9 +65,9 @@ setnames(dataAllNew,c("st.mea.f","st", "H", "D", "BAtot","BApPer","BAspPer","BAb
 full.probit<-polr(st.mea.f ~ st+H+D+BAtot+BApPer+BAspPer+BAbPer,data=dataAllNew ,method='probit')
 step.probit <- stepAIC(full.probit, direction = "both",
                       trace = FALSE)
-predict(step.probit,type='p')
+# predict(step.probit,type='p')
 
-save(step.probit,file = 'data/stProbit.rdata')
+save(step.probit,file = paste0(generalPath,'surErrMods/stProbit.rdata'))
 
 #### logistic regression to predict the pure forests
 dataAll$max.pro.ref<-apply(dataAll[, c('PINE.mea','SPRUCE.mea','BL.mea')], 1, max)
@@ -72,6 +77,6 @@ dataAll$pure.ref[dataAll$max.pro.ref>=100]<-T
 # dataAll$pure.ref<-as.factor(dataAll$pure.ref)
 logistic.model<-glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
                  data = dataAll)
-summary(logistic.model)
-plot(dataAll$max.pro.est,predict(logistic.model,type="response"))
-save(logistic.model,file = 'data/logisticPureF.rdata')
+# summary(logistic.model)
+# plot(dataAll$max.pro.est,predict(logistic.model,type="response"))
+save(logistic.model,file = paste0(generalPath,'surErrMods/logisticPureF.rdata'))

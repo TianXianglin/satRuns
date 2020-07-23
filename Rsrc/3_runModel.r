@@ -1,7 +1,6 @@
 
 ### Run settings
 source("Rsrc/settings.r")
-setwd(generalPath)
 ###check and create output directories
 setwd(generalPath)
 mkfldr <- paste0("output/","init",startingYear,"/st",siteTypeX)

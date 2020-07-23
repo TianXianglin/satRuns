@@ -7,32 +7,36 @@ source("Rsrc/functions.r")
 setwd(generalPath)
 
 yearX <- 3
-load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
-load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))  
-load(paste0("output/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
 load(paste0("procData/init",startingYear,"/","st",siteTypeX,"/uniqueData.rdata"))  
-load(paste0("outDT/init",startingYear,"/","st",siteTypeX,"/V_NoHarv_CurrClimlayerall.rdata"))  
-Vmod2019 <- rowSums(out[,yearX,6,])
-load(paste0("initPrebas/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
-dataX <- data.table(cbind(initPrebas$multiInitVar[,3:5,1],initPrebas$multiInitVar[,5,2],
-                          initPrebas$multiInitVar[,5,3],initPrebas$siteInfo[,3],Vmod2019))
-setnames(dataX,c("H","D","BAp","BAsp","BAb","st","Vmod"))
-if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTypes of the tile are in the sample")
+load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
+load("surErrMods/logisticPureF.rdata")
+load("surErrMods/stProbit.rdata")
+load("surErrMods/surMod.rdata")
 
-#### Here we use stepwise regression to construct an emulator for volume prediction
-dataX$lnVmod<-log(dataX$Vmod)
-dataX$alpha<-NA
-dataX$alpha[dataX$st==1]<- mean(pCROB['alfar1',1:3])
-dataX$alpha[dataX$st==2]<- mean(pCROB['alfar2',1:3])
-dataX$alpha[dataX$st==3]<- mean(pCROB['alfar3',1:3])
-dataX$alpha[dataX$st==4]<- mean(pCROB['alfar4',1:3])
-dataX$alpha[dataX$st==5]<- mean(pCROB['alfar5',1:3])
-dataX$lnBAp<-log(dataX$BAp+1)
-dataX$lnBAsp<-log(dataX$BAsp+1)
-dataX$lnBAb<-log(dataX$BAb+1)
-full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st+alpha,data=dataX)
-step.model <- stepAIC(full.model, direction = "both",
-                        trace = FALSE)
+# load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))  
+# load(paste0("output/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
+# load(paste0("outDT/init",startingYear,"/","st",siteTypeX,"/V_NoHarv_CurrClimlayerall.rdata"))  
+# Vmod2019 <- rowSums(out[,yearX,6,])
+# load(paste0("initPrebas/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
+# dataX <- data.table(cbind(initPrebas$multiInitVar[,3:5,1],initPrebas$multiInitVar[,5,2],
+#                           initPrebas$multiInitVar[,5,3],initPrebas$siteInfo[,3],Vmod2019))
+# setnames(dataX,c("H","D","BAp","BAsp","BAb","st","Vmod"))
+# if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTypes of the tile are in the sample")
+# 
+# #### Here we use stepwise regression to construct an emulator for volume prediction
+# dataX$lnVmod<-log(dataX$Vmod)
+# dataX$alpha<-NA
+# dataX$alpha[dataX$st==1]<- mean(pCROB['alfar1',1:3])
+# dataX$alpha[dataX$st==2]<- mean(pCROB['alfar2',1:3])
+# dataX$alpha[dataX$st==3]<- mean(pCROB['alfar3',1:3])
+# dataX$alpha[dataX$st==4]<- mean(pCROB['alfar4',1:3])
+# dataX$alpha[dataX$st==5]<- mean(pCROB['alfar5',1:3])
+# dataX$lnBAp<-log(dataX$BAp+1)
+# dataX$lnBAsp<-log(dataX$BAsp+1)
+# dataX$lnBAb<-log(dataX$BAb+1)
+# full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st+alpha,data=dataX)
+# step.model <- stepAIC(full.model, direction = "both",
+#                         trace = FALSE)
 #summary(step.model)
 #sd(exp(predict(step.model))-dataX$Vmod)
 #### 
@@ -62,7 +66,7 @@ fixBAper <- function(BApers){
 
 nSample = 10
 pSTx <- function(segIDx,nSample){
-    set.seed(123)
+    # set.seed(123)
     sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
@@ -76,31 +80,32 @@ pSTx <- function(segIDx,nSample){
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-if(nrow(sampleX)<nSample){
-  sample1 <- sampleX
-  set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
-  # segIDx <- dataSurV[segID==2]
-  sampleX <- data.table()
-  sampleX$H <- segIDx$H + sampleError$H
-  sampleX$D <- segIDx$D + sampleError$D
-  sampleX$BAtot <- segIDx$BAtot + sampleError$G
-  sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-  sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-  sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-  sampleX <- sampleX[H>1.5]
-  sampleX <- sampleX[D>0.5]
-  sampleX <- sampleX[BAtot>0.045]
-  sampleX <- rbind(sample1,sampleX)
-  sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-}
+  if(nrow(sampleX)<nSample){
+    sample1 <- sampleX
+    # set.seed(1234)
+    sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+    # segIDx <- dataSurV[segID==2]
+    sampleX <- data.table()
+    sampleX$H <- segIDx$H + sampleError$H
+    sampleX$D <- segIDx$D + sampleError$D
+    sampleX$BAtot <- segIDx$BAtot + sampleError$G
+    sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+    sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+    sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX <- sampleX[H>1.5]
+    sampleX <- sampleX[D>0.5]
+    sampleX <- sampleX[BAtot>0.045]
+    sampleX <- rbind(sample1,sampleX)
+    sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  }
   
   sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
             as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
           by = seq_len(nrow(sampleX))]
   
   max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
-  set.seed(123)
+  segIDx[,max.pro.est:=max.pro.est]
+  # set.seed(123)
   sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
   if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
   if(max.pro.est==2) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,100,0)]
@@ -115,25 +120,26 @@ if(nrow(sampleX)<nSample){
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
   # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
-  sampleX$alpha<-0
+  sampleX$st <- factor(sampleX$st)
   sampleX$lnBAp<-log(sampleX$BAp+1)
   sampleX$lnBAsp<-log(sampleX$BAsp+1)
   sampleX$lnBAb<-log(sampleX$BAb+1)
+  sampleX[,BAtot:=(BAp+BAsp+BAb)]
+  sampleX[,lnBAh:=log(BAtot*H)]
+  sampleX[,N:=BAtot/(pi*(D/200)^2)]
+  b = -1.605 ###coefficient of Reineke
+  sampleX[,lnSDI:=log(N) + b * log(D) - b * log(10)]
+  
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
-  sampleX$st <- 1
-  sampleX$alpha<-0.2833333 #mean(pCROB['alfar1',1:3])
+  sampleX$st <- factor(1)
   sampleX[,VsurST1 := exp(predict(step.model,newdata=sampleX))]
-  sampleX$st <- 2
-  sampleX$alpha<-0.4066667 #mean(pCROB['alfar2',1:3])
+  sampleX$st <- factor(2)
   sampleX[,VsurST2 := exp(predict(step.model,newdata=sampleX))]
-  sampleX$st <- 3
-  sampleX$alpha<-0.4966667 #mean(pCROB['alfar3',1:3])
+  sampleX$st <- factor(3)
   sampleX[,VsurST3 := exp(predict(step.model,newdata=sampleX))]
-  sampleX$st <- 4
-  sampleX$alpha<-0.6233333 #mean(pCROB['alfar4',1:3])
+  sampleX$st <- factor(4)
   sampleX[,VsurST4 := exp(predict(step.model,newdata=sampleX))]
-  sampleX$st <- 5
-  sampleX$alpha<-0.7866667 #mean(pCROB['alfar5',1:3])
+  sampleX$st <- factor(5)
   sampleX[,VsurST5 := exp(predict(step.model,newdata=sampleX))]
   
   pst1 <- mean(dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
