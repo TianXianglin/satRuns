@@ -12,7 +12,7 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
 load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))  
 
   
-  sampleID <- 1
+  sampleID <- 10
   rcpfile="CurrClim"
 
   # resample siteType using a uniform distribution 
@@ -82,17 +82,22 @@ load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"
     dataX$lnVmod<-log(dataX$Vmod)
     # dataX$alpha<-NA
     dataX$st <- factor(dataX$st)
-    dataX$lnBAp<-log(dataX$BAp+1)
-    dataX$lnBAsp<-log(dataX$BAsp+1)
-    dataX$lnBAb<-log(dataX$BAb+1)
+    # dataX$lnBAp<-dataX$BAp
+    # dataX$lnBAsp<-dataX$BAsp
+    # dataX$lnBAb<-dataX$BAb
     dataX[,BAtot:=(BAp+BAsp+BAb)]
-    dataX[,lnBAh:=log(BAtot*H)]
+    dataX[,BAh:=BAtot*H]
     dataX[,N:=BAtot/(pi*(D/200)^2)]
     b = -1.605 ###coefficient of Reineke
-    dataX[,lnSDI:=log(N) + b * log(D) - b * log(10)]
-    full.model<-lm(lnVmod~H+D+lnSDI+lnBAh+lnBAp+lnBAsp+lnBAb+st,data=dataX)
+    dataX[,SDI:=N *(D/10)^b]
+    full.model<-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.model <- stepAIC(full.model, direction = "both",
                           trace = FALSE)
     
+    
+    sV <- step.model$fitted.values
+    pV <- dataX$Vmod
+    plot(sV,pV)
+    summary(step.model)
     save(step.model,file="surMod/surMod.rdata")
     
