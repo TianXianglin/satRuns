@@ -9,6 +9,8 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
+yearX <- 3
+
 load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))  
 
   
@@ -54,7 +56,8 @@ load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"
 
     
     ###run Model
-    Vx <- rowSums(multiPrebas(initPrebas)$multiOut[,,30,,1])
+    out <- multiPrebas(initPrebas)$multiOut
+    Vx <- rowSums(out[,yearX,30,,1])
     
     Vx <- data.table(segID=initPrebas$siteInfo[,1],V3=Vx)
     print("runs completed")
@@ -63,9 +66,9 @@ load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"
     
     ####build surrogate model
     library(MASS)
+    library(minpack.lm)
     ### Run settings & functions
 
-    yearX <- 3
     load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
     # load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))  
     # load(paste0("output/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
@@ -79,49 +82,47 @@ load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"
     # if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTypes of the tile are in the sample")
     
     #### Here we use stepwise regression to construct an emulator for volume prediction
-    dataX$lnVmod<-log(dataX$Vmod)
+    # dataX$lnVmod<-log(dataX$Vmod)
     # dataX$alpha<-NA
     dataX$st <- factor(dataX$st)
-    # dataX$lnBAp<-dataX$BAp
-    # dataX$lnBAsp<-dataX$BAsp
-    # dataX$lnBAb<-dataX$BAb
     dataX[,BAtot:=(BAp+BAsp+BAb)]
     dataX[,BAh:=BAtot*H]
     dataX[,N:=BAtot/(pi*(D/200)^2)]
     b = -1.605 ###coefficient of Reineke
     dataX[,SDI:=N *(D/10)^b]
-    full.model<-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    full.modelV<-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.model <- stepAIC(full.model, direction = "both",
                           trace = FALSE)
-    start<-as.vector(full.model$coefficients)
+    # start<-as.vector(full.model$coefficients)
 ### Anonther option is to use nonlinear regression, which differed in error assumption. 
-    full.model0<-lm(lnVmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
-    start<-as.vector(full.model0$coefficients)
-    nonlinear<-nlsLM(Vmod~exp(a+b*H+c*D+d*SDI+e*BAh+f*BAp+g*BAsp+h*BAb+
-                              i2*as.numeric(st==2)+
-                              i3*as.numeric(st==3)+
-                              i4*as.numeric(st==4)+
-                              i5*as.numeric(st==5)
-                            ),
-                   data=dataX,start = list(a=start[1],
-                                     b=start[2],
-                                     c=start[3],
-                                     d=start[4],
-                                     e=start[5],
-                                     f=start[6],
-                                     g=start[7],
-                                     h=start[8],
-                                     i2=start[9],
-                                     i3=start[10],
-                                     i4=start[11],
-                                     i5=start[12]
-                                     ))
-        
+    # full.model0<-lm(lnVmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    # start<-as.vector(full.model0$coefficients)
+    # nonlinear<-nlsLM(Vmod~exp(a+b*H+c*D+d*SDI+e*BAh+f*BAp+g*BAsp+h*BAb+
+    #                           i2*as.numeric(st==2)+
+    #                           i3*as.numeric(st==3)+
+    #                           i4*as.numeric(st==4)+
+    #                           i5*as.numeric(st==5)
+    #                         ),
+    #                data=dataX,start = list(a=start[1],
+    #                                  b=start[2],
+    #                                  c=start[3],
+    #                                  d=start[4],
+    #                                  e=start[5],
+    #                                  f=start[6],
+    #                                  g=start[7],
+    #                                  h=start[8],
+    #                                  i2=start[9],
+    #                                  i3=start[10],
+    #                                  i4=start[11],
+    #                                  i5=start[12]
+    #                                  ))
+    #     
     sV <- step.model$fitted.values
-    sV2<-predict(nonlinear)
+    # sV2<-predict(nonlinear)
     pV <- dataX$Vmod
+    # plot(sV2,pV,col=2)
     plot(sV,pV)
-    plot(sV2,pV)
+    # summary(nonlinear)
     summary(step.model)
-    save(step.model,file="surMod/surMod.rdata")
+    save(step.model,file="surErrMods/surMod.rdata")
     

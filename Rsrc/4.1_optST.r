@@ -121,26 +121,23 @@ pSTx <- function(segIDx,nSample){
   # sampleX$lnVmod<-log(sampleX$Vmod)
   # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
   sampleX$st <- factor(sampleX$st)
-  sampleX$lnBAp<-log(sampleX$BAp+1)
-  sampleX$lnBAsp<-log(sampleX$BAsp+1)
-  sampleX$lnBAb<-log(sampleX$BAb+1)
   sampleX[,BAtot:=(BAp+BAsp+BAb)]
-  sampleX[,lnBAh:=log(BAtot*H)]
+  sampleX[,BAh:=BAtot*H]
   sampleX[,N:=BAtot/(pi*(D/200)^2)]
   b = -1.605 ###coefficient of Reineke
-  sampleX[,lnSDI:=log(N) + b * log(D) - b * log(10)]
+  sampleX[,SDI:=N *(D/10)^b]
   
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
   sampleX$st <- factor(1)
-  sampleX[,VsurST1 := exp(predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST1 := pmax(0.,predict(step.model,newdata=sampleX))]
   sampleX$st <- factor(2)
-  sampleX[,VsurST2 := exp(predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST2 := pmax(0.,predict(step.model,newdata=sampleX))]
   sampleX$st <- factor(3)
-  sampleX[,VsurST3 := exp(predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST3 := pmax(0.,predict(step.model,newdata=sampleX))]
   sampleX$st <- factor(4)
-  sampleX[,VsurST4 := exp(predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST4 := pmax(0.,predict(step.model,newdata=sampleX))]
   sampleX$st <- factor(5)
-  sampleX[,VsurST5 := exp(predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST5 := pmax(0.,predict(step.model,newdata=sampleX))]
   
   pst1 <- mean(dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
   pst2 <- mean(dnorm(sampleX$VsurST2 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
@@ -162,7 +159,14 @@ system.time(for(i in 1:200){
   if (i %% 100 == 0) { print(i) }
 } )
 stProbs <- data.table(stProbs)
-test <- predict(step.probit,type='p',newData=dataSurV[1:200])   ### needs to be changed . We need to calculate with 2016 and 2019 data 
+test <- predict(step.probit,type='p',dataSurV[1:200,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+ops <- array(NA, dim = c(200,5,2))
+ops[,,1] <- as.matrix(stProbs[1:200])
+ops[,,2] <- test
+
 
 # system.time(ll <- dataSurV[1:200, pSTx(.SDcol,nSample),by=segID])
-
+boxplot(stProbs[1:200])
+ciao <- data.table(apply(ops,1:2,mean))
+boxplot(data.table(test))
+boxplot(ciao)
