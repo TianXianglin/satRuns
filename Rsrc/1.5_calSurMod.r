@@ -93,11 +93,35 @@ load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"
     full.model<-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.model <- stepAIC(full.model, direction = "both",
                           trace = FALSE)
-    
-    
+    start<-as.vector(full.model$coefficients)
+### Anonther option is to use nonlinear regression, which differed in error assumption. 
+    full.model0<-lm(lnVmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    start<-as.vector(full.model0$coefficients)
+    nonlinear<-nlsLM(Vmod~exp(a+b*H+c*D+d*SDI+e*BAh+f*BAp+g*BAsp+h*BAb+
+                              i2*as.numeric(st==2)+
+                              i3*as.numeric(st==3)+
+                              i4*as.numeric(st==4)+
+                              i5*as.numeric(st==5)
+                            ),
+                   data=dataX,start = list(a=start[1],
+                                     b=start[2],
+                                     c=start[3],
+                                     d=start[4],
+                                     e=start[5],
+                                     f=start[6],
+                                     g=start[7],
+                                     h=start[8],
+                                     i2=start[9],
+                                     i3=start[10],
+                                     i4=start[11],
+                                     i5=start[12]
+                                     ))
+        
     sV <- step.model$fitted.values
+    sV2<-predict(nonlinear)
     pV <- dataX$Vmod
     plot(sV,pV)
+    plot(sV2,pV)
     summary(step.model)
     save(step.model,file="surMod/surMod.rdata")
     
