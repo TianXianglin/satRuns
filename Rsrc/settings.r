@@ -26,6 +26,9 @@ require(sm)
 require(rgdal)
 library(raster)
 library(rgdal)
+library(parallel)
+devtools::install_github("collectivemedia/tictoc")
+library(tictoc)
 
 
 ###check prebas version and install if needed
@@ -42,6 +45,8 @@ climatepath = "C:/Users/minunno/Documents/research/extarctWeather/inputs/" #### 
 # climatepath = "/scratch/project_2000994/RCP/" ####on CSC
 climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.tif"
 # climIDpath <- "/scratch/project_2000994/PREBASruns/metadata/" ####on CSC
+
+coresN <- 10L ###Set number of cores to use in parallel run 
 
 startYearWeather <- 1971 ###1971 for Finnish weather dataBase
 startingYear <- 2016  #2019
