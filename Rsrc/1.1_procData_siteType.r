@@ -2,7 +2,7 @@
 #####Run settings####
 source("Rsrc/settings.r")
 setwd(generalPath)
-mkfldr <- paste0("procData/",paste0("init",startingYear,"/st",siteTypeX))
+mkfldr <- paste0("procData/",paste0("init",startingYear,"/calST"))
 if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
@@ -125,7 +125,7 @@ data.all[,dV := v2-v]
 data.all[,dVy := (v2-v)/(year2 - startingYear)]
 
 ####group pixels by same values
-data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, siteType, climID,dVy,v2)]
+data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, siteType1,siteType2, climID,dVy,v2)]
 # data.all[clCut==1 ,hist(dVy)]
 
 
@@ -134,8 +134,8 @@ data.all[, npix:=.N, segID]
 
 # uniqueData <- data.table()
 ####find unique initial conditions
-uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,
-                                                  siteType,N,climID,segID,npix,dVy,v2)])
+uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
+                                                  siteType2,N,climID,segID,npix,dVy,v2)])
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
@@ -174,10 +174,10 @@ for(i in 1:nSamples){
   segID <- c(segID,sampleX$segID)
 }
 
-save(data.all,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/allData.rdata"))         ### All data
-save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
-save(samples,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
-save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
+save(data.all,file=paste0(procDataPath,"init",startingYear,"/calST/allData.rdata"))         ### All data
+save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/calST/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
+save(samples,file=paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))    ### unique pixel combination to run in PREBAS
+save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/calST/XYsegID.rdata"))    ### Coordinates and segID of all pixels
 
 
 

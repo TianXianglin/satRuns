@@ -418,13 +418,13 @@ pSTx <- function(segIDx,nSample){
   sampleX[,BAp:=BApPer*BAtot/100]
   sampleX[,BAsp:=BAspPer*BAtot/100]
   sampleX[,BAb:=BAbPer*BAtot/100]
-  sampleX[,st:=segIDx$st]
+  # sampleX[,st:=segIDx$st]
   sampleX[,V2:=segIDx$V2]
   sampleX[,segID:=segIDx$segID]
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
   # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
-  sampleX$st <- factor(sampleX$st)
+  # sampleX$st <- factor(sampleX$st)
   sampleX[,BAtot:=(BAp+BAsp+BAb)]
   sampleX[,BAh:=BAtot*H]
   sampleX[,N:=BAtot/(pi*(D/200)^2)]

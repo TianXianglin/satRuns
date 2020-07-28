@@ -11,14 +11,14 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
 
 yearX <- 3
 
-load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))  
+load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))  
 
   
   sampleID <- 10
   rcpfile="CurrClim"
 
   # resample siteType using a uniform distribution 
-  samples[[sampleID]]$siteType <- sample(1:5,length(samples[[sampleID]]$siteType),replace = T)
+  samples[[sampleID]]$siteType <- sample(1:5,nrow(samples[[sampleID]]),replace = T)
 
   if(rcpfile=="CurrClim"){
     load(paste(climatepath, rcpfile,".rdata", sep=""))  
@@ -48,7 +48,6 @@ load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"
     clim = prep.climate.f(dat, data.sample, startingYear, nYears,startYearWeather)
     
     # Region = nfiareas[ID==r_no, Region]
-    
     initPrebas = create_prebas_input.f(r_no, clim, data.sample, nYears = nYears,
                                        startingYear = startingYear,domSPrun=domSPrun)
     
@@ -90,7 +89,7 @@ load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"
     dataX[,N:=BAtot/(pi*(D/200)^2)]
     b = -1.605 ###coefficient of Reineke
     dataX[,SDI:=N *(D/10)^b]
-    full.modelV<-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    full.model <-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.model <- stepAIC(full.model, direction = "both",
                           trace = FALSE)
     # start<-as.vector(full.model$coefficients)
@@ -122,6 +121,7 @@ load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"
     pV <- dataX$Vmod
     # plot(sV2,pV,col=2)
     plot(sV,pV)
+    abline(0,1)
     # summary(nonlinear)
     summary(step.model)
     save(step.model,file="surErrMods/surMod.rdata")
