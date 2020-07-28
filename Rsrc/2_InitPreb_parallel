@@ -1,3 +1,5 @@
+#### NOTICE that argument "par", to indicate parallel processed files, is included in the filepaths here.
+
 ### Run settings & functions
 source("Rsrc/settings.r")
 source("Rsrc/functions.r")
@@ -11,8 +13,8 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
 
 load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))  
 
-nSamples <- length(samples)
-sampleIDs <- 1:nSamples
+#nSamples <- length(samples)
+#sampleIDs <- 1:nSamples
 
 if(testRun){
   sampleID <- 1
