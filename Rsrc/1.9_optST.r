@@ -7,42 +7,13 @@ source("Rsrc/functions.r")
 setwd(generalPath)
 
 yearX <- 3
+nSample = 10
 load(paste0("procData/init",startingYear,"/","st",siteTypeX,"/uniqueData.rdata"))  
 load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
 load("surErrMods/logisticPureF.rdata")
 load("surErrMods/stProbit.rdata")
 load("surErrMods/surMod.rdata")
 
-# load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))  
-# load(paste0("output/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
-# load(paste0("outDT/init",startingYear,"/","st",siteTypeX,"/V_NoHarv_CurrClimlayerall.rdata"))  
-# Vmod2019 <- rowSums(out[,yearX,6,])
-# load(paste0("initPrebas/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
-# dataX <- data.table(cbind(initPrebas$multiInitVar[,3:5,1],initPrebas$multiInitVar[,5,2],
-#                           initPrebas$multiInitVar[,5,3],initPrebas$siteInfo[,3],Vmod2019))
-# setnames(dataX,c("H","D","BAp","BAsp","BAb","st","Vmod"))
-# if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTypes of the tile are in the sample")
-# 
-# #### Here we use stepwise regression to construct an emulator for volume prediction
-# dataX$lnVmod<-log(dataX$Vmod)
-# dataX$alpha<-NA
-# dataX$alpha[dataX$st==1]<- mean(pCROB['alfar1',1:3])
-# dataX$alpha[dataX$st==2]<- mean(pCROB['alfar2',1:3])
-# dataX$alpha[dataX$st==3]<- mean(pCROB['alfar3',1:3])
-# dataX$alpha[dataX$st==4]<- mean(pCROB['alfar4',1:3])
-# dataX$alpha[dataX$st==5]<- mean(pCROB['alfar5',1:3])
-# dataX$lnBAp<-log(dataX$BAp+1)
-# dataX$lnBAsp<-log(dataX$BAsp+1)
-# dataX$lnBAb<-log(dataX$BAb+1)
-# full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st+alpha,data=dataX)
-# step.model <- stepAIC(full.model, direction = "both",
-#                         trace = FALSE)
-#summary(step.model)
-#sd(exp(predict(step.model))-dataX$Vmod)
-#### 
-
-# Vmod3 <- data.table(cbind(segID,V[,3]))
-# setnames(Vmod3,c("segID","Vpreb3y"))
 
 uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
 uniqueData[,BAsp:= (ba * spruceP/(pineP+spruceP+blp))]
@@ -64,7 +35,6 @@ fixBAper <- function(BApers){
   return(BApers)
 }
 
-nSample = 10
 pSTx <- function(segIDx,nSample){
     # set.seed(123)
     sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
@@ -154,10 +124,13 @@ pSTx <- function(segIDx,nSample){
 }
 
 stProbs <- matrix(NA,nrow(dataSurV),5)
-system.time(for(i in 1:200){
+nSeg <- 200 #nrow(dataSurV)
+
+system.time(for(i in 1:nSeg){
   stProbs[i,] <- pSTx(dataSurV[i],nSample)
   if (i %% 100 == 0) { print(i) }
 } )
+
 stProbs <- data.table(stProbs)
 test <- predict(step.probit,type='p',dataSurV[1:200,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
 ops <- array(NA, dim = c(200,5,2))
