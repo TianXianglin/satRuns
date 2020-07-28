@@ -30,7 +30,7 @@ dataSurV[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 
 
 
-nSeg <- 1000#nrow(dataSurV)  ##200
+nSeg <- nrow(dataSurV)  ##200
 stProbMod <- matrix(NA,nSeg,5)
 
 for(i in 1:nSeg){
