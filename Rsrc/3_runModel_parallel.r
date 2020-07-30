@@ -22,7 +22,7 @@ if(testRun){
 }
 
 #Processing time is measured with tictoc
-tic("total time taken to initialize sample data")
+tic("total time taken to run the model with sample data")
 
 for (rcpfile in weather) { ## ---------------------------------------------
   print(date())
