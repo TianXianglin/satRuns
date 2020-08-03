@@ -370,7 +370,7 @@ fixBAper <- function(BApers){
 }
 
 pSTx <- function(segIDx,nSample){
-  # set.seed(123)
+  set.seed(1234)
   sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
@@ -386,7 +386,7 @@ pSTx <- function(segIDx,nSample){
   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   if(nrow(sampleX)<nSample){
     sample1 <- sampleX
-    # set.seed(1234)
+    set.seed(1234)
     sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
     # segIDx <- dataSurV[segID==2]
     sampleX <- data.table()
@@ -409,7 +409,7 @@ pSTx <- function(segIDx,nSample){
   
   max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
   segIDx[,max.pro.est:=max.pro.est]
-  # set.seed(123)
+  set.seed(1234)
   sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
   if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
   if(max.pro.est==2) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,100,0)]
