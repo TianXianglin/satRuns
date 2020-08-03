@@ -29,6 +29,8 @@ library(rgdal)
 library(parallel)
 devtools::install_github("collectivemedia/tictoc")
 library(tictoc)
+library(MASS)
+library(minpack.lm)
 
 
 ###check prebas version and install if needed
