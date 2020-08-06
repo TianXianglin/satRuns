@@ -1,12 +1,23 @@
 
 #####Run settings####
 source("Rsrc/settings.r")
+#source(Rsrc/mainSettings.r) ### in CSC	
+
+# Create folders for outputs.
 setwd(generalPath)
 mkfldr <- paste0("procData/",paste0("init",startingYear,"/calST"))
 if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
+# If output is set to be split to smaller parts (splitRun = TRUE), create separate	
+# folder for the split data tables.	
+mkfldr_split <- paste0("procData/",paste0("init",startingYear,"/calST_split"))	
+if (splitRun) {	
+  if(!dir.exists(file.path(generalPath, mkfldr_split))) {	
+  dir.create(file.path(generalPath, mkfldr_split), recursive = TRUE)	
+  }	
+}
 
 ###extract CurrClim IDs
 rastX <- raster(baRast)
@@ -179,5 +190,37 @@ save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/calST/uniqueData.
 save(samples,file=paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))    ### unique pixel combination to run in PREBAS
 save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/calST/XYsegID.rdata"))    ### Coordinates and segID of all pixels
 
-
+#### If splitRun = TRUE, unique data is split to four tables here to enable 	
+#    running 1.9_optST in multiple sections. Running in multiple sections will reduce 	
+#    total processing time of 1.9_optST.	
+if (splitRun) {	
+  	
+  # Create split_id column which is used in splitting the table. Here the data is split to	
+  # four parts. NOTICE that the parts are not necessarily equal sized: three are equal 	
+  # sized but the fourth is either equal or few observations smaller depending on the amount 	
+  # of rows in the original data.	
+  split_length <- ceiling(nrow(uniqueData)/4)	
+  uniqueData <- uniqueData[, split_id := NA]	
+  uniqueData$split_id[1:split_length] <- 1	
+  uniqueData$split_id[(split_length+1):(split_length*2)] <- 2	
+  uniqueData$split_id[(2*split_length+1):(split_length*3)] <- 3	
+  uniqueData$split_id[(3*split_length+1):(nrow(uniqueData))] <- 4	
+  # Split the table to list of 4 elements. Splitting is done based on the split_id.	
+  split_list <- split(uniqueData,uniqueData$split_id)	
+  # Convert the split results to separate data tables	
+  uniqueData1 <- as.data.table(split_list[[1]])	
+  uniqueData2 <- as.data.table(split_list[[2]])	
+  uniqueData3 <- as.data.table(split_list[[3]])	
+  uniqueData4 <- as.data.table(split_list[[4]])	
+  # Remove split_id column	
+  uniqueData1 <- uniqueData1[, split_id:=NULL]	
+  uniqueData2 <- uniqueData2[, split_id:=NULL]	
+  uniqueData3 <- uniqueData3[, split_id:=NULL]	
+  uniqueData4 <- uniqueData4[, split_id:=NULL]	
+  # Save splitted tables 	
+  save(uniqueData1,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData1.rdata"))  	
+  save(uniqueData2,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData2.rdata"))	
+  save(uniqueData3,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData3.rdata"))	
+  save(uniqueData4,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData4.rdata"))	
+}
 
