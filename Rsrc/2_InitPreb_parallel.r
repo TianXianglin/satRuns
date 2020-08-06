@@ -1,12 +1,10 @@
-#### NOTICE that argument "par", to indicate parallel processed files, is included in the filepaths here.
-
 ### Run settings & functions
 source("Rsrc/settings.r")
 source("Rsrc/functions.r")
 
 ###check and create output directories
 setwd(generalPath)
-mkfldr <- paste0("initPrebas/","init",startingYear,"/st",siteTypeX, "par")
+mkfldr <- paste0("initPrebas/","init",startingYear,"/st",siteTypeX)
 if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
@@ -45,7 +43,7 @@ for (rcpfile in weather) { ## ---------------------------------------------
   
   # Create PREBAS input data from sample data. Process data in parallel with mclapply command.
   # Number of cores used for processing can be defined with mc.cores argument. mc.cores=1 disables 
-  # parallel processing. 
+  # parallel processing. Recommended amount of cores to use with this code is 20.
   initPrebFiles <- mclapply(seq_along(samples), function(x) {
     ## Prepare the same initial state for all harvest scenarios that are simulated in a loop below
     
@@ -78,7 +76,7 @@ for (rcpfile in weather) { ## ---------------------------------------------
     
     # if(stXruns){
     save(initPrebas,file=paste0(initPrebasPath,"init",startingYear,"/",
-                                "st",siteTypeX,"par","/",
+                                "st",siteTypeX,"/",
                                 rcpfile,"_sample",sampleID,".rdata"))
     # }else{
     # save(initPrebas,file=paste0(initPrebasPath,startingYear,"/",
