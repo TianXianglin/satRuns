@@ -100,8 +100,9 @@ splitRun <- FALSE
 # Range/number of split parts. NOTICE: Code doesn't adjust number of split parts by merely 
 # adjusting this variable. If number of parts needs to be changed from 4, both 1.1 and 1.9 
 # need to be modified.
-if (splitRun){
+if(splitRun){
   splitRange <- 1:4
+}
 
 ####thresholds for variables to reset stand from plantation
 maxDens <- 10000
