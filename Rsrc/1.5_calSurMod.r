@@ -57,8 +57,20 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     ###run Model
     out <- multiPrebas(initPrebas)$multiOut
     Vx <- rowSums(out[,yearX,30,,1])
+    Bx <- rowSums(out[,yearX,13,,1])
+    Bpx <- out[,yearX,13,1,1]
+    Bspx <- out[,yearX,13,2,1]
+    Bdx <- out[,yearX,13,3,1]
+    Hx <- out[,yearX,11,1,1] * out[,yearX,13,1,1]/Bx +
+      out[,yearX,11,2,1] * out[,yearX,13,2,1]/Bx +
+      out[,yearX,11,3,1] * out[,yearX,13,3,1]/Bx
+    Dx <- out[,yearX,12,1,1] * out[,yearX,13,1,1]/Bx +
+      out[,yearX,12,2,1] * out[,yearX,13,2,1]/Bx +
+      out[,yearX,12,3,1] * out[,yearX,13,3,1]/Bx
     
-    Vx <- data.table(segID=initPrebas$siteInfo[,1],V3=Vx)
+    PREBx <- data.table(segID=initPrebas$siteInfo[,1],V3 = Vx, B3 = Bx,
+                        H3 = Hx, D3 = Dx,
+                        Bp3=Bpx,Bsp3=Bspx,Bd3=Bdx)
     print("runs completed")
     
     
@@ -76,8 +88,11 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     # Vmod2019 <- rowSums(out[,yearX,6,])
     # load(paste0("initPrebas/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
     dataX <- data.table(cbind(initPrebas$multiInitVar[,3:5,1],initPrebas$multiInitVar[,5,2],
-                              initPrebas$multiInitVar[,5,3],initPrebas$siteInfo[,3],Vx$V3))
-    setnames(dataX,c("H","D","BAp","BAsp","BAb","st","Vmod"))
+                              initPrebas$multiInitVar[,5,3],initPrebas$siteInfo[,3],
+                              PREBx$V3,PREBx$B3,PREBx$H3,PREBx$D3,
+                              PREBx$Bp3,PREBx$Bsp3,PREBx$Bd3))
+    setnames(dataX,c("H","D","BAp","BAsp","BAb","st","Vmod","Bmod",
+                     "Hmod","Dmod","BApmod","BAspmod","BAdmod"))
     # if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTypes of the tile are in the sample")
     
     #### Here we use stepwise regression to construct an emulator for volume prediction
@@ -89,9 +104,27 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     dataX[,N:=BAtot/(pi*(D/200)^2)]
     b = -1.605 ###coefficient of Reineke
     dataX[,SDI:=N *(D/10)^b]
-    full.model <-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
-    step.model <- stepAIC(full.model, direction = "both",
+    full.modelV <-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    step.modelV <- stepAIC(full.modelV, direction = "both",
                           trace = FALSE)
+    full.modelB <-lm(Bmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    step.modelB <- stepAIC(full.modelB, direction = "both",
+                           trace = FALSE)
+    full.modelH <-lm(Hmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    step.modelH <- stepAIC(full.modelH, direction = "both",
+                           trace = FALSE)
+    full.modelD <-lm(Dmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    step.modelD <- stepAIC(full.modelD, direction = "both",
+                           trace = FALSE)
+    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    step.modelBp <- stepAIC(full.modelBp, direction = "both",
+                           trace = FALSE)
+    full.modelBsp <-lm(BAspmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    step.modelBsp <- stepAIC(full.modelBsp, direction = "both",
+                             trace = FALSE)
+    full.modelBd <-lm(BAdmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    step.modelBd <- stepAIC(full.modelBd, direction = "both",
+                             trace = FALSE)
     # start<-as.vector(full.model$coefficients)
 ### Anonther option is to use nonlinear regression, which differed in error assumption. 
     # full.model0<-lm(lnVmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
@@ -116,13 +149,24 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     #                                  i5=start[12]
     #                                  ))
     #     
-    sV <- step.model$fitted.values
-    # sV2<-predict(nonlinear)
-    pV <- dataX$Vmod
-    # plot(sV2,pV,col=2)
-    plot(sV,pV)
+    plot(step.modelV$fitted.values,dataX$Vmod,pch=".")
     abline(0,1)
+    plot(step.modelB$fitted.values,dataX$Bmod,pch=".")
+    abline(0,1)
+    plot(step.modelH$fitted.values,dataX$Hmod,pch=".")
+    abline(0,1)
+    plot(step.modelD$fitted.values,dataX$Dmod,pch=".")
+    abline(0,1)
+    plot(step.modelBp$fitted.values,dataX$BApmod,pch=".")
+    abline(0,1)
+    plot(step.modelBsp$fitted.values,dataX$BAspmod,pch=".")
+    abline(0,1)
+    plot(step.modelBd$fitted.values,dataX$BAdmod,pch=".")
+    abline(0,1)
+    
     # summary(nonlinear)
-    summary(step.model)
-    save(step.model,file="surErrMods/surMod.rdata")
+    # summary(step.model)
+    save(step.modelV,step.modelB,step.modelD,step.modelH,
+         step.modelBp,step.modelBsp,step.modelBd,
+         file="surErrMods/surMod.rdata")
     

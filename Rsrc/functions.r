@@ -433,15 +433,15 @@ pSTx <- function(segIDx,nSample){
   
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
   sampleX$st <- factor(1)
-  sampleX[,VsurST1 := pmax(0.,predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST1 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX$st <- factor(2)
-  sampleX[,VsurST2 := pmax(0.,predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST2 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX$st <- factor(3)
-  sampleX[,VsurST3 := pmax(0.,predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST3 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX$st <- factor(4)
-  sampleX[,VsurST4 := pmax(0.,predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST4 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX$st <- factor(5)
-  sampleX[,VsurST5 := pmax(0.,predict(step.model,newdata=sampleX))]
+  sampleX[,VsurST5 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   
   pst1 <- mean(dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
   pst2 <- mean(dnorm(sampleX$VsurST2 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
@@ -456,3 +456,91 @@ pSTx <- function(segIDx,nSample){
   pst5 <- pst5/psum
   return(pST=c(pst1,pst2,pst3,pst4,pst5)) 
 }
+
+
+###function for structural variables data assimilation 
+pSVDA <- function(segIDx,nSample){
+  pST <- c(segIDx$pST1,segIDx$pST2,segIDx$pST3,segIDx$pST4,segIDx$pST5)
+  st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
+  set.seed(1234)
+  sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+
+  # segIDx <- dataSurV[segID==2]
+  sampleX <- data.table()
+  sampleX$H <- segIDx$H + sampleError$H
+  sampleX$D <- segIDx$D + sampleError$D
+  sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX <- sampleX[H>1.5]
+  sampleX <- sampleX[D>0.5]
+  sampleX <- sampleX[BAtot>0.045]
+  sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  if(nrow(sampleX)<nSample){
+    sample1 <- sampleX
+    set.seed(1234)
+    sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+    # segIDx <- dataSurV[segID==2]
+    sampleX <- data.table()
+    sampleX$H <- segIDx$H + sampleError$H
+    sampleX$D <- segIDx$D + sampleError$D
+    sampleX$BAtot <- segIDx$BAtot + sampleError$G
+    sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+    sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+    sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX <- sampleX[H>1.5]
+    sampleX <- sampleX[D>0.5]
+    sampleX <- sampleX[BAtot>0.045]
+    sampleX <- rbind(sample1,sampleX)
+    sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  }
+
+  sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
+            as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
+          by = seq_len(nrow(sampleX))]
+  
+  max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
+  segIDx$max.pro.est=max.pro.est
+
+  set.seed(1234)
+  sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
+  if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
+  if(max.pro.est==2) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,100,0)]
+  if(max.pro.est==3) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,0,100)]
+  
+  sampleX[,BAp:=BApPer*BAtot/100]
+  sampleX[,BAsp:=BAspPer*BAtot/100]
+  sampleX[,BAb:=BAbPer*BAtot/100]
+  # sampleX[,st:=segIDx$st]
+  sampleX[,V2:=segIDx$V2]
+  sampleX[,segID:=segIDx$segID]
+  
+  # sampleX$lnVmod<-log(sampleX$Vmod)
+  # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
+  # sampleX$st <- factor(sampleX$st)
+  sampleX[,BAtot:=(BAp+BAsp+BAb)]
+  sampleX[,BAh:=BAtot*H]
+  sampleX[,N:=BAtot/(pi*(D/200)^2)]
+  b = -1.605 ###coefficient of Reineke
+  sampleX[,SDI:=N *(D/10)^b]
+  sampleX$st <- st
+  # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
+  sampleX$st <- factor(sampleX$st)
+  sampleX[,Hx := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  sampleX[,Dx := pmax(0.,predict(step.modelD,newdata=sampleX))]
+  sampleX[,Bx := pmax(0.,predict(step.modelB,newdata=sampleX))]
+  # sampleX[,Vx := pmax(0.,predict(step.modelV,newdata=sampleX))]
+  sampleX[,Bpx := pmax(0.,predict(step.modelBp,newdata=sampleX))]
+  sampleX[,Bspx := pmax(0.,predict(step.modelBsp,newdata=sampleX))]
+  sampleX[,Bdx := pmax(0.,predict(step.modelBd,newdata=sampleX))]
+  
+  mux <- sampleX[,colMeans(cbind(Hx,Dx,Bx,Bpx,Bspx,Bdx))]
+  covMat <- sampleX[,cov(cbind(Hx,Dx,Bx,Bpx,Bspx,Bdx))]
+  
+  pMvnorm <- c(mux,as.vector(covMat))
+
+    
+  return(pMvnorm=pMvnorm) 
+}
+
