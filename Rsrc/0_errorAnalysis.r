@@ -1,11 +1,13 @@
 library(data.table)
+source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
 
 mkfldr <- paste0("surErrMods/")
 if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
-load("data/traningSites.rdata")
+#load("data/traningSites.rdata")
+load("/scratch/project_2000994/PREBASruns/assessCarbon/data/traningSites.rdata") # in CSC
 data2016$year <- 2016
 data2019$year <- 2019
 dataAll <- rbind(data2016,data2019)
@@ -44,7 +46,8 @@ errData$all <- calError(dataAll)
 # errData$t35VNL <- calError(dataAll[S2Tile == "35VNL"])
 # errData$t34VEQ <- calError(dataAll[S2Tile == "34VEQ"])
 # errData$t35WMN <- calError(dataAll[S2Tile == "35WMN"])
-save(errData,file="data/inputUncer.rdata")
+# save(errData,file="data/inputUncer.rdata")
+save(errData,file="/scratch/project_2000994/PREBASruns/assessCarbon/data/inputUncer.rdata") # in CSC
 
 
 #### Probit regression between sitetype.ref and sitetype.est 
@@ -64,7 +67,7 @@ dataAllNew <- dataAll[,.(Class.ref.f, Class.est,H.est,D.est,G.est,PINE.est, SPRU
 setnames(dataAllNew,c("st.mea.f","st", "H", "D", "BAtot","BApPer","BAspPer","BAbPer"))
 full.probit<-polr(st.mea.f ~ st+H+D+BAtot+BApPer+BAspPer+BAbPer,data=dataAllNew ,method='probit')
 step.probit <- stepAIC(full.probit, direction = "both",
-                      trace = FALSE)
+                       trace = FALSE)
 # predict(step.probit,type='p')
 
 save(step.probit,file = paste0(generalPath,'surErrMods/stProbit.rdata'))
@@ -76,7 +79,7 @@ dataAll$pure.ref<-F
 dataAll$pure.ref[dataAll$max.pro.ref>=100]<-T
 # dataAll$pure.ref<-as.factor(dataAll$pure.ref)
 logistic.model<-glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
-                 data = dataAll)
+                    data = dataAll)
 # summary(logistic.model)
 # plot(dataAll$max.pro.est,predict(logistic.model,type="response"))
 save(logistic.model,file = paste0(generalPath,'surErrMods/logisticPureF.rdata'))
