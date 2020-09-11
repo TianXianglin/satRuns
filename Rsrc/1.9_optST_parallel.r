@@ -1,13 +1,13 @@
 ### Run settings & functions
-	source("Rsrc/settings.r")	
-#source(Rsrc/mainSettings.r) ### in CSC	
-source("Rsrc/functions.r")
+# source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC	
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
 
 ###check and create output directories
 setwd(generalPath)
 
 yearX <- 3
-	nSample = 1000 ### number of samples from the error distribution. 1000 for proper runs. 	
+nSample = 1000 ### number of samples from the error distribution. 1000 for proper runs. 	
                  # While testing, use of a smaller amount is recommended (for example 100).	
 
 # Load unique data.	
