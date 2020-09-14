@@ -48,7 +48,7 @@ climatepath = "C:/Users/minunno/Documents/research/extarctWeather/inputs/" #### 
 climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.tif"
 # climIDpath <- "/scratch/project_2000994/PREBASruns/metadata/" ####on CSC
 
-coresN <- 10L ###Set number of cores to use in parallel run 
+coresN <- 20L ###Set number of cores to use in parallel run 
 
 startYearWeather <- 1971 ###1971 for Finnish weather dataBase
 startingYear <- 2016  #2019
@@ -94,6 +94,12 @@ siteTypeNA <- c(254:255); siteTypeConv <- 1
 stXruns <- TRUE
 siteTypeX <- startingYear #startingYear #year2 #startingYear #1:5
 
+# Source of tile-specific settings. Defined in batch job script. When set to TRUE will overwrite the tile-specific 
+# settings in this script (lines: 41-49, 53-56, 72-81) with settings from filepath in mySettings variable.
+if(tileSettings) {
+  source(mySettings)
+}
+
 # Set whether to split unique data in 1.1_procData_siteType to four smaller parts. If
 # TRUE, data is split.
 splitRun <- FALSE
@@ -101,7 +107,7 @@ splitRun <- FALSE
 # adjusting this variable. If number of parts needs to be changed from 4, both 1.1 and 1.9 
 # need to be modified.
 if(splitRun){
-  splitRange <- 1:4
+  splitRange <- 1:10
 }
 
 ####thresholds for variables to reset stand from plantation
