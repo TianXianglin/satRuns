@@ -1,6 +1,12 @@
-source("Rsrc/settings.r")
-source("Rsrc/functions.r")
+# Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+if(modifiedSettings) {
+  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
+}
+# Run functions 
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
 
+# Check and create output directories
 setwd(generalPath)
 mkfldr <- paste0("outDT/","init",startingYear,"/st",siteTypeX)
 if(!dir.exists(file.path(generalPath, mkfldr))) {
