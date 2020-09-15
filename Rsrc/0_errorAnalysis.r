@@ -1,6 +1,11 @@
-library(data.table)
-source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
+# Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+if(modifiedSettings) {
+  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
+}
 
+
+### Check and create output directories
 mkfldr <- paste0("surErrMods/")
 if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
@@ -83,3 +88,4 @@ logistic.model<-glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "
 # summary(logistic.model)
 # plot(dataAll$max.pro.est,predict(logistic.model,type="response"))
 save(logistic.model,file = paste0(generalPath,'surErrMods/logisticPureF.rdata'))
+
