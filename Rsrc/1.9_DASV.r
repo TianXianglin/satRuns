@@ -1,7 +1,11 @@
 library(MASS)
-### Run settings & functions
-source("Rsrc/settings.r")
-source("Rsrc/functions.r")
+# Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+if(modifiedSettings) {
+  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
+}
+# Run functions 
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
 
 ###check and create output directories
 setwd(generalPath)
@@ -9,7 +13,8 @@ setwd(generalPath)
 yearX <- 3
 nSample = 1000 ###number of samples from the error distribution
 load(paste0("procData/init",startingYear,"/calST/uniqueData.rdata"))  
-load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
+#load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
+load("/scratch/project_2000994/PREBASruns/assessCarbon/data/inputUncer.rdata") # in CSC
 load("surErrMods/logisticPureF.rdata")
 load("surErrMods/stProbit.rdata")
 load("surErrMods/surMod.rdata")
