@@ -1,3 +1,5 @@
+library(devtools)
+tileSettings = F
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
 if(modifiedSettings) {
@@ -11,8 +13,13 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
-#load("data/traningSites.rdata")
-load("/scratch/project_2000994/PREBASruns/assessCarbon/data/traningSites.rdata") # in CSC
+
+if(CSCrun){
+  load("/scratch/project_2000994/PREBASruns/assessCarbon/data/traningSites.rdata") # in CSC
+}else{
+  load("data/traningSites.rdata")
+}
+
 data2016$year <- 2016
 data2019$year <- 2019
 dataAll <- rbind(data2016,data2019)
@@ -36,23 +43,28 @@ calError <- function(dataX){
 }
 errData <- list()
 errData$all <- calError(dataAll)
-# errData$y2016$all <- calError(data2016)
-# errData$y2019$all <- calError(data2019)
-# errData$y2016$t35VLJ <- calError(data2016[S2Tile == "35VLJ"])
-# errData$y2019$t35VLJ <- calError(data2019[S2Tile == "35VLJ"])
-# errData$y2016$t35VNL <- calError(data2016[S2Tile == "35VNL"])
-# errData$y2019$t35VNL <- calError(data2019[S2Tile == "35VNL"])
-# errData$y2016$t34VEQ <- calError(data2016[S2Tile == "34VEQ"])
-# errData$y2019$t34VEQ <- calError(data2019[S2Tile == "34VEQ"])
-# errData$y2016$t35WMN <- calError(data2016[S2Tile == "35WMN"])
-# errData$y2019$t35WMN <- calError(data2019[S2Tile == "35VLJ"])
+errData$y2016$all <- calError(data2016)
+errData$y2019$all <- calError(data2019)
+errData$y2016$t35VLJ <- calError(data2016[S2Tile == "35VLJ"])
+errData$y2019$t35VLJ <- calError(data2019[S2Tile == "35VLJ"])
+errData$y2016$t35VNL <- calError(data2016[S2Tile == "35VNL"])
+errData$y2019$t35VNL <- calError(data2019[S2Tile == "35VNL"])
+errData$y2016$t34VEQ <- calError(data2016[S2Tile == "34VEQ"])
+errData$y2019$t34VEQ <- calError(data2019[S2Tile == "34VEQ"])
+errData$y2016$t35WMN <- calError(data2016[S2Tile == "35WMN"])
+errData$y2019$t35WMN <- calError(data2019[S2Tile == "35VLJ"])
 # 
-# errData$t35VLJ <- calError(dataAll[S2Tile == "35VLJ"])
-# errData$t35VNL <- calError(dataAll[S2Tile == "35VNL"])
-# errData$t34VEQ <- calError(dataAll[S2Tile == "34VEQ"])
-# errData$t35WMN <- calError(dataAll[S2Tile == "35WMN"])
-# save(errData,file="data/inputUncer.rdata")
-save(errData,file="/scratch/project_2000994/PREBASruns/assessCarbon/data/inputUncer.rdata") # in CSC
+errData$t35VLJ <- calError(dataAll[S2Tile == "35VLJ"])
+errData$t35VNL <- calError(dataAll[S2Tile == "35VNL"])
+errData$t34VEQ <- calError(dataAll[S2Tile == "34VEQ"])
+errData$t35WMN <- calError(dataAll[S2Tile == "35WMN"])
+
+if(CSCrun){
+  save(errData,file="/scratch/project_2000994/PREBASruns/assessCarbon/data/inputUncer.rdata") # in CSC
+}else{
+  save(errData,file="data/inputUncer.rdata")
+}
+
 
 
 #### Probit regression between sitetype.ref and sitetype.est 
@@ -68,24 +80,78 @@ dataAll$alpha[dataAll$Class.est==5]<- 0.7866667 #mean(pCROB['alfar5',1:3])
 
 dataAll$Class.est.f<-factor(dataAll$Class.est,levels = 1:5)
 dataAll$Class.ref.f<-factor(dataAll$Class.ref,levels = 1:5)
-dataAllNew <- dataAll[,.(Class.ref.f, Class.est,H.est,D.est,G.est,PINE.est, SPRUCE.est, BL.est)]
-setnames(dataAllNew,c("st.mea.f","st", "H", "D", "BAtot","BApPer","BAspPer","BAbPer"))
-full.probit<-polr(st.mea.f ~ st+H+D+BAtot+BApPer+BAspPer+BAbPer,data=dataAllNew ,method='probit')
-step.probit <- stepAIC(full.probit, direction = "both",
-                       trace = FALSE)
-# predict(step.probit,type='p')
+
+
+calProbit <- function(dataX, yearX="all", tileX="all"){
+  if(yearX=="all" & tileX=="all"){
+    dataX <- dataX[,.(Class.ref.f, Class.est,H.est,D.est,G.est,PINE.est, SPRUCE.est, BL.est)]
+  }else if(yearX=="all" & tileX!="all"){
+    dataX <- dataX[S2Tile==tileX,.(Class.ref.f, Class.est,H.est,D.est,G.est,PINE.est, SPRUCE.est, BL.est)]
+  }else if(yearX!="all" & tileX=="all"){
+    dataX <- dataX[year==yearX,.(Class.ref.f, Class.est,H.est,D.est,G.est,PINE.est, SPRUCE.est, BL.est)]
+  }else{
+    dataX <- dataX[year==yearX & S2Tile==tileX,.(Class.ref.f, Class.est,H.est,D.est,G.est,PINE.est, SPRUCE.est, BL.est)]
+  }
+  setnames(dataX,c("st.mea.f","st", "H", "D", "BAtot","BApPer","BAspPer","BAbPer"))
+  full.probit<-polr(st.mea.f ~ st+H+D+BAtot+BApPer+BAspPer+BAbPer,data=dataX ,method='probit')
+  step.probit <- stepAIC(full.probit, direction = "both",
+                         trace = FALSE)
+  return(step.probit)
+}
+
+step.probit <- list()
+step.probit$all <- calProbit(dataAll)
+step.probit$y2016$t35VLJ <- calProbit(dataAll,yearX=2016,tileX="35VLJ")
+step.probit$y2019$t35VLJ <- calProbit(dataAll,yearX=2019,tileX="35VLJ")
+# step.probit$y2016$t35VNL <- calProbit(dataAll,yearX=2016,tileX="35VNL")
+step.probit$y2019$t35VNL <- calProbit(dataAll,yearX=2019,tileX="35VNL")
+step.probit$y2016$t34VEQ <- calProbit(dataAll,yearX=2016,tileX="34VEQ")
+step.probit$y2019$t34VEQ <- calProbit(dataAll,yearX=2019,tileX="34VEQ")
+step.probit$t35WMN <- calProbit(dataAll,yearX="all",tileX="35WMN")
 
 save(step.probit,file = paste0(generalPath,'surErrMods/stProbit.rdata'))
 
-#### logistic regression to predict the pure forests
+#### logistic function to predict the pure forests
+
 dataAll$max.pro.ref<-apply(dataAll[, c('PINE.mea','SPRUCE.mea','BL.mea')], 1, max)
 dataAll$max.pro.est<-apply(dataAll[, c('PINE.est','SPRUCE.est','BL.est')], 1, max)
 dataAll$pure.ref<-F
 dataAll$pure.ref[dataAll$max.pro.ref>=100]<-T
 # dataAll$pure.ref<-as.factor(dataAll$pure.ref)
-logistic.model<-glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+
+logistic.model <- list()
+
+logistic.model$all <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
                     data = dataAll)
-# summary(logistic.model)
+
+yearX=2016; tileX = "35VLJ"
+dataX <- dataAll[year==yearX & S2Tile == tileX]
+logistic.model[[paste0("y",yearX)]][[paste0("t",tileX)]] <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+                                   data = dataX)
+yearX=2019; tileX = "35VLJ"
+dataX <- dataAll[year==yearX & S2Tile == tileX]
+logistic.model[[paste0("y",yearX)]][[paste0("t",tileX)]] <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+                                                                data = dataX)
+yearX=2019; tileX = "35VNL"
+dataX <- dataAll[year==yearX & S2Tile == tileX]
+logistic.model[[paste0("y",yearX)]][[paste0("t",tileX)]] <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+                                                                data = dataX)
+yearX=2016; tileX = "34VEQ"
+dataX <- dataAll[year==yearX & S2Tile == tileX]
+logistic.model[[paste0("y",yearX)]][[paste0("t",tileX)]] <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+                                                                data = dataX)
+yearX=2019; tileX = "34VEQ"
+dataX <- dataAll[year==yearX & S2Tile == tileX]
+logistic.model[[paste0("y",yearX)]][[paste0("t",tileX)]] <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+                                                                data = dataX)
+yearX=2016; tileX = "35WMN"
+dataX <- dataAll[year==yearX & S2Tile == tileX]
+logistic.model[[paste0("y",yearX)]][[paste0("t",tileX)]] <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+                                                                data = dataX)
+yearX=2019; tileX = "35WMN"
+dataX <- dataAll[year==yearX & S2Tile == tileX]
+logistic.model[[paste0("y",yearX)]][[paste0("t",tileX)]] <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
+                                                                data = dataX)
 # plot(dataAll$max.pro.est,predict(logistic.model,type="response"))
 save(logistic.model,file = paste0(generalPath,'surErrMods/logisticPureF.rdata'))
 
