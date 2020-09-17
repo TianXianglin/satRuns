@@ -33,13 +33,19 @@ calError <- function(dataX){
   resids$BAp <- (dataX$PINE.mea- dataX$PINE.est)
   resids$BAsp <- (dataX$SPRUCE.mea- dataX$SPRUCE.est)
   resids$BAb <- (dataX$BL.mea- dataX$BL.est)
-  Vres <- (dataX$V.mea- dataX$V.est)
-  sigma <- cov(resids)
-  mu <- colMeans(resids)
-  muV <- mean(Vres)
-  sdV <- sd(Vres)
-  corMat <- cor(resids)
-  return(list(resids = resids,mu=mu,sigma=sigma,corMat=corMat, muV = muV, sdV = sdV))
+  sigmaFSVda <- cov(resids)
+  muFSVda <- colMeans(resids)
+  ###include V in the multivariate normal distribution for ite type DA
+  resids2 <- resids[,.(G,D,H)]
+  resids2$V <- (dataX$V.mea- dataX$V.est)
+  muSTda <- colMeans(resids2)
+  sigmaSTda <- cov(resids2)
+  corMatFSVda <- cor(resids)
+  corMatSTda <- cor(resids2)
+  return(list(residsFSVda = resids,muFSVda=muFSVda,sigmaFSVda=sigmaFSVda,
+              corMatFSVda=corMatFSVda,
+              residsSTda = resids,muSTda=muSTda,sigmaSTda=sigmaSTda,
+              corMatSTda=corMatSTda))
 }
 errData <- list()
 errData$all <- calError(dataAll)

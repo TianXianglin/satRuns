@@ -1,3 +1,7 @@
+library(devtools)
+tileSettings = F
+modifiedSettings = F
+
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
 if(modifiedSettings) {
@@ -13,47 +17,52 @@ setwd(generalPath)
 
 yearX <- 3
 nSample = 1000 ###number of samples from the error distribution
-load(paste0("procData/init",startingYear,"/calST_test/uniqueData.rdata")) 
+load(paste0("procData/init",startingYear,"/calST/uniqueData.rdata")) 
 #load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
-load("/scratch/project_2000994/PREBASruns/assessCarbon/data/inputUncer.rdata") # in CSC
-load("surErrMods/logisticPureF_test.rdata")
-load("surErrMods/stProbit_test.rdata")
-load("surErrMods/surMod_test.rdata")
+
+####load error models
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/logisticPureF.rdata"))
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/step.probit.rdata"))
+###load surrMods
+load("surErrMods/surMod.rdata")
 
 
 uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
 uniqueData[,BAsp:= (ba * spruceP/(pineP+spruceP+blp))]
 uniqueData[,BAb:= (ba * blp/(pineP+spruceP+blp))]
 
-dataSurV <- uniqueData[,.(h,dbh,BAp,BAsp,BAb,siteType1,siteType2,v2,segID)] 
-setnames(dataSurV,c("H","D","BAp","BAsp","BAb","st1","st2","V2","segID"))
+dataSur <- uniqueData[,.(h,dbh,BAp,BAsp,BAb,siteType1,
+                          siteType2,v2,ba2,h2,dbh2,segID)] 
+setnames(dataSur,c("H","D","BAp","BAsp","BAb","st1",
+                    "st2","V2","ba2","h2","dbh2","segID"))
 
 
-dataSurV[,BApPer:=.(BAp/sum(BAp,BAsp,BAb)*100),by=segID]
-dataSurV[,BAspPer:=.(BAsp/sum(BAp,BAsp,BAb)*100),by=segID]
-dataSurV[,BAbPer:=.(BAb/sum(BAp,BAsp,BAb)*100),by=segID]
-dataSurV[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
+dataSur[,BApPer:=.(BAp/sum(BAp,BAsp,BAb)*100),by=segID]
+dataSur[,BAspPer:=.(BAsp/sum(BAp,BAsp,BAb)*100),by=segID]
+dataSur[,BAbPer:=.(BAb/sum(BAp,BAsp,BAb)*100),by=segID]
+dataSur[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 
 
 
-nSeg <- nrow(dataSurV)  ##200
+nSeg <- nrow(dataSur)  ##200
 stProbMod <- matrix(NA,nSeg,5)
 
 
 for(i in 1:nSeg){
-  stProbMod[i,] <- pSTx(dataSurV[i],nSample)
+  stProbMod[i,] <- pSTx(dataSur[i],nSample)
   # if (i %% 100 == 0) { print(i) }
 }
 
 stProbMod <- data.table(stProbMod)
 
 ###calculate probit2016
-dataSurV[,st:=st1]
-probit1 <- predict(step.probit,type='p',dataSurV[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+dataSur[,st:=st1]
+probit1 <- predict(step.probit,type='p',dataSur[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
 
 ###calculate probit2019
-dataSurV[,st:=st2]
-probit2 <- predict(step.probit,type='p',dataSurV[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+dataSur[,st:=st2]
+probit2 <- predict(step.probit,type='p',dataSur[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
 
 stProb <- array(NA, dim=c(nSeg,5,3))
 stProb[,,1] <- probit1

@@ -369,7 +369,8 @@ fixBAper <- function(BApers){
   return(BApers)
 }
 
-pSTx <- function(segIDx,nSample){
+###function for site type data assimilation
+pSTx <- function(segIDx,nSample,yearX,tileX){
   set.seed(1234)
   sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
   # segIDx <- dataSurV[segID==2]
@@ -409,6 +410,13 @@ pSTx <- function(segIDx,nSample){
   
   max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
   segIDx[,max.pro.est:=max.pro.est]
+  
+  if(yearX=="all" & tileX=="all"){
+    logistic.model <- logisticPureF$all
+  }else{
+    logistic.model <- logisticPureF[[paste0("y",yearX)]][[paste0("t",tileX)]]
+  }
+  
   set.seed(1234)
   sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
   if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
@@ -420,6 +428,9 @@ pSTx <- function(segIDx,nSample){
   sampleX[,BAb:=BAbPer*BAtot/100]
   # sampleX[,st:=segIDx$st]
   sampleX[,V2:=segIDx$V2]
+  sampleX[,ba2:=segIDx$ba2]
+  sampleX[,h2:=segIDx$h2]
+  sampleX[,dbh2:=segIDx$dbh2]
   sampleX[,segID:=segIDx$segID]
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
@@ -434,16 +445,35 @@ pSTx <- function(segIDx,nSample){
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
   sampleX$st <- factor(1)
   sampleX[,VsurST1 := pmax(0.,predict(step.modelV,newdata=sampleX))]
+  sampleX[,BsurST1 := pmax(0.,predict(step.modelB,newdata=sampleX))]
+  sampleX[,DsurST1 := pmax(0.,predict(step.modelD,newdata=sampleX))]
+  sampleX[,HsurST1 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   sampleX$st <- factor(2)
   sampleX[,VsurST2 := pmax(0.,predict(step.modelV,newdata=sampleX))]
+  sampleX[,BsurST2 := pmax(0.,predict(step.modelB,newdata=sampleX))]
+  sampleX[,DsurST2 := pmax(0.,predict(step.modelD,newdata=sampleX))]
+  sampleX[,HsurST2 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   sampleX$st <- factor(3)
   sampleX[,VsurST3 := pmax(0.,predict(step.modelV,newdata=sampleX))]
+  sampleX[,BsurST3 := pmax(0.,predict(step.modelB,newdata=sampleX))]
+  sampleX[,DsurST3 := pmax(0.,predict(step.modelD,newdata=sampleX))]
+  sampleX[,HsurST3 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   sampleX$st <- factor(4)
   sampleX[,VsurST4 := pmax(0.,predict(step.modelV,newdata=sampleX))]
+  sampleX[,BsurST4 := pmax(0.,predict(step.modelB,newdata=sampleX))]
+  sampleX[,DsurST4 := pmax(0.,predict(step.modelD,newdata=sampleX))]
+  sampleX[,HsurST4 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   sampleX$st <- factor(5)
   sampleX[,VsurST5 := pmax(0.,predict(step.modelV,newdata=sampleX))]
+  sampleX[,BsurST5 := pmax(0.,predict(step.modelB,newdata=sampleX))]
+  sampleX[,DsurST5 := pmax(0.,predict(step.modelD,newdata=sampleX))]
+  sampleX[,HsurST5 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   
-  pst1 <- mean(dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
+  errData$all$muV
+  pst1 <- mean(dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV)*
+                 dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV)*
+                 dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV)*
+                 dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
   pst2 <- mean(dnorm(sampleX$VsurST2 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
   pst3 <- mean(dnorm(sampleX$VsurST3 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
   pst4 <- mean(dnorm(sampleX$VsurST4 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
