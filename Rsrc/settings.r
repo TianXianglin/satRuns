@@ -18,6 +18,7 @@ if(CSCrun){
 }
 
 ##load libraries
+library(mvtnorm)
 library(reshape2)
 library(plyr)
 library(raster)

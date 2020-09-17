@@ -370,9 +370,13 @@ fixBAper <- function(BApers){
 }
 
 ###function for site type data assimilation
-pSTx <- function(segIDx,nSample,yearX,tileX){
+pSTx <- function(segIDx,nSample,year1,year2,tileX){
+  mu1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$muFSVda
+  sigma1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$sigmaFSVda
+  mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muSTda
+  sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaSTda
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+  sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
   sampleX$H <- segIDx$H + sampleError$H
@@ -388,7 +392,7 @@ pSTx <- function(segIDx,nSample,yearX,tileX){
   if(nrow(sampleX)<nSample){
     sample1 <- sampleX
     set.seed(1234)
-    sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+    sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
     # segIDx <- dataSurV[segID==2]
     sampleX <- data.table()
     sampleX$H <- segIDx$H + sampleError$H
@@ -411,10 +415,10 @@ pSTx <- function(segIDx,nSample,yearX,tileX){
   max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
   segIDx[,max.pro.est:=max.pro.est]
   
-  if(yearX=="all" & tileX=="all"){
+  if(year1=="all" & tileX=="all"){
     logistic.model <- logisticPureF$all
   }else{
-    logistic.model <- logisticPureF[[paste0("y",yearX)]][[paste0("t",tileX)]]
+    logistic.model <- logisticPureF[[paste0("y",year1)]][[paste0("t",tileX)]]
   }
   
   set.seed(1234)
@@ -469,15 +473,22 @@ pSTx <- function(segIDx,nSample,yearX,tileX){
   sampleX[,DsurST5 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST5 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   
-  errData$all$muV
-  pst1 <- mean(dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV)*
-                 dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV)*
-                 dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV)*
-                 dnorm(sampleX$VsurST1 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
-  pst2 <- mean(dnorm(sampleX$VsurST2 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
-  pst3 <- mean(dnorm(sampleX$VsurST3 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
-  pst4 <- mean(dnorm(sampleX$VsurST4 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
-  pst5 <- mean(dnorm(sampleX$VsurST5 - segIDx$V2,mean=errData$all$muV,sd=errData$all$sdV))
+  dx1 <- cbind(sampleX$BsurST1 - segIDx$ba2,sampleX$DsurST1 - segIDx$dbh2,
+               sampleX$HsurST1 - segIDx$h2,sampleX$VsurST1 - segIDx$V2)
+  dx2 <- cbind(sampleX$BsurST2 - segIDx$ba2,sampleX$DsurST2 - segIDx$dbh2,
+               sampleX$HsurST2 - segIDx$h2,sampleX$VsurST2 - segIDx$V2)
+  dx3 <- cbind(sampleX$BsurST3 - segIDx$ba2,sampleX$DsurST3 - segIDx$dbh2,
+               sampleX$HsurST3 - segIDx$h2,sampleX$VsurST3 - segIDx$V2)
+  dx4 <- cbind(sampleX$BsurST4 - segIDx$ba2,sampleX$DsurST4 - segIDx$dbh2,
+               sampleX$HsurST4 - segIDx$h2,sampleX$VsurST4 - segIDx$V2)
+  dx5 <- cbind(sampleX$BsurST5 - segIDx$ba2,sampleX$DsurST5 - segIDx$dbh2,
+               sampleX$HsurST5 - segIDx$h2,sampleX$VsurST5 - segIDx$V2)
+  
+  pst1 <- mean(dmvnorm(x=dx1, mean=mu2, sigma=sigma2, log=FALSE))
+  pst2 <- mean(dmvnorm(x=dx2, mean=mu2, sigma=sigma2, log=FALSE))
+  pst3 <- mean(dmvnorm(x=dx3, mean=mu2, sigma=sigma2, log=FALSE))
+  pst4 <- mean(dmvnorm(x=dx4, mean=mu2, sigma=sigma2, log=FALSE))
+  pst5 <- mean(dmvnorm(x=dx5, mean=mu2, sigma=sigma2, log=FALSE))
   psum <- pst1 +pst2+pst3 +pst4+pst5
   pst1 <- pst1/psum
   pst2 <- pst2/psum
@@ -490,6 +501,7 @@ pSTx <- function(segIDx,nSample,yearX,tileX){
 
 ###function for structural variables data assimilation 
 pSVDA <- function(segIDx,nSample){
+  
   pST <- c(segIDx$pST1,segIDx$pST2,segIDx$pST3,segIDx$pST4,segIDx$pST5)
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
   set.seed(1234)

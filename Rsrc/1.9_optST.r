@@ -50,7 +50,7 @@ stProbMod <- matrix(NA,nSeg,5)
 
 
 for(i in 1:nSeg){
-  stProbMod[i,] <- pSTx(dataSur[i],nSample)
+  stProbMod[i,] <- pSTx(dataSur[i],nSample,startingYear,year2,tileX)
   # if (i %% 100 == 0) { print(i) }
 }
 
@@ -58,11 +58,13 @@ stProbMod <- data.table(stProbMod)
 
 ###calculate probit2016
 dataSur[,st:=st1]
-probit1 <- predict(step.probit,type='p',dataSur[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+step.probit1 <- step.probit[[paste0("y",startingYear)]][[paste0("t",tileX)]]
+probit1 <- predict(step.probit1,type='p',dataSur[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
 
 ###calculate probit2019
 dataSur[,st:=st2]
-probit2 <- predict(step.probit,type='p',dataSur[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+step.probit2 <- step.probit[[paste0("y",year2)]][[paste0("t",tileX)]]
+probit2 <- predict(step.probit2,type='p',dataSur[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
 
 stProb <- array(NA, dim=c(nSeg,5,3))
 stProb[,,1] <- probit1
