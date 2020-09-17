@@ -1,3 +1,6 @@
+library(devtools)
+tileSettings = F
+modifiedSettings = F
 
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
@@ -53,7 +56,10 @@ fileNames <- c(baRast,
                sprucePerRast,
                siteTypeRast,
                siteTypeRast2,
-               vRast2)
+               vRast2,
+               baRast2,
+               dbhRast2,
+               hRast2)
 
 for(i in 1:length(fileNames)){
   rastX <- raster(fileNames[i])
@@ -71,15 +77,18 @@ for(i in 1:length(fileNames)){
 data.all$climID <- extract(climID,data.all[,.(x,y)])
 # dataX <- data.table(rasterToPoints(climIDs))
 # data.all <- merge(data.all,dataX)
-setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType1","siteType2","v2","climID"))
+setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType1","siteType2","v2","ba2","dbh2","h2","climID"))
 
 ##filter data 
 data.all <- data.all[!ba %in% baNA]
+data.all <- data.all[!ba2 %in% baNA]
 data.all <- data.all[!blp %in% blPerNA]
 data.all <- data.all[!dbh %in% dbhNA]
+data.all <- data.all[!dbh2 %in% dbhNA]
 data.all <- data.all[!v %in% vNA]
 data.all <- data.all[!v2 %in% vNA]
 data.all <- data.all[!h %in% hNA]
+data.all <- data.all[!h2 %in% hNA]
 data.all <- data.all[!pineP %in% pinePerNA]
 data.all <- data.all[!spruceP %in% sprucePerNA]
 data.all <- data.all[!siteType1 %in% siteTypeNA]
@@ -87,11 +96,14 @@ data.all <- data.all[!siteType2 %in% siteTypeNA]
 
 ####convert data to prebas units
 data.all <- data.all[, ba := ba * baConv]
+data.all <- data.all[, ba2 := ba2 * baConv]
 data.all <- data.all[, blp := blp * blPerConv]
 data.all <- data.all[, dbh := dbh * dbhConv]
+data.all <- data.all[, dbh2 := dbh2 * dbhConv]
 data.all <- data.all[, v := v * vConv]
 data.all <- data.all[, v2 := v2 * vConv]
 data.all <- data.all[, h := h * hConv]
+data.all <- data.all[, h2 := h2 * hConv]
 data.all <- data.all[, pineP := pineP * pinePerConv]
 data.all <- data.all[, spruceP := spruceP * sprucePerConv]
 data.all <- data.all[, siteType1 := siteType1 * siteTypeConv]
@@ -135,12 +147,20 @@ data.all[pineP == 0 & spruceP == 0 & blp ==0 & siteType >= 4, pineP:=1  ]
 
 ###!!!!!!!!!!!!########careful with this part##########!!!!!!!!#########
 
-####calculate dV
-data.all[,dV := v2-v]
+####calculate dV, dBA, dH, dDBH
+# data.all[,dV := v2-v]
 data.all[,dVy := (v2-v)/(year2 - startingYear)]
+# data.all[,dBA := ba2-ba]
+data.all[,dBAy := (ba2-ba)/(year2 - startingYear)]
+# data.all[,dH := h2-h]
+data.all[,dHy := (h2-h)/(year2 - startingYear)]
+# data.all[,dDBH := dbh2-dbh]
+data.all[,dDBHy := (dbh2-dbh)/(year2 - startingYear)]
 
 ####group pixels by same values
-data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, siteType1,siteType2, climID,dVy,v2)]
+data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, 
+                                 siteType1,siteType2, climID,dVy,v2,
+                                 dBAy,ba2,dHy,h2,dDBHy,dbh2)]
 # data.all[clCut==1 ,hist(dVy)]
 
 
@@ -150,7 +170,8 @@ data.all[, npix:=.N, segID]
 # uniqueData <- data.table()
 ####find unique initial conditions
 uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
-                                                  siteType2,N,climID,segID,npix,dVy,v2)])
+                                                  siteType2,N,climID,segID,npix,dVy,v2,
+                                                  dBAy,ba2,dHy,h2,dDBHy,dbh2)])
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]

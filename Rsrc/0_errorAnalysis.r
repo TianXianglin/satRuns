@@ -1,5 +1,5 @@
 library(devtools)
-tileSettings = F
+# tileSettings = F
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
 if(modifiedSettings) {
@@ -110,6 +110,11 @@ step.probit$y2019$t34VEQ <- calProbit(dataAll,yearX=2019,tileX="34VEQ")
 step.probit$t35WMN <- calProbit(dataAll,yearX="all",tileX="35WMN")
 
 save(step.probit,file = paste0(generalPath,'surErrMods/stProbit.rdata'))
+if(CSCrun){
+  save(step.probit,file="/scratch/project_2000994/PREBASruns/assessCarbon/data/step.probit.rdata") # in CSC
+}else{
+  save(step.probit,file="data/step.probit.rdata")
+}
 
 #### logistic function to predict the pure forests
 
@@ -153,5 +158,10 @@ dataX <- dataAll[year==yearX & S2Tile == tileX]
 logistic.model[[paste0("y",yearX)]][[paste0("t",tileX)]] <- glm(formula = pure.ref ~ max.pro.est, family = binomial(link = "logit"), 
                                                                 data = dataX)
 # plot(dataAll$max.pro.est,predict(logistic.model,type="response"))
-save(logistic.model,file = paste0(generalPath,'surErrMods/logisticPureF.rdata'))
+logisticPureF <- logistic.model
+if(CSCrun){
+  save(logisticPureF,file="/scratch/project_2000994/PREBASruns/assessCarbon/data/logisticPureF.rdata") # in CSC
+}else{
+  save(logisticPureF,file="data/logisticPureF.rdata")
+}
 

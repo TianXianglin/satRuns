@@ -79,6 +79,9 @@ sprucePerRast <- paste0(rasterPath,"FI_34VEQ-2016_P_spruce_10M_1CHS_8BITS.tif")
 siteTypeRast <- paste0(rasterPath,"FI_34VEQ-2016_SITE_10M_1CHS_8BITS.tif")
 siteTypeRast2 <- paste0(rasterPath,"FI_34VEQ-2019_SITE_10M_1CHS_8BITS.tif")
 vRast2 <- paste0(rasterPath,"FI_34VEQ-2019_GSV_10M_1CHS_16BITS.tif")
+baRast2 <-  paste0(rasterPath,"FI_34VEQ-2019_BA_10M_1CHS_8BITS.tif")
+dbhRast2 <- paste0(rasterPath,"FI_34VEQ-2019_DIA_10M_1CHS_8BITS.tif")
+hRast2 <- paste0(rasterPath,"FI_34VEQ-2019_HGT_10M_1CHS_16BITS.tif")
 
 ####set values for NAs and convert factor for prebas units
 baNA <- c(253:255); baConv<- 1
