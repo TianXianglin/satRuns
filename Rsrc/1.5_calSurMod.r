@@ -113,6 +113,8 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     dataX[,N:=BAtot/(pi*(D/200)^2)]
     b = -1.605 ###coefficient of Reineke
     dataX[,SDI:=N *(D/10)^b]
+    dataX[,rootBAp:=BAp^0.5]
+    dataX[,BAp2:=BAp^2]
     full.modelV <-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.modelV <- stepAIC(full.modelV, direction = "both",
                           trace = FALSE)
@@ -125,7 +127,7 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     full.modelD <-lm(Dmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.modelD <- stepAIC(full.modelD, direction = "both",
                            trace = FALSE)
-    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st+rootBAp+BAp2,data=dataX)
     step.modelBp <- stepAIC(full.modelBp, direction = "both",
                            trace = FALSE)
     full.modelBsp <-lm(BAspmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
