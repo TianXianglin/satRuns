@@ -18,6 +18,7 @@ if(CSCrun){
 }
 
 ##load libraries
+library(lfda)
 library(mvtnorm)
 library(reshape2)
 library(plyr)
@@ -70,6 +71,7 @@ harvscen = "NoHarv"
 
 
 ####indicate raster files
+tileX = "34VEQ"
 baRast <-  paste0(rasterPath,"FI_34VEQ-2016_BA_10M_1CHS_8BITS.tif")
 blPerRast <- paste0(rasterPath,"FI_34VEQ-2016_BLP_10M_1CHS_8BITS.tif")
 dbhRast <- paste0(rasterPath,"FI_34VEQ-2016_DIA_10M_1CHS_8BITS.tif")
@@ -83,6 +85,9 @@ vRast2 <- paste0(rasterPath,"FI_34VEQ-2019_GSV_10M_1CHS_16BITS.tif")
 baRast2 <-  paste0(rasterPath,"FI_34VEQ-2019_BA_10M_1CHS_8BITS.tif")
 dbhRast2 <- paste0(rasterPath,"FI_34VEQ-2019_DIA_10M_1CHS_8BITS.tif")
 hRast2 <- paste0(rasterPath,"FI_34VEQ-2019_HGT_10M_1CHS_16BITS.tif")
+pinePerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_P_pine_10M_1CHS_8BITS.tif")
+sprucePerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_P_spruce_10M_1CHS_8BITS.tif")
+blPerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_BLP_10M_1CHS_8BITS.tif")
 
 ####set values for NAs and convert factor for prebas units
 baNA <- c(253:255); baConv<- 1

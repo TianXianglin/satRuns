@@ -32,39 +32,39 @@ uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
 uniqueData[,BAsp:= (ba * spruceP/(pineP+spruceP+blp))]
 uniqueData[,BAb:= (ba * blp/(pineP+spruceP+blp))]
 
-dataSur <- uniqueData[,.(h,dbh,BAp,BAsp,BAb,siteType1,
+dataSurMod <- uniqueData[,.(h,dbh,BAp,BAsp,BAb,siteType1,
                           siteType2,v2,ba2,h2,dbh2,segID)] 
-setnames(dataSur,c("H","D","BAp","BAsp","BAb","st1",
+setnames(dataSurMod,c("H","D","BAp","BAsp","BAb","st1",
                     "st2","V2","ba2","h2","dbh2","segID"))
 
 
-dataSur[,BApPer:=.(BAp/sum(BAp,BAsp,BAb)*100),by=segID]
-dataSur[,BAspPer:=.(BAsp/sum(BAp,BAsp,BAb)*100),by=segID]
-dataSur[,BAbPer:=.(BAb/sum(BAp,BAsp,BAb)*100),by=segID]
-dataSur[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
+dataSurMod[,BApPer:=.(BAp/sum(BAp,BAsp,BAb)*100),by=segID]
+dataSurMod[,BAspPer:=.(BAsp/sum(BAp,BAsp,BAb)*100),by=segID]
+dataSurMod[,BAbPer:=.(BAb/sum(BAp,BAsp,BAb)*100),by=segID]
+dataSurMod[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 
 
 
-nSeg <- nrow(dataSur)  ##200
+nSeg <- nrow(dataSurMod)  ##200
 stProbMod <- matrix(NA,nSeg,5)
 
 
 for(i in 1:nSeg){
-  stProbMod[i,] <- pSTx(dataSur[i],nSample,startingYear,year2,tileX)
+  stProbMod[i,] <- pSTx(dataSurMod[i],nSample,startingYear,year2,tileX)
   # if (i %% 100 == 0) { print(i) }
 }
 
 stProbMod <- data.table(stProbMod)
 
 ###calculate probit2016
-dataSur[,st:=st1]
+dataSurMod[,st:=st1]
 step.probit1 <- step.probit[[paste0("y",startingYear)]][[paste0("t",tileX)]]
-probit1 <- predict(step.probit1,type='p',dataSur[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+probit1 <- predict(step.probit1,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
 
 ###calculate probit2019
-dataSur[,st:=st2]
+dataSurMod[,st:=st2]
 step.probit2 <- step.probit[[paste0("y",year2)]][[paste0("t",tileX)]]
-probit2 <- predict(step.probit2,type='p',dataSur[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
 
 stProb <- array(NA, dim=c(nSeg,5,3))
 stProb[,,1] <- probit1

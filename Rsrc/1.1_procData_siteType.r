@@ -59,7 +59,10 @@ fileNames <- c(baRast,
                vRast2,
                baRast2,
                dbhRast2,
-               hRast2)
+               hRast2,
+               pinePerRast2,
+               sprucePerRast2,
+               blPerRast2)
 
 for(i in 1:length(fileNames)){
   rastX <- raster(fileNames[i])
@@ -77,12 +80,15 @@ for(i in 1:length(fileNames)){
 data.all$climID <- extract(climID,data.all[,.(x,y)])
 # dataX <- data.table(rasterToPoints(climIDs))
 # data.all <- merge(data.all,dataX)
-setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType1","siteType2","v2","ba2","dbh2","h2","climID"))
+setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
+                    "siteType1","siteType2","v2","ba2","dbh2","h2",
+                    "pineP2","spruceP2","blp2","climID"))
 
 ##filter data 
 data.all <- data.all[!ba %in% baNA]
 data.all <- data.all[!ba2 %in% baNA]
 data.all <- data.all[!blp %in% blPerNA]
+data.all <- data.all[!blp2 %in% blPerNA]
 data.all <- data.all[!dbh %in% dbhNA]
 data.all <- data.all[!dbh2 %in% dbhNA]
 data.all <- data.all[!v %in% vNA]
@@ -91,6 +97,8 @@ data.all <- data.all[!h %in% hNA]
 data.all <- data.all[!h2 %in% hNA]
 data.all <- data.all[!pineP %in% pinePerNA]
 data.all <- data.all[!spruceP %in% sprucePerNA]
+data.all <- data.all[!pineP2 %in% pinePerNA]
+data.all <- data.all[!spruceP2 %in% sprucePerNA]
 data.all <- data.all[!siteType1 %in% siteTypeNA]
 data.all <- data.all[!siteType2 %in% siteTypeNA]
 
@@ -108,6 +116,9 @@ data.all <- data.all[, pineP := pineP * pinePerConv]
 data.all <- data.all[, spruceP := spruceP * sprucePerConv]
 data.all <- data.all[, siteType1 := siteType1 * siteTypeConv]
 data.all <- data.all[, siteType2 := siteType2 * siteTypeConv]
+data.all <- data.all[, pineP2 := pineP2 * pinePerConv]
+data.all <- data.all[, spruceP2 := spruceP2 * sprucePerConv]
+data.all <- data.all[, blp2 := blp2 * blPerConv]
 
 if(siteTypeX==year2){
   data.all[,siteType:=siteType2]  
@@ -133,7 +144,7 @@ data.all[clCut==0,N:=ba/(pi*(dbh/200)^2)]
 smallH <- intersect(which(data.all$h < initH), which(data.all$clCut==0))
 data.all[smallH, h:=initH]
 
-###check where density is too high and replase stand variables with initial conditions
+###check where density is too high and replace stand variables with initial conditions
 tooDens <- intersect(which(data.all$N> maxDens), which(data.all$clCut==0))
 data.all[tooDens,h:=initH]
 data.all[tooDens,ba:=initBA]
@@ -160,7 +171,8 @@ data.all[,dDBHy := (dbh2-dbh)/(year2 - startingYear)]
 ####group pixels by same values
 data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, 
                                  siteType1,siteType2, climID,dVy,v2,
-                                 dBAy,ba2,dHy,h2,dDBHy,dbh2)]
+                                 dBAy,ba2,dHy,h2,dDBHy,dbh2,
+                                 pineP2, spruceP2,blp2)]
 # data.all[clCut==1 ,hist(dVy)]
 
 
@@ -171,7 +183,8 @@ data.all[, npix:=.N, segID]
 ####find unique initial conditions
 uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
                                                   siteType2,N,climID,segID,npix,dVy,v2,
-                                                  dBAy,ba2,dHy,h2,dDBHy,dbh2)])
+                                                  dBAy,ba2,dHy,h2,dDBHy,dbh2,
+                                                  pineP2, spruceP2,blp2)])
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]

@@ -500,12 +500,16 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
 
 
 ###function for structural variables data assimilation 
-pSVDA <- function(segIDx,nSample){
+pSVDA <- function(segIDx,nSample,year1,year2,tileX){
+  mu1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$muFSVda
+  sigma1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$sigmaFSVda
+  mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muFSVda
+  sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaFSVda
   
   pST <- c(segIDx$pST1,segIDx$pST2,segIDx$pST3,segIDx$pST4,segIDx$pST5)
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+  sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
 
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
@@ -521,8 +525,8 @@ pSVDA <- function(segIDx,nSample){
   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   if(nrow(sampleX)<nSample){
     sample1 <- sampleX
-    set.seed(1234)
-    sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+    set.seed(123)
+    sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
     # segIDx <- dataSurV[segID==2]
     sampleX <- data.table()
     sampleX$H <- segIDx$H + sampleError$H
@@ -544,7 +548,13 @@ pSVDA <- function(segIDx,nSample){
   
   max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
   segIDx$max.pro.est=max.pro.est
-
+  
+  if(year1=="all" & tileX=="all"){
+    logistic.model <- logisticPureF$all
+  }else{
+    logistic.model <- logisticPureF[[paste0("y",year1)]][[paste0("t",tileX)]]
+  }
+  
   set.seed(1234)
   sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
   if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
@@ -556,6 +566,12 @@ pSVDA <- function(segIDx,nSample){
   sampleX[,BAb:=BAbPer*BAtot/100]
   # sampleX[,st:=segIDx$st]
   sampleX[,V2:=segIDx$V2]
+  sampleX[,ba2:=segIDx$ba2]
+  sampleX[,h2:=segIDx$h2]
+  sampleX[,dbh2:=segIDx$dbh2]
+  # sampleX[,BApPer2:=segIDx$BApPer2]
+  # sampleX[,BAspPer2:=segIDx$BAspPer2]
+  # sampleX[,BAbPer2:=segIDx$BAbPer2]
   sampleX[,segID:=segIDx$segID]
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
@@ -576,13 +592,85 @@ pSVDA <- function(segIDx,nSample){
   sampleX[,Bpx := pmax(0.,predict(step.modelBp,newdata=sampleX))]
   sampleX[,Bspx := pmax(0.,predict(step.modelBsp,newdata=sampleX))]
   sampleX[,Bdx := pmax(0.,predict(step.modelBd,newdata=sampleX))]
+  sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
   
-  mux <- sampleX[,colMeans(cbind(Hx,Dx,Bx,Bpx,Bspx,Bdx))]
-  covMat <- sampleX[,cov(cbind(Hx,Dx,Bx,Bpx,Bspx,Bdx))]
+  nax <- unique(which(is.na(sampleX),arr.ind = T)[,1])
+  if(length(nax)>0) sampleX <- sampleX[-nax]
+  mux <- sampleX[,colMeans(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
+  sigmax <- sampleX[,cov(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
   
-  pMvnorm <- c(mux,as.vector(covMat))
+  pMvnormx <- c(mux,as.vector(sigmax))
 
-    
-  return(pMvnorm=pMvnorm) 
+###sample from second measurement
+  set.seed(1234)
+  sampleError2 <- data.table(mvrnorm(nSample*2,mu=mu2,Sigma=sigma2))
+  
+  Sample2 <- data.table()
+  Sample2$H <- segIDx$h2 + sampleError2$H
+  Sample2$D <- segIDx$dbh2 + sampleError2$D
+  Sample2$BAtot <- segIDx$ba2 + sampleError2$G
+  Sample2$BApPer <- segIDx$BApPer2 + sampleError2$BAp
+  Sample2$BAspPer <- segIDx$BAspPer2 + sampleError2$BAsp
+  Sample2$BAbPer <- segIDx$BAbPer2 + sampleError2$BAb
+  Sample2 <- Sample2[H>1.5]
+  Sample2 <- Sample2[D>0.5]
+  Sample2 <- Sample2[BAtot>0.045]
+  Sample2 <- Sample2[1:min(nSample,nrow(Sample2))]
+  if(nrow(Sample2)<nSample){
+    sample1 <- Sample2
+    set.seed(123)
+    sampleError2 <- data.table(mvrnorm(nSample*2,mu=mu2,Sigma=sigma2))
+    # segIDx <- dataSurV[segID==2]
+    Sample2 <- data.table()
+    Sample2$H <- segIDx$h2 + sampleError2$H
+    Sample2$D <- segIDx$dbh2 + sampleError2$D
+    Sample2$BAtot <- segIDx$ba2 + sampleError2$G
+    Sample2$BApPer <- segIDx$BApPer2 + sampleError2$BAp
+    Sample2$BAspPer <- segIDx$BAspPer2 + sampleError2$BAsp
+    Sample2$BAbPer <- segIDx$BAbPer2 + sampleError2$BAb
+    Sample2 <- Sample2[H>1.5]
+    Sample2 <- Sample2[D>0.5]
+    Sample2 <- Sample2[BAtot>0.045]
+    Sample2 <- rbind(sample1,Sample2)
+    Sample2 <- Sample2[1:min(nSample,nrow(Sample2))]
+  }
+
+  Sample2[, c("BApPer", "BAspPer", "BAbPer"):=
+            as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
+          by = seq_len(nrow(Sample2))]
+  
+  max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
+  segIDx$max.pro.est=max.pro.est
+  
+  if(year1=="all" & tileX=="all"){
+    logistic.model <- logisticPureF$all
+  }else{
+    logistic.model <- logisticPureF[[paste0("y",year2)]][[paste0("t",tileX)]]
+  }
+  
+  set.seed(1234)
+  Sample2$pureF <- runif(min(nSample,nrow(Sample2)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
+  if(max.pro.est==1) Sample2[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
+  if(max.pro.est==2) Sample2[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,100,0)]
+  if(max.pro.est==3) Sample2[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,0,100)]
+  
+  Sample2[,segID:=segIDx$segID]
+  
+  mux2 <- Sample2[,colMeans(cbind(H,D,BAtot,BApPer,BAspPer,BAbPer))]
+  sigmax2 <- Sample2[,cov(cbind(H,D,BAtot,BApPer,BAspPer,BAbPer))]
+  
+  pMvnormx2 <- c(mux2,as.vector(sigmax2))
+  
+  aa <- 6
+  LL <- solve(sigmax[1:aa,1:aa] + sigmax2[1:aa,1:aa],tol=1e-20)
+  sigmaPost <- sigmax[1:aa,1:aa] %*% LL %*% sigmax2[1:aa,1:aa]
+  muPost <- sigmax2[1:aa,1:aa] %*% LL %*% mux[1:aa] + sigmax[1:aa,1:aa] %*% LL %*% mux2[1:aa]
+  
+  # ss= inv(inv(sigmax)+inv(sigmax2))
+  # ff <- sigmaPost %*% (sigmax %^%(-1)) %*% mux + sigmaPost %*% (sigmax2 %^%(-1)) %*% mux2
+
+  return(list(muPrior=mux,muLik=mux2,muPost=muPost))
 }
 
