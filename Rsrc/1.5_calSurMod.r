@@ -89,7 +89,7 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     ### Run settings & functions
 
     # load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
-    load("/scratch/project_2000994/PREBASruns/assessCarbon/data/inputUncer.rdata") # in CSC
+    load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
     # load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))  
     # load(paste0("output/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
     # load(paste0("procData/init",startingYear,"/","st",siteTypeX,"/uniqueData.rdata"))  
