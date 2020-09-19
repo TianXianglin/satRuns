@@ -60,6 +60,6 @@ dataSurMod <- cbind(dataSurMod[1:nSeg],stProb[1:nSeg,])
 
 system.time({
  pMvn <- dataSurMod[1:nSeg, pSVDA(.SD,nSample = nSeg,year1=startingYear,
-                                  tileX=tileX), by = seq_len(nSeg)]
+                              year2=year2,tileX=tileX), by = seq_len(nSeg)]
 })
 save(pMvn,file="pMvn.rdata")

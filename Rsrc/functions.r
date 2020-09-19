@@ -616,10 +616,13 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   muPost <- sigmax2 %*% LL %*% mux + 
     sigmax %*% LL %*% mux2
   
+  pMvnormPost <- c(muPost,as.vector(sigmaPost))
   # ss= inv(inv(sigmax)+inv(sigmax2))
   # ff <- sigmaPost %*% (sigmax %^%(-1)) %*% mux + sigmaPost %*% (sigmax2 %^%(-1)) %*% mux2
 
-  return(list(muPrior=mux,muLik=mux2,muPost=as.vector(muPost),
-              sigPrior=sigmax,sigLik=sigmax2,sigPost=sigmaPost))
+  # return(list(muPrior=mux,muLik=mux2,muPost=as.vector(muPost),
+  #             sigPrior=sigmax,sigLik=sigmax2,sigPost=sigmaPost))
+  pars <- c(as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
+  return(pars)
 }
 
