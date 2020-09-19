@@ -626,3 +626,108 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   return(pars)
 }
 
+
+###function for structural variables forcast and uncertainty 
+prForUnc <- function(segIDx,nSample,yearUnc,tileX){
+  if(yearUnc=="all"){
+    muUnc <- errData$all$muFSVda
+    sigmaUnc <- errData$all$sigmaFSVda
+    step.probitX <- step.probit$all
+  }else{
+    muUnc <- errData[[paste0("y",yearUnc)]][[paste0("t",tileX)]]$muFSVda
+    sigmaUnc <- errData[[paste0("y",yearUnc)]][[paste0("t",tileX)]]$sigmaFSVda
+    step.probitX <- step.probit[[paste0("y",yearUnc)]][[paste0("t",tileX)]]
+  }
+
+  pST <- predict(step.probitX,type='p',segIDx)   ### needs to be changed . We need to calculate with 2016 and 2019 data
+  
+  st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
+  set.seed(1234)
+  sampleError <- data.table(mvrnorm(nSample*2,mu=muUnc,Sigma=sigmaUnc))
+  
+  # segIDx <- dataSurV[segID==2]
+  sampleX <- data.table()
+  sampleX$H <- segIDx$H + sampleError$H
+  sampleX$D <- segIDx$D + sampleError$D
+  sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX <- sampleX[H>1.5]
+  sampleX <- sampleX[D>0.5]
+  sampleX <- sampleX[BAtot>0.045]
+  sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  if(nrow(sampleX)<nSample){
+    sample1 <- sampleX
+    set.seed(123)
+    sampleError <- data.table(mvrnorm(nSample*2,mu=muUnc,Sigma=sigmaUnc))
+    # segIDx <- dataSurV[segID==2]
+    sampleX <- data.table()
+    sampleX$H <- segIDx$H + sampleError$H
+    sampleX$D <- segIDx$D + sampleError$D
+    sampleX$BAtot <- segIDx$BAtot + sampleError$G
+    sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+    sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+    sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX <- sampleX[H>1.5]
+    sampleX <- sampleX[D>0.5]
+    sampleX <- sampleX[BAtot>0.045]
+    sampleX <- rbind(sample1,sampleX)
+    sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  }
+  
+  sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
+            as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
+          by = seq_len(nrow(sampleX))]
+  
+  max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
+  segIDx$max.pro.est=max.pro.est
+  
+  if(yearUnc=="all"){
+    logistic.model <- logisticPureF$all
+  }else{
+    logistic.model <- logisticPureF[[paste0("y",yearUnc)]][[paste0("t",tileX)]]
+  }
+  
+  set.seed(1234)
+  sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
+  if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
+  if(max.pro.est==2) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,100,0)]
+  if(max.pro.est==3) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,0,100)]
+  
+  sampleX[,BAp:=BApPer*BAtot/100]
+  sampleX[,BAsp:=BAspPer*BAtot/100]
+  sampleX[,BAb:=BAbPer*BAtot/100]
+
+  sampleX[,segID:=segIDx$segID]
+  
+  sampleX[,BAtot:=(BAp+BAsp+BAb)]
+  sampleX[,BAh:=BAtot*H]
+  sampleX[,N:=BAtot/(pi*(D/200)^2)]
+  b = -1.605 ###coefficient of Reineke
+  sampleX[,SDI:=N *(D/10)^b]
+  sampleX$st <- st
+  
+  sampleX$st <- factor(sampleX$st)
+  sampleX[,Hx := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  sampleX[,Dx := pmax(0.,predict(step.modelD,newdata=sampleX))]
+  sampleX[,Bx := pmax(0.,predict(step.modelB,newdata=sampleX))]
+  sampleX[,Bpx := pmax(0.,predict(step.modelBp,newdata=sampleX))]
+  sampleX[,Bspx := pmax(0.,predict(step.modelBsp,newdata=sampleX))]
+  sampleX[,Bdx := pmax(0.,predict(step.modelBd,newdata=sampleX))]
+  sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
+  
+  nax <- unique(which(is.na(sampleX),arr.ind = T)[,1])
+  if(length(nax)>0) sampleX <- sampleX[-nax]
+  mux <- sampleX[,colMeans(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
+  sigmax <- sampleX[,cov(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
+  
+  pMvnormx <- c(mux,as.vector(sigmax))
+  
+  ###sample from second measurement
+  pars <- as.vector(pMvnormx)
+  return(pars)
+}
+
