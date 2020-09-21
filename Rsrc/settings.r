@@ -34,6 +34,7 @@ library(tictoc)
 library(MASS)
 library(minpack.lm)
 library(sf)
+library(fasterize)
 
 
 ###check prebas version and install if needed
