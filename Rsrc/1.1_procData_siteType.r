@@ -1,11 +1,10 @@
 library(devtools)
-tileSettings = F
-modifiedSettings = F
-
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(modifiedSettings) {
-  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
+if(exists("modifiedSettings")) {
+  if(modifiedSettings) {
+    source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
+  }
 }
 
 # Create folders for outputs.
@@ -250,7 +249,7 @@ if (splitRun) {
   uniqueData$split_id[(8*split_length+1):(split_length*9)] <- 9
   uniqueData$split_id[(9*split_length+1):(nrow(uniqueData))] <- 10
   
-  # Split the table to list of defined amount of elements. Splitting is done based on the split_id.
+  # Split the table to list of elements. Splitting is done based on the split_id.
   split_list <- split(uniqueData,uniqueData$split_id)
   
   # Convert the split results to separate data tables
