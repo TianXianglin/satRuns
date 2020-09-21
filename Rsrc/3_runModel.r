@@ -1,11 +1,7 @@
 library(devtools)
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(exists("modifiedSettings")) {
-  if(modifiedSettings) {
-    source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-  }
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file in local directory if one exists
 
 ###check and create output directories
 setwd(generalPath)
@@ -33,7 +29,7 @@ for (rcpfile in weather) { ## ---------------------------------------------
   print(date())
   print(rcpfile)
   
-  if(parallelRun) {
+  if(parallelRun) {   ## PARALLEL run
     # Run the model for sample data. Process data in parallel with mclapply command.
     # Number of cores used for processing can be defined with mc.cores argument. mc.cores=1 disables 
     # parallel processing. Recommended amount of cores to use with this code is 20.
@@ -58,7 +54,7 @@ for (rcpfile in weather) { ## ---------------------------------------------
       
     }, mc.cores = coresN)
     
-  } else {
+  } else {    ## SERIAL run
       # Run the model for sample data.
       for(sampleID in sampleIDs){
     
