@@ -12,13 +12,13 @@ setwd(generalPath)
 
 yearX <- 3
 nSample = 1000 ###number of samples from the error distribution
-load(paste0("procData/init",startingYear,"/calST/uniqueData.rdata"))  
+load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
 
 ####load error models
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/logisticPureF.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/step.probit.rdata"))
-###load surrMods
+###load surrMods !!!change name
 load("surErrMods/surMod.rdata")
 
 uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
@@ -62,4 +62,4 @@ system.time({
  pMvn <- dataSurMod[1:nSeg, pSVDA(.SD,nSample = nSample,year1=startingYear,
                               year2=year2,tileX=tileX), by = seq_len(nSeg)]
 })
-save(pMvn,file="pMvn.rdata")
+save(pMvn,file="pMvn_FSV.rdata")

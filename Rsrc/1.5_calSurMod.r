@@ -16,8 +16,8 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
 
 yearX <- 3
 
-load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))  
-
+####needs to be changed for ForUnc runs
+load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))  
   
   sampleID <- 10
   rcpfile="CurrClim"
@@ -176,5 +176,5 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     # summary(step.model)
     save(step.modelV,step.modelB,step.modelD,step.modelH,
          step.modelBp,step.modelBsp,step.modelBd,
-         file="surErrMods/surMod.rdata")
+         file="surErrMods/surMod.rdata") ###needs to be changed update name
     

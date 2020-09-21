@@ -19,6 +19,7 @@ load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/in
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/logisticPureF.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/step.probit.rdata"))
 ###load surrMods
+###this needs to be changed loading the 1.5 surr mod calibrated with the right uniqueData
 load("surErrMods/surMod.rdata")
 
 uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
@@ -54,4 +55,4 @@ system.time({
  pMvn <- dataSurMod[1:nSeg, prForUnc(.SD,nSample = nSample,yearUnc=startingYear,
                               tileX=tileX), by = seq_len(nSeg)]
 })
-save(pMvn,file="pMvn.rdata")
+save(pMvn,file="pMvn_ForUnc.rdata")

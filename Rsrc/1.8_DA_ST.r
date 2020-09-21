@@ -27,7 +27,7 @@ if (splitRun) {
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/logisticPureF.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/step.probit.rdata"))
-###load surrMods
+###load surrMods  ###change name
 load("surErrMods/surMod.rdata")
 
 
