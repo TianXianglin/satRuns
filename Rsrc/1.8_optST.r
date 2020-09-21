@@ -1,11 +1,7 @@
 library(devtools)
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(exists("modifiedSettings")) {
-  if(modifiedSettings) {
-    source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-  }
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings in local directory if one exists
 
 # Run functions 
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
@@ -54,7 +50,7 @@ dataSurMod[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 nSeg <- nrow(dataSurMod)  ##200
 stProbMod <- matrix(NA,nSeg,5)
 
-if(parallelRun){
+if(parallelRun){  ### PARALLEL run
   # Run surrogate model in parallel. Number of cores used for processing is defined with 
   # mc.cores argument. mc.cores=1 disables parallel processing. For now the result is 
   # a matrix in which all 5 site probability values are in one column. This could be modified 
@@ -76,7 +72,7 @@ if(parallelRun){
   stProbMod <- stProbMod[, V4:=as.numeric(V4)]
   stProbMod <- stProbMod[, V5:=as.numeric(V5)]
   
-} else {
+} else {   ### SERIAL run
   for(i in 1:nSeg){
     stProbMod[i,] <- pSTx(dataSurMod[i],nSample,startingYear,year2,tileX)
     # if (i %% 100 == 0) { print(i) }
