@@ -114,12 +114,12 @@ if(exists("tileSettings")){
 # Set TRUE to enable running 1.8_optST, 2_InitPreb and 3_runModel in parallel. Set to FALSE, these scripts run as serial.
 parallelRun <- TRUE
 
-# Set whether to split unique data in 1.1_procData_siteType to four smaller parts. If
+# Set whether to split unique data in 1.1_procData_siteType to smaller parts. If
 # TRUE, data is split.
 splitRun <- FALSE
 # Range/number of split parts. NOTICE: Code doesn't adjust number of split parts by merely 
-# adjusting this variable. If number of parts needs to be changed from 4, both 1.1 and 1.9 
-# need to be modified.
+# adjusting this variable. If number of parts needs to be changed, 1.1_procData_siteType 
+# needs to be modified.
 if(splitRun){
   splitRange <- 1:10
 }
