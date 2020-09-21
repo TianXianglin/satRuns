@@ -3,11 +3,8 @@ library(devtools)
 
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(exists("modifiedSettings")) {
-  if(modifiedSettings) {
-    source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-  }
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
+
 
 # Create folders for outputs.
 setwd(generalPath)
@@ -77,13 +74,28 @@ for(i in 1:length(fileNames)){
   print(fileNames[i])
 }
 
+####management mask
+if(exists(manFile)){
+  rastX <- raster(manFile)
+  if(testRun) rastX <- crop(rastX,extNew)    ####if it is a test run rasters are cropped to a smaller area
+  dataX <- data.table(rasterToPoints(rastX))
+  data.all <- merge(data.all,dataX)
+  print(manFile)
+}
+
 ###attach weather ID
 data.all$climID <- extract(climID,data.all[,.(x,y)])
 # dataX <- data.table(rasterToPoints(climIDs))
 # data.all <- merge(data.all,dataX)
-setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
-                    "siteType1","siteType2","v2","ba2","dbh2","h2",
-                    "pineP2","spruceP2","blp2","climID"))
+if(exists(manFile)){
+  setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
+                      "siteType1","siteType2","v2","ba2","dbh2","h2",
+                      "pineP2","spruceP2","blp2","management","climID"))
+}else{
+  setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
+                      "siteType1","siteType2","v2","ba2","dbh2","h2",
+                      "pineP2","spruceP2","blp2","climID"))
+}  
 
 ##filter data 
 data.all <- data.all[!ba %in% baNA]
@@ -182,10 +194,17 @@ data.all[, npix:=.N, segID]
 
 # uniqueData <- data.table()
 ####find unique initial conditions
-uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
+if(exists(manFile)){
+  uniqueData <- unique(data.all[clCut==0 & management==0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
                                                   siteType2,N,climID,segID,npix,dVy,v2,
                                                   dBAy,ba2,dHy,h2,dDBHy,dbh2,
                                                   pineP2, spruceP2,blp2)])
+}else{
+  uniqueData <- unique(data.all[clCut==0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
+                                                    siteType2,N,climID,segID,npix,dVy,v2,
+                                                    dBAy,ba2,dHy,h2,dDBHy,dbh2,
+                                                    pineP2, spruceP2,blp2)])
+}
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
