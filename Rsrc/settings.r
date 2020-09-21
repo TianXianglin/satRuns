@@ -7,7 +7,7 @@ testRun = T ####set to TRUE to test the code on a small raster proportion
 CSCrun = F ### set to TRUE if you are running on CSC
 fracTest <- 0.2 ###fraction of test area
 maxSitesRun <- 20000
-maxSitesRunTest <- 1000
+maxSitesRunTest <- 20000
 saveVars <- c(1,11:13,17,30,43,44) ####select variables to save
 varHD <- FALSE #### if true will vary H and D of pine and spruce using siteType
 
@@ -18,6 +18,8 @@ if(CSCrun){
 }
 
 ##load libraries
+library(lfda)
+library(mvtnorm)
 library(reshape2)
 library(plyr)
 library(raster)
@@ -26,6 +28,11 @@ require(sm)
 require(rgdal)
 library(raster)
 library(rgdal)
+library(parallel)
+devtools::install_github("collectivemedia/tictoc")
+library(tictoc)
+library(MASS)
+library(minpack.lm)
 
 
 ###check prebas version and install if needed
@@ -42,6 +49,8 @@ climatepath = "C:/Users/minunno/Documents/research/extarctWeather/inputs/" #### 
 # climatepath = "/scratch/project_2000994/RCP/" ####on CSC
 climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.tif"
 # climIDpath <- "/scratch/project_2000994/PREBASruns/metadata/" ####on CSC
+
+coresN <- 20L ###Set number of cores to use in parallel run 
 
 startYearWeather <- 1971 ###1971 for Finnish weather dataBase
 startingYear <- 2016  #2019
@@ -62,6 +71,7 @@ harvscen = "NoHarv"
 
 
 ####indicate raster files
+tileX = "34VEQ"
 baRast <-  paste0(rasterPath,"FI_34VEQ-2016_BA_10M_1CHS_8BITS.tif")
 blPerRast <- paste0(rasterPath,"FI_34VEQ-2016_BLP_10M_1CHS_8BITS.tif")
 dbhRast <- paste0(rasterPath,"FI_34VEQ-2016_DIA_10M_1CHS_8BITS.tif")
@@ -72,6 +82,12 @@ sprucePerRast <- paste0(rasterPath,"FI_34VEQ-2016_P_spruce_10M_1CHS_8BITS.tif")
 siteTypeRast <- paste0(rasterPath,"FI_34VEQ-2016_SITE_10M_1CHS_8BITS.tif")
 siteTypeRast2 <- paste0(rasterPath,"FI_34VEQ-2019_SITE_10M_1CHS_8BITS.tif")
 vRast2 <- paste0(rasterPath,"FI_34VEQ-2019_GSV_10M_1CHS_16BITS.tif")
+baRast2 <-  paste0(rasterPath,"FI_34VEQ-2019_BA_10M_1CHS_8BITS.tif")
+dbhRast2 <- paste0(rasterPath,"FI_34VEQ-2019_DIA_10M_1CHS_8BITS.tif")
+hRast2 <- paste0(rasterPath,"FI_34VEQ-2019_HGT_10M_1CHS_16BITS.tif")
+pinePerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_P_pine_10M_1CHS_8BITS.tif")
+sprucePerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_P_spruce_10M_1CHS_8BITS.tif")
+blPerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_BLP_10M_1CHS_8BITS.tif")
 
 ####set values for NAs and convert factor for prebas units
 baNA <- c(253:255); baConv<- 1
@@ -85,7 +101,28 @@ siteTypeNA <- c(254:255); siteTypeConv <- 1
 
 ####settings for sitetype estimation
 stXruns <- TRUE
-siteTypeX <- year2 #startingYear #year2 #startingYear #1:5
+siteTypeX <- startingYear #startingYear #year2 #startingYear #1:5
+
+# Source of tile-specific settings. Defined in batch job script. When set to TRUE will overwrite the tile-specific 
+# settings in this script (lines: 41-49, 53-56, 72-81) with settings from filepath in mySettings variable.
+if(exists("tileSettings")){
+  if(tileSettings) {
+    source(mySettings)
+  }
+}
+
+# Set TRUE to enable running 1.8_optST, 2_InitPreb and 3_runModel in parallel. Set to FALSE, these scripts run as serial.
+parallelRun <- TRUE
+
+# Set whether to split unique data in 1.1_procData_siteType to four smaller parts. If
+# TRUE, data is split.
+splitRun <- FALSE
+# Range/number of split parts. NOTICE: Code doesn't adjust number of split parts by merely 
+# adjusting this variable. If number of parts needs to be changed from 4, both 1.1 and 1.9 
+# need to be modified.
+if(splitRun){
+  splitRange <- 1:10
+}
 
 ####thresholds for variables to reset stand from plantation
 maxDens <- 10000
