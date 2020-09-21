@@ -12,7 +12,7 @@ setwd(generalPath)
 
 yearX <- 3
 nSample = 1000 ###number of samples from the error distribution
-load(paste0("procData/init",startingYear,"/calST/uniqueData.rdata"))  
+load(paste0("procData/init",startingYear,"/ForUn",yearEnd,"/uniqueData.rdata"))  
 
 ####load error models
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))

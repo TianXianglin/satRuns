@@ -12,12 +12,12 @@ setwd(generalPath)
 if (splitRun) {
   # If output is set to be split to smaller parts (splitRun = TRUE), create separate
   # folder for the split data tables.
-  mkfldr_split <- paste0("procData/",paste0("init",startingYear,"/calST_split"))
+  mkfldr_split <- paste0("procData/",paste0("init",startingYear,"/DA",year2,"_split"))
   if(!dir.exists(file.path(generalPath, mkfldr_split))) {
     dir.create(file.path(generalPath, mkfldr_split), recursive = TRUE)
   }
 } else {
-  mkfldr <- paste0("procData/",paste0("init",startingYear,"/calST"))
+  mkfldr <- paste0("procData/",paste0("init",startingYear,"/DA",year2))
   if(!dir.exists(file.path(generalPath, mkfldr))) {
     dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
   }
@@ -71,14 +71,6 @@ for(i in 1:length(fileNames)){
   print(fileNames[i])
 }
 
-####management mask
-if(exists(manFile)){
-  rastX <- raster(manFile)
-  if(testRun) rastX <- crop(rastX,extNew)    ####if it is a test run rasters are cropped to a smaller area
-  dataX <- data.table(rasterToPoints(rastX))
-  data.all <- merge(data.all,dataX)
-  print(manFile)
-}
 
 ###attach weather ID
 data.all$climID <- extract(climID,data.all[,.(x,y)])
@@ -89,7 +81,6 @@ setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
                     "pineP2","spruceP2","blp2", if (mgmtmask==T) "mgmtmask","climID"))
 
 ##filter data 
-
 if (mgmtmask==T) data.all <- data.all[mgmtmask == 0]
 data.all <- data.all[!ba %in% baNA]
 data.all <- data.all[!ba2 %in% baNA]
@@ -185,14 +176,15 @@ data.all[, npix:=.N, segID]
 
 # uniqueData <- data.table()
 ####find unique initial conditions
-uniqueData <- unique(data.all[clCut==0,.(ba,blp,dbh,h,pineP,spruceP,climID,
-                                siteType1,dBAy,ba2,dHy,h2,dDBHy,dbh2,
-                                                    pineP2, spruceP2,blp2)])
+uniqueData <- unique(data.all[clCut==0,.(segID,npix,climID,ba,blp,dbh,h,pineP,spruceP,
+                                         siteType1,siteType2,dBAy,ba2,dVy,v2,
+                                         dHy,h2,dDBHy,dbh2,pineP2, spruceP2,blp2)])
 
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
-range(uniqueData$N)
+# range(uniqueData$N)
+
 uniqueData[,area:=npix*resX^2/10000]
 
 ###assign ID to similar pixels
@@ -227,10 +219,10 @@ for(i in 1:nSamples){
   segID <- c(segID,sampleX$segID)
 }
 
-save(data.all,file=paste0(procDataPath,"init",startingYear,"/calST/allData.rdata"))         ### All data
-save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/calST/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
-save(samples,file=paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))    ### unique pixel combination to run in PREBAS
-save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/calST/XYsegID.rdata"))    ### Coordinates and segID of all pixels
+save(data.all,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/allData.rdata"))         ### All data
+save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
+save(samples,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
+save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
 
 #### If needed (splitRun = TRUE), unique data is split to ten tables here to enable 
 #    running 1.9_optST in multiple sections. Running in multiple sections will reduce 
@@ -282,15 +274,15 @@ if (splitRun) {
   uniqueData10 <- uniqueData10[, split_id:=NULL]
   
   # Save splitted tables 
-  save(uniqueData1,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData1.rdata"))  
-  save(uniqueData2,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData2.rdata"))
-  save(uniqueData3,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData3.rdata"))
-  save(uniqueData4,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData4.rdata"))
-  save(uniqueData5,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData5.rdata"))
-  save(uniqueData6,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData6.rdata"))
-  save(uniqueData7,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData7.rdata"))
-  save(uniqueData8,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData8.rdata"))
-  save(uniqueData9,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData9.rdata"))
-  save(uniqueData10,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData10.rdata"))
+  save(uniqueData1,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData1.rdata"))  
+  save(uniqueData2,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData2.rdata"))
+  save(uniqueData3,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData3.rdata"))
+  save(uniqueData4,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData4.rdata"))
+  save(uniqueData5,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData5.rdata"))
+  save(uniqueData6,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData6.rdata"))
+  save(uniqueData7,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData7.rdata"))
+  save(uniqueData8,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData8.rdata"))
+  save(uniqueData9,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData9.rdata"))
+  save(uniqueData10,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData10.rdata"))
   
 }

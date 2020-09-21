@@ -16,11 +16,11 @@ nSample = 1000 ###number of samples from the error distribution
 # If data is processed in split parts, define to variable split_id which split part to process (in batch job script).
 # If splitRun is not needed, the unique data dataset for the whole tile is loaded.
 if (splitRun) {
-  uniqueData_file <- load(paste0("procData/init",startingYear,"/calST_split/uniqueData", split_id, ".rdata"))
+  uniqueData_file <- load(paste0("procData/init",startingYear,"/DA",year2,"_split/uniqueData", split_id, ".rdata"))
   uniqueData <- get(uniqueData_file)
   rm(uniqueData_file)
 } else{
-  load(paste0("procData/init",startingYear,"/calST/uniqueData.rdata")) 
+  load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
 }
 
 ####load error models
