@@ -60,7 +60,9 @@ fileNames <- c(baRast,
                hRast2,
                pinePerRast2,
                sprucePerRast2,
-               blPerRast2)
+               blPerRast2,
+               if (mgmtmask==T) mgmtmaskRast)
+
 
 for(i in 1:length(fileNames)){
   rastX <- raster(fileNames[i])
@@ -87,17 +89,13 @@ if(exists(manFile)){
 data.all$climID <- extract(climID,data.all[,.(x,y)])
 # dataX <- data.table(rasterToPoints(climIDs))
 # data.all <- merge(data.all,dataX)
-if(exists(manFile)){
-  setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
-                      "siteType1","siteType2","v2","ba2","dbh2","h2",
-                      "pineP2","spruceP2","blp2","management","climID"))
-}else{
-  setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
-                      "siteType1","siteType2","v2","ba2","dbh2","h2",
-                      "pineP2","spruceP2","blp2","climID"))
-}  
+setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
+                    "siteType1","siteType2","v2","ba2","dbh2","h2",
+                    "pineP2","spruceP2","blp2", if (mgmtmask==T) "mgmtmask","climID"))
 
 ##filter data 
+
+if (mgmtmask==T) data.all <- data.all[mgmtmask == 0]
 data.all <- data.all[!ba %in% baNA]
 data.all <- data.all[!ba2 %in% baNA]
 data.all <- data.all[!blp %in% blPerNA]
