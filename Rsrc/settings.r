@@ -105,9 +105,14 @@ siteTypeX <- startingYear #startingYear #year2 #startingYear #1:5
 
 # Source of tile-specific settings. Defined in batch job script. When set to TRUE will overwrite the tile-specific 
 # settings in this script (lines: 41-49, 53-56, 72-81) with settings from filepath in mySettings variable.
-if(tileSettings) {
-  source(mySettings)
+if(exists("tileSettings")){
+  if(tileSettings) {
+    source(mySettings)
+  }
 }
+
+# Set TRUE to enable running 1.8_optST, 2_InitPreb and 3_runModel in parallel. Set to FALSE, these scripts run as serial.
+parallelRun <- TRUE
 
 # Set whether to split unique data in 1.1_procData_siteType to four smaller parts. If
 # TRUE, data is split.
