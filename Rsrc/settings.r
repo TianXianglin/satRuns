@@ -60,6 +60,8 @@ year2 <- 2019 ###year of the second measurement
 yearEnd <- 2019     #2024
 nYears <-  yearEnd - startingYear ## number of simulation years
 domSPrun = 0.
+mgmtmask = F # switch for masking of management
+
 
 resX <- 10 ### pixel resolution in meters
 
@@ -90,6 +92,7 @@ hRast2 <- paste0(rasterPath,"FI_34VEQ-2019_HGT_10M_1CHS_16BITS.tif")
 pinePerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_P_pine_10M_1CHS_8BITS.tif")
 sprucePerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_P_spruce_10M_1CHS_8BITS.tif")
 blPerRast2 <- paste0(rasterPath,"FI_34VEQ-2019_BLP_10M_1CHS_8BITS.tif")
+mgmtmaskRast <- paste0(rasterPath, tileX, "_mgmtmask.tif") #not (yet) controlled via tileSettings (see below)
 
 ####set values for NAs and convert factor for prebas units
 baNA <- c(253:255); baConv<- 1
