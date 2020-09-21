@@ -179,25 +179,16 @@ data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP,
                                  siteType1,siteType2, climID,dVy,v2,
                                  dBAy,ba2,dHy,h2,dDBHy,dbh2,
                                  pineP2, spruceP2,blp2)]
-# data.all[clCut==1 ,hist(dVy)]
-
 
 ####Count segID pix
 data.all[, npix:=.N, segID]
 
 # uniqueData <- data.table()
 ####find unique initial conditions
-if(exists(manFile)){
-  uniqueData <- unique(data.all[clCut==0 & management==0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
-                                                  siteType2,N,climID,segID,npix,dVy,v2,
-                                                  dBAy,ba2,dHy,h2,dDBHy,dbh2,
-                                                  pineP2, spruceP2,blp2)])
-}else{
-  uniqueData <- unique(data.all[clCut==0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
-                                                    siteType2,N,climID,segID,npix,dVy,v2,
-                                                    dBAy,ba2,dHy,h2,dDBHy,dbh2,
+uniqueData <- unique(data.all[clCut==0,.(ba,blp,dbh,h,pineP,spruceP,climID,
+                                siteType1,dBAy,ba2,dHy,h2,dDBHy,dbh2,
                                                     pineP2, spruceP2,blp2)])
-}
+
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
