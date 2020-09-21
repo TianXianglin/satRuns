@@ -35,12 +35,7 @@ if(testRun){
 }
 
 climID <- raster(climIDpath)
-# climIDx <- crop(climID,rastX)
-# plot(climIDx)
-# plot(rastX,add=T)
-# climIDs <- resample(climIDx,rastX,method="ngb")
-# writeRaster(climIDs,paste0(rasterPath,"climIDs.tif"),overwrite=T)
-# climIDs <- raster(paste0(rastersPath,"climIDs.tif"))
+
 rm(rastX)
 gc()
 
