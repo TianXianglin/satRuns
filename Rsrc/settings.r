@@ -137,7 +137,7 @@ if(exists("tileSettings")){
 }
 
 # Set TRUE to enable running 1.8_optST, 2_InitPreb and 3_runModel in parallel. Set to FALSE, these scripts run as serial.
-parallelRun <- TRUE
+parallelRun <- FALSE
 
 # Set whether to split unique data in 1.1_procData_siteType to smaller parts. If
 # TRUE, data is split.
