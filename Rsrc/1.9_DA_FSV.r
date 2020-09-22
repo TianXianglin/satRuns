@@ -28,12 +28,12 @@ uniqueData[,BAp2:= (ba2 * pineP2/(pineP2+spruceP2+blp2))]
 uniqueData[,BAsp2:= (ba2 * spruceP2/(pineP2+spruceP2+blp2))]
 uniqueData[,BAb2:= (ba2 * blp2/(pineP2+spruceP2+blp2))]
 
-dataSurMod <- uniqueData[,.(h,dbh,BAp,BAsp,BAb,siteType1,
+dataSurMod <- uniqueData[,.(segID,h,dbh,BAp,BAsp,BAb,siteType1,
                             siteType2,v2,ba2,h2,dbh2,
-                            BAp2,BAsp2,BAb2,segID)] 
-setnames(dataSurMod,c("H","D","BAp","BAsp","BAb","st1",
+                            BAp2,BAsp2,BAb2)] 
+setnames(dataSurMod,c("segID","H","D","BAp","BAsp","BAb","st1",
                       "st2","V2","ba2","h2","dbh2",
-                      "BAp2","BAsp2","BAb2","segID"))
+                      "BAp2","BAsp2","BAb2"))
 
 
 dataSurMod[,BApPer:=.(BAp/sum(BAp,BAsp,BAb)*100),by=segID]
@@ -47,19 +47,21 @@ dataSurMod[,BAtot2:=.(sum(BAp2,BAsp2,BAb2)),by=segID]
 
 nSeg <- nrow(dataSurMod)  ##200
 load("stProbMod.rdata")
-colnames(stProb) <- paste0("pST",1:5)
-dataSurMod <- cbind(dataSurMod[1:nSeg],stProb[1:nSeg,])
+stProb <- data.table(stProb)
+# colnames(stProb) <- paste0("segID","pST",1:5)
+dataSurMod <- merge(dataSurMod[1:nSeg],stProb[1:nSeg,])
 
-# pMvNorm <- matrix(NA,42,nSeg)
-# system.time({
-#   for(i in 1:nSeg){
-#     pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample)
-#     if (i %% 100 == 0) { print(i) }
-#   }
-# })
-
+pMvNorm <- matrix(NA,126,nSeg)
 system.time({
- pMvn <- dataSurMod[1:nSeg, pSVDA(.SD,nSample = nSample,year1=startingYear,
-                              year2=year2,tileX=tileX), by = seq_len(nSeg)]
+  for(i in 1:nSeg){
+    pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
+                         year2=year2,tileX=tileX)
+    if (i %% 100 == 0) { print(i) }
+  }
 })
+
+# system.time({
+#  pMvn <- dataSurMod[1:nSeg, pSVDA(.SD,nSample = nSample,year1=startingYear,
+#                               year2=year2,tileX=tileX), by = seq_len(nSeg)]
+# })
 save(pMvn,file="pMvn_FSV.rdata")

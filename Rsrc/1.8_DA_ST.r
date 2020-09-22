@@ -107,10 +107,11 @@ if (splitRun) {
   stProb <- array(NA, dim=c(nSeg,5,3))
   stProb[,,1] <- probit1
   stProb[,,2] <- probit2
-  stProb[,,3] <- as.matrix(stProbMod)
+  stProb[,,3] <- as.matrix(stProbMod[,2:6])
 
   stProb <- apply(stProb, c(1,2), mean)
-
+  stProb <- cbind(dataSurMod$segID,stProb)
+  colnames(stProb) <- colnames(stProbMod)
   save(stProb,probit1,probit2,stProbMod,file="stProbMod.rdata")
 }
 

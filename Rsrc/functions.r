@@ -583,6 +583,11 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   b = -1.605 ###coefficient of Reineke
   sampleX[,SDI:=N *(D/10)^b]
   sampleX$st <- st
+  sampleX[,rootBAp:=BAp^0.5]
+  sampleX[,BAp2:=ba2*BApPer/100]
+  sampleX[,BAsp2:=ba2*BAspPer/100]
+  sampleX[,BAb2:=ba2*BAbPer/100]
+  
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
   sampleX$st <- factor(sampleX$st)
   sampleX[,Hx := pmax(0.,predict(step.modelH,newdata=sampleX))]
