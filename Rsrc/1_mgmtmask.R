@@ -1,4 +1,10 @@
 #### MANAGEMENT MASK SETTINGS #####
+
+# Run settings 
+library(devtools)
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
+
 # set periods for declarations to be used
 # note: submission 2 weeks -  3 years (!) prior to mgmt, no obligation to conduct declared mgmt
 mm_startdate_tend <- "2014-07-01"
