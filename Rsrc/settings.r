@@ -38,7 +38,9 @@ library(fasterize)
 
 
 ###check prebas version and install if needed
-devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
+if(!CSCrun){
+  devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
+}
 require(Rprebasso)
 
 ####indicate rasterPath and climID path
