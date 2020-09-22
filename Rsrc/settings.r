@@ -18,6 +18,7 @@ if(CSCrun){
 }
 
 ##load libraries
+install.packages("lfda")
 library(lfda)
 library(mvtnorm)
 library(reshape2)
