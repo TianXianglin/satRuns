@@ -51,7 +51,7 @@ stProb <- data.table(stProb)
 # colnames(stProb) <- paste0("segID","pST",1:5)
 dataSurMod <- merge(dataSurMod[1:nSeg],stProb[1:nSeg,])
 
-pMvNorm <- matrix(NA,126,nSeg)
+pMvNorm <- matrix(NA,127,nSeg)
 system.time({
   for(i in 1:nSeg){
     pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,

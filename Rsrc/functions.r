@@ -600,6 +600,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,rootBAp:=BAp^0.5]
   
   nax <- unique(which(is.na(sampleX),arr.ind = T)[,1])
   if(length(nax)>0) sampleX <- sampleX[-nax]
@@ -627,7 +628,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
 
   # return(list(muPrior=mux,muLik=mux2,muPost=as.vector(muPost),
   #             sigPrior=sigmax,sigLik=sigmax2,sigPost=sigmaPost))
-  pars <- c(as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
+  pars <- c(segIDx$segID,as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
   return(pars)
 }
 
@@ -661,6 +662,7 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
+  sampleX[,rootBAp:=BAp^0.5]
   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   if(nrow(sampleX)<nSample){
     sample1 <- sampleX
