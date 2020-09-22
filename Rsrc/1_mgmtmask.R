@@ -17,13 +17,13 @@ mm_tend_buff <- 25 # m buffer around tending declarations, treated as polygons t
 mm_thresh <- 6 # threshold for growing stock change (dV) during modelling period (2016-2019) to be masked out within declaration polygons (m3/3a)
 
 ##  path for declaration input
-declpath <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/data/mgmtmask/",tileX, "_mkdecl.subset.gpkg")
+declpath <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/data/mgmtmask/", areaID, "_", tileX, "_mkdecl.subset.gpkg")
 
 
 #### READING DATA ####
 # Growing stock rasters for 2016 and 2019
-v16raw <- raster(paste0(rasterPath, tileX, "-2016_GSV_10M_1CHS_16BITS.tif"))
-v19raw <- raster(paste0(rasterPath, tileX, "-2019_GSV_10M_1CHS_16BITS.tif"))
+v16raw <- raster(paste0(rasterPath, areaID, "_", tileX, "-2016_GSV_10M_1CHS_16BITS.tif"))
+v19raw <- raster(paste0(rasterPath, areaID, "_", tileX, "-2019_GSV_10M_1CHS_16BITS.tif"))
 
 # read tileX-specific declaration dataset (preprocessed in qgis)
 decl <- st_read(declpath)  
@@ -79,4 +79,4 @@ build_mm <- function(cc, tend, dv){return(ifelse(is.na(dv), NA, ifelse(!is.na(te
 mgmtmask_rast <- overlay(cc_rast, ts_rast, dV, fun=build_mm)
 
 # saving raster
-writeRaster(mgmtmask_rast, file=paste0(rasterPath, tileX, "_mgmtmask"), format="GTiff", overwrite=T)
+writeRaster(mgmtmask_rast, file=paste0(rasterPath, areaID, "_", tileX, "_mgmtmask"), format="GTiff", overwrite=T)
