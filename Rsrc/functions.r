@@ -495,7 +495,7 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   pst3 <- pst3/psum
   pst4 <- pst4/psum
   pst5 <- pst5/psum
-  return(pST=c(pst1,pst2,pst3,pst4,pst5)) 
+  return(pST=c(segIDx$segID,pst1,pst2,pst3,pst4,pst5)) 
 }
 
 

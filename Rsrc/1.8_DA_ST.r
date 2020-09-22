@@ -35,9 +35,9 @@ uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
 uniqueData[,BAsp:= (ba * spruceP/(pineP+spruceP+blp))]
 uniqueData[,BAb:= (ba * blp/(pineP+spruceP+blp))]
 
-dataSurMod <- uniqueData[,.(h,dbh,BAp,BAsp,BAb,siteType1,
+dataSurMod <- uniqueData[,.(segID,h,dbh,BAp,BAsp,BAb,siteType1,
                             siteType2,v2,ba2,h2,dbh2,segID)] 
-setnames(dataSurMod,c("H","D","BAp","BAsp","BAb","st1",
+setnames(dataSurMod,c("segID","H","D","BAp","BAsp","BAb","st1",
                       "st2","V2","ba2","h2","dbh2","segID"))
 
 
@@ -48,7 +48,8 @@ dataSurMod[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 
 
 nSeg <- nrow(dataSurMod)  ##200
-stProbMod <- matrix(NA,nSeg,5)
+stProbMod <- matrix(NA,nSeg,6)
+colnames(stProbMod) <- c("segID",paste0("pST",1:5))
 
 if(parallelRun){  ### PARALLEL run
   # Run surrogate model in parallel. Number of cores used for processing is defined with 
