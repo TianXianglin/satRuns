@@ -4,7 +4,7 @@ vPREBAS <- "v0.2.x"   #### choose PREBAS verson to run the model  "master"
 
 #####Settings####
 testRun = T ####set to TRUE to test the code on a small raster proportion
-if(!exists(CSCrun)){
+if(!exists("CSCrun")){
   CSCrun = F ### set to TRUE if you are running on CSC
 }
 fracTest <- 0.2 ###fraction of test area
