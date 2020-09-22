@@ -1,7 +1,6 @@
 
+# Run settings 
 library(devtools)
-
-# Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
 if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
@@ -16,12 +15,13 @@ if (splitRun) {
   if(!dir.exists(file.path(generalPath, mkfldr_split))) {
     dir.create(file.path(generalPath, mkfldr_split), recursive = TRUE)
   }
-} else {
-  mkfldr <- paste0("procData/",paste0("init",startingYear,"/DA",year2))
-  if(!dir.exists(file.path(generalPath, mkfldr))) {
-    dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
-  }
+} 
+  
+mkfldr <- paste0("procData/",paste0("init",startingYear,"/DA",year2))
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
+
 
 
 ###extract CurrClim IDs
