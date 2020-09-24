@@ -495,7 +495,7 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   pst3 <- pst3/psum
   pst4 <- pst4/psum
   pst5 <- pst5/psum
-  return(pST=c(pst1,pst2,pst3,pst4,pst5)) 
+  return(pST=c(segIDx$segID,pst1,pst2,pst3,pst4,pst5)) 
 }
 
 
@@ -583,6 +583,11 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   b = -1.605 ###coefficient of Reineke
   sampleX[,SDI:=N *(D/10)^b]
   sampleX$st <- st
+  sampleX[,rootBAp:=BAp^0.5]
+  sampleX[,BAp2:=ba2*BApPer/100]
+  sampleX[,BAsp2:=ba2*BAspPer/100]
+  sampleX[,BAb2:=ba2*BAbPer/100]
+  
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
   sampleX$st <- factor(sampleX$st)
   sampleX[,Hx := pmax(0.,predict(step.modelH,newdata=sampleX))]
@@ -595,6 +600,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,rootBAp:=BAp^0.5]
   
   nax <- unique(which(is.na(sampleX),arr.ind = T)[,1])
   if(length(nax)>0) sampleX <- sampleX[-nax]
@@ -622,7 +628,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
 
   # return(list(muPrior=mux,muLik=mux2,muPost=as.vector(muPost),
   #             sigPrior=sigmax,sigLik=sigmax2,sigPost=sigmaPost))
-  pars <- c(as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
+  pars <- c(segIDx$segID,as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
   return(pars)
 }
 
@@ -656,6 +662,7 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
+  sampleX[,rootBAp:=BAp^0.5]
   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   if(nrow(sampleX)<nSample){
     sample1 <- sampleX

@@ -1,11 +1,7 @@
 library(devtools)
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(exists("modifiedSettings")) {
-  if(modifiedSettings) {
-    source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-  }
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings in local directory if one exists
 
 # Run functions 
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
@@ -20,18 +16,18 @@ nSample = 1000 ###number of samples from the error distribution
 # If data is processed in split parts, define to variable split_id which split part to process (in batch job script).
 # If splitRun is not needed, the unique data dataset for the whole tile is loaded.
 if (splitRun) {
-  uniqueData_file <- load(paste0("procData/init",startingYear,"/calST_split/uniqueData", split_id, ".rdata"))
+  uniqueData_file <- load(paste0("procData/init",startingYear,"/DA",year2,"_split/uniqueData", split_id, ".rdata"))
   uniqueData <- get(uniqueData_file)
   rm(uniqueData_file)
 } else{
-  load(paste0("procData/init",startingYear,"/calST/uniqueData.rdata")) 
+  load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
 }
 
 ####load error models
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/logisticPureF.rdata"))
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/step.probit.rdata"))
-###load surrMods
+###load surrMods  ###change name
 load("surErrMods/surMod.rdata")
 
 
@@ -39,9 +35,9 @@ uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
 uniqueData[,BAsp:= (ba * spruceP/(pineP+spruceP+blp))]
 uniqueData[,BAb:= (ba * blp/(pineP+spruceP+blp))]
 
-dataSurMod <- uniqueData[,.(h,dbh,BAp,BAsp,BAb,siteType1,
+dataSurMod <- uniqueData[,.(segID,h,dbh,BAp,BAsp,BAb,siteType1,
                             siteType2,v2,ba2,h2,dbh2,segID)] 
-setnames(dataSurMod,c("H","D","BAp","BAsp","BAb","st1",
+setnames(dataSurMod,c("segID","H","D","BAp","BAsp","BAb","st1",
                       "st2","V2","ba2","h2","dbh2","segID"))
 
 
@@ -52,9 +48,10 @@ dataSurMod[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 
 
 nSeg <- nrow(dataSurMod)  ##200
-stProbMod <- matrix(NA,nSeg,5)
+stProbMod <- matrix(NA,nSeg,6)
+colnames(stProbMod) <- c("segID",paste0("pST",1:5))
 
-if(parallelRun){
+if(parallelRun){  ### PARALLEL run
   # Run surrogate model in parallel. Number of cores used for processing is defined with 
   # mc.cores argument. mc.cores=1 disables parallel processing. For now the result is 
   # a matrix in which all 5 site probability values are in one column. This could be modified 
@@ -76,7 +73,7 @@ if(parallelRun){
   stProbMod <- stProbMod[, V4:=as.numeric(V4)]
   stProbMod <- stProbMod[, V5:=as.numeric(V5)]
   
-} else {
+} else {   ### SERIAL run
   for(i in 1:nSeg){
     stProbMod[i,] <- pSTx(dataSurMod[i],nSample,startingYear,year2,tileX)
     # if (i %% 100 == 0) { print(i) }
@@ -110,10 +107,11 @@ if (splitRun) {
   stProb <- array(NA, dim=c(nSeg,5,3))
   stProb[,,1] <- probit1
   stProb[,,2] <- probit2
-  stProb[,,3] <- as.matrix(stProbMod)
+  stProb[,,3] <- as.matrix(stProbMod[,2:6])
 
   stProb <- apply(stProb, c(1,2), mean)
-
+  stProb <- cbind(dataSurMod$segID,stProb)
+  colnames(stProb) <- colnames(stProbMod)
   save(stProb,probit1,probit2,stProbMod,file="stProbMod.rdata")
 }
 

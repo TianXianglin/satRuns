@@ -1,11 +1,8 @@
 library(devtools)
-tileSettings = F
-modifiedSettings = F
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(modifiedSettings) {
-  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings in local directory if one exists
+
 # Run functions 
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
 
@@ -19,8 +16,8 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
 
 yearX <- 3
 
-load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))  
-
+####needs to be changed for ForUnc runs
+load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))  
   
   sampleID <- 10
   rcpfile="CurrClim"
@@ -179,5 +176,5 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     # summary(step.model)
     save(step.modelV,step.modelB,step.modelD,step.modelH,
          step.modelBp,step.modelBsp,step.modelBd,
-         file="surErrMods/surMod.rdata")
+         file="surErrMods/surMod.rdata") ###needs to be changed update name
     
