@@ -95,7 +95,7 @@ hRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_HGT_10M_1CHS_16BITS.tif
 pinePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_pine_10M_1CHS_8BITS.tif")
 sprucePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_spruce_10M_1CHS_8BITS.tif")
 blPerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_BLP_10M_1CHS_8BITS.tif")
-mgmtmaskRast <- paste0(rasterPath, tileX, "_mgmtmask.tif")
+mgmtmaskRast <- paste0(rasterPath, areaID, "_", tileX, "_mgmtmask.tif")
 
 ####set values for NAs and convert factor for prebas units
 baNA <- c(253:255); baConv<- 1
