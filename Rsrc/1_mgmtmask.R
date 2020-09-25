@@ -5,6 +5,8 @@ library(devtools)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
 if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
+ts <- T # trouble-shooting on/off
+
 # set periods for declarations to be used
 # note: submission 2 weeks -  3 years (!) prior to mgmt, no obligation to conduct declared mgmt
 mm_startdate_tend <- "2014-07-01"
@@ -36,8 +38,12 @@ rm_nadummies <- function(rast){return(ifelse(rast == 65533 |rast == 65534 |rast 
 v16 <- overlay(v16raw, fun=rm_nadummies)
 v19 <- overlay(v19raw, fun=rm_nadummies)
 
+if (ts) print(paste0("Tile ", tileX, ": na removal overlay ok"))
+
 # calculate volume change
 dV <- overlay(v16, v19, fun=function(v16, v19){return(v19-v16)})
+
+if (ts) print(paste0("Tile ", tileX, ": dV overlay ok"))
 
 
 # DECLARATION PROCESSING
@@ -74,9 +80,14 @@ ss_tendunsp_bfd <- st_buffer(ss_tendunsp, dist=mm_tend_buff)
 cc_rast <- fasterize(ss_cc_bfd, dV)
 ts_rast <- fasterize(ss_tendunsp_bfd, dV) 
 
+if (ts) print(paste0("Tile ", tileX, ": r(f)asterizing mgmt polygons ok"))
+
+
 # building mask (mgmt = 1, none = 0, NAs matching those of input rasters (RasterToPoints consistency))
 build_mm <- function(cc, tend, dv){return(ifelse(is.na(dv), NA, ifelse(!is.na(tend) & dv<=mm_thresh | !is.na(cc) & dv<=mm_thresh, 1, 0)))}
 mgmtmask_rast <- overlay(cc_rast, ts_rast, dV, fun=build_mm)
+
+if (ts) print(paste0("Tile ", tileX, ": final mgmtmask overlay ok"))
 
 # saving raster
 writeRaster(mgmtmask_rast, file=paste0(rasterPath, areaID, "_", tileX, "_mgmtmask"), format="GTiff", overwrite=T)
