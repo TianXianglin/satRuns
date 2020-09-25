@@ -81,7 +81,7 @@ cc_rast <- fasterize(ss_cc_bfd, dV)
 ts_rast <- fasterize(ss_tendunsp_bfd, dV) 
 
 if (ts) print(paste0("Tile ", tileX, ": r(f)asterizing mgmt polygons ok"))
-
+if (ts) print(paste0("dV CRS: ", crs(dV), "; cc_rast crs: ", crs(cc_rast), "; cc_rast crs: ", crs(ts_rast)))
 
 # building mask (mgmt = 1, none = 0, NAs matching those of input rasters (RasterToPoints consistency))
 build_mm <- function(cc, tend, dv){return(ifelse(is.na(dv), NA, ifelse(!is.na(tend) & dv<=mm_thresh | !is.na(cc) & dv<=mm_thresh, 1, 0)))}
