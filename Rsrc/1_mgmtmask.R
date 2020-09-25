@@ -80,14 +80,33 @@ ss_tendunsp_bfd <- st_buffer(ss_tendunsp, dist=mm_tend_buff)
 cc_rast <- fasterize(ss_cc_bfd, dV)
 ts_rast <- fasterize(ss_tendunsp_bfd, dV) 
 
-if (ts) print(paste0("Tile ", tileX, ": r(f)asterizing mgmt polygons ok"))
-if (ts) print(paste0("dV CRS: ", crs(dV), "; cc_rast crs: ", crs(cc_rast), "; cc_rast crs: ", crs(ts_rast)))
+if (ts) {
+  print(paste0("Tile ", tileX, ": r(f)asterizing mgmt polygons ok"))
+  print(paste0("ndV CRS:     ", crs(dV)))
+  print(paste0("cc_rast crs: ", crs(cc_rast),))
+  print(paste0("ts_rast crs: ", crs(ts_rast)))
+  print("starting reprojection")
+}
+
+# in CSC runs, the fasterized rasters' crs doesn't match dV's crs (does not happen when run locally)
+#--> reproject (shouldn't change anything but the crs about the rasters in practice)
+cc_rast_reproj <- projectRaster(cc_rast, dV)
+ts_rast_reproj <- projectRaster(ts_rast, dV)
+
+if (ts) {
+  print(paste0("Tile ", tileX, ": reprojection / crs homogenisation done"))
+  print(paste0("ndV CRS:            ", crs(dV)))
+  print(paste0("cc_rast_reproj crs: ", crs(cc_rast_reproj)))
+  print(paste0("ts_rast_reproj crs: ", crs(ts_rast_reproj)))
+  print("starting mask overlay")
+  
+}
 
 # building mask (mgmt = 1, none = 0, NAs matching those of input rasters (RasterToPoints consistency))
 build_mm <- function(cc, tend, dv){return(ifelse(is.na(dv), NA, ifelse(!is.na(tend) & dv<=mm_thresh | !is.na(cc) & dv<=mm_thresh, 1, 0)))}
 mgmtmask_rast <- overlay(cc_rast, ts_rast, dV, fun=build_mm)
 
-if (ts) print(paste0("Tile ", tileX, ": final mgmtmask overlay ok"))
+if (ts) print(paste0("Tile ", tileX, ": final mgmtmask overlay ok, that was it!"))
 
 # saving raster
 writeRaster(mgmtmask_rast, file=paste0(rasterPath, areaID, "_", tileX, "_mgmtmask"), format="GTiff", overwrite=T)
