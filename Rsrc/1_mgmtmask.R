@@ -83,7 +83,7 @@ ts_rast <- fasterize(ss_tendunsp_bfd, dV)
 if (ts) {
   print(paste0("Tile ", tileX, ": r(f)asterizing mgmt polygons ok"))
   print(paste0("ndV CRS:     ", crs(dV)))
-  print(paste0("cc_rast crs: ", crs(cc_rast),))
+  print(paste0("cc_rast crs: ", crs(cc_rast)))
   print(paste0("ts_rast crs: ", crs(ts_rast)))
   print("starting reprojection")
 }
