@@ -85,26 +85,26 @@ if (ts) {
   print(paste0("ndV CRS:     ", crs(dV)))
   print(paste0("cc_rast crs: ", crs(cc_rast)))
   print(paste0("ts_rast crs: ", crs(ts_rast)))
-  print("starting reprojection")
+  #print("starting reprojection")
 }
 
 # in CSC runs, the fasterized rasters' crs doesn't match dV's crs (does not happen when run locally)
 #--> reproject (shouldn't change anything but the crs about the rasters in practice)
-cc_rast_reproj <- projectRaster(cc_rast, dV)
-ts_rast_reproj <- projectRaster(ts_rast, dV)
+#cc_rast_reproj <- projectRaster(cc_rast, dV)
+#ts_rast_reproj <- projectRaster(ts_rast, dV)
 
-if (ts) {
-  print(paste0("Tile ", tileX, ": reprojection / crs homogenisation done"))
-  print(paste0("ndV CRS:            ", crs(dV)))
-  print(paste0("cc_rast_reproj crs: ", crs(cc_rast_reproj)))
-  print(paste0("ts_rast_reproj crs: ", crs(ts_rast_reproj)))
-  print("starting mask overlay")
-  
-}
+# if (ts) {
+#   print(paste0("Tile ", tileX, ": reprojection / crs homogenisation done"))
+#   print(paste0("ndV CRS:            ", crs(dV)))
+#   print(paste0("cc_rast_reproj crs: ", crs(cc_rast_reproj)))
+#   print(paste0("ts_rast_reproj crs: ", crs(ts_rast_reproj)))
+#   print("starting mask overlay")
+#   
+# }
 
 # building mask (mgmt = 1, none = 0, NAs matching those of input rasters (RasterToPoints consistency))
 build_mm <- function(cc, tend, dv){return(ifelse(is.na(dv), NA, ifelse(!is.na(tend) & dv<=mm_thresh | !is.na(cc) & dv<=mm_thresh, 1, 0)))}
-mgmtmask_rast <- overlay(cc_rast, ts_rast, dV, fun=build_mm)
+mgmtmask_rast <- overlay(projectRaster(cc_rast, dV), projectRaster(ts_rast, dV), dV, fun=build_mm)
 
 if (ts) print(paste0("Tile ", tileX, ": final mgmtmask overlay ok, that was it!"))
 
