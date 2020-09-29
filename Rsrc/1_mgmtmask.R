@@ -5,8 +5,8 @@ library(devtools)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
 if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
-ts <- F # trouble-shooting on/off
-s <- Sys.time()
+ts <- T # trouble-shooting on/off
+
 # set periods for declarations to be used
 # note: submission 2 weeks -  3 years (!) prior to mgmt, no obligation to conduct declared mgmt
 mm_startdate_tend <- "2014-07-01"
@@ -22,17 +22,10 @@ mm_thresh <- 6 # threshold for growing stock change (dV) during modelling period
 declpath <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/data/mgmtmask/", areaID, "_", tileX, "_mkdecl.subset.gpkg")
 
 
-# ###### LOCAL RUN
-# rasterPath="/Volumes/onedrive/OneDrive\ -\ University\ of\ Helsinki/ext_dat/assessc/mgmtmask_v2/"
-# declpath=paste0("/Volumes/onedrive/OneDrive\ -\ University\ of\ Helsinki/ext_dat/assessc/mgmtmask_v2/", areaID, "_", tileX, "_mkdecl.subset.gpkg")
-# ##### // LOCAL RUN
-
-
 #### READING DATA ####
 # Growing stock rasters for 2016 and 2019
-v16 <- raster(paste0(rasterPath, areaID, "_", tileX, "-2016_GSV_10M_1CHS_16BITS.tif"))
-v19 <- raster(paste0(rasterPath, areaID, "_", tileX, "-2019_GSV_10M_1CHS_16BITS.tif"))
-
+v16raw <- raster(paste0(rasterPath, areaID, "_", tileX, "-2016_GSV_10M_1CHS_16BITS.tif"))
+v19raw <- raster(paste0(rasterPath, areaID, "_", tileX, "-2019_GSV_10M_1CHS_16BITS.tif"))
 
 # read tileX-specific declaration dataset (preprocessed in qgis)
 decl <- st_read(declpath)  
@@ -42,22 +35,15 @@ decl <- st_read(declpath)
 # CALCULATE VOL CHANGE RASTER 
 # remove NA dummy values (replace with NA)
 rm_nadummies <- function(rast){return(ifelse(rast == 65533 |rast == 65534 |rast == 65535 , NA, rast))} # faster than %in% version (?)
-#internalised into next overklay to save memory:
-#v16 <- overlay(v16raw, fun=rm_nadummies)
-#v19 <- overlay(v19raw, fun=rm_nadummies)
+v16 <- overlay(v16raw, fun=rm_nadummies)
+v19 <- overlay(v19raw, fun=rm_nadummies)
 
-# if (ts) print(paste0("Tile ", tileX, ": na removal overlay ok"))
+if (ts) print(paste0("Tile ", tileX, ": na removal overlay ok"))
 
 # calculate volume change
-dV <- overlay(overlay(v16, fun=rm_nadummies), overlay(v19, fun=rm_nadummies), fun=function(v16, v19){return(v19-v16)})
+dV <- overlay(v16, v19, fun=function(v16, v19){return(v19-v16)})
 
-#if (ts) print(paste0("Tile ", tileX, ": dV overlay ok"))
-
-
-# #####
-# install.packages("pryr")
-# library(pryr)
-# mem_used()
+if (ts) print(paste0("Tile ", tileX, ": dV overlay ok"))
 
 
 # DECLARATION PROCESSING
@@ -89,18 +75,18 @@ ss_tendunsp <- subset(ss_tendunsp, ss_tendunsp$declarationarrivaldate>=mm_startd
 # buffering
 ss_cc_bfd <- st_buffer(ss_cc, dist=mm_cc_buff)
 ss_tendunsp_bfd <- st_buffer(ss_tendunsp, dist=mm_tend_buff)
-# 
-# # rasterise polygons; mask=1, rest=NA (fasterize default)
-# cc_rast <- fasterize(ss_cc_bfd, dV)
-# ts_rast <- fasterize(ss_tendunsp_bfd, dV) 
-# 
-# if (ts) {
-#   print(paste0("Tile ", tileX, ": r(f)asterizing mgmt polygons ok"))
-#   print(paste0("ndV CRS:     ", crs(dV)))
-#   print(paste0("cc_rast crs: ", crs(cc_rast)))
-#   print(paste0("ts_rast crs: ", crs(ts_rast)))
-#   #print("starting reprojection")
-# }
+
+# rasterise polygons; mask=1, rest=NA (fasterize default)
+cc_rast <- fasterize(ss_cc_bfd, dV)
+ts_rast <- fasterize(ss_tendunsp_bfd, dV) 
+
+if (ts) {
+  print(paste0("Tile ", tileX, ": r(f)asterizing mgmt polygons ok"))
+  print(paste0("ndV CRS:     ", crs(dV)))
+  print(paste0("cc_rast crs: ", crs(cc_rast)))
+  print(paste0("ts_rast crs: ", crs(ts_rast)))
+  #print("starting reprojection")
+}
 
 # in CSC runs, the fasterized rasters' crs doesn't match dV's crs (does not happen when run locally)
 #--> reproject (shouldn't change anything but the crs about the rasters in practice)
@@ -118,11 +104,9 @@ ss_tendunsp_bfd <- st_buffer(ss_tendunsp, dist=mm_tend_buff)
 
 # building mask (mgmt = 1, none = 0, NAs matching those of input rasters (RasterToPoints consistency))
 build_mm <- function(cc, tend, dv){return(ifelse(is.na(dv), NA, ifelse(!is.na(tend) & dv<=mm_thresh | !is.na(cc) & dv<=mm_thresh, 1, 0)))}
-mgmtmask_rast <- overlay(projectRaster(fasterize(ss_cc_bfd, dV), dV), projectRaster(fasterize(ss_tendunsp_bfd, dV), dV), dV, fun=build_mm)
+mgmtmask_rast <- overlay(projectRaster(cc_rast, dV), projectRaster(ts_rast, dV), dV, fun=build_mm)
 
 if (ts) print(paste0("Tile ", tileX, ": final mgmtmask overlay ok, that was it!"))
 
 # saving raster
 writeRaster(mgmtmask_rast, file=paste0(rasterPath, areaID, "_", tileX, "_mgmtmask"), format="GTiff", overwrite=T)
-print(paste0("total run time: ", Sys.time()-s))
-
