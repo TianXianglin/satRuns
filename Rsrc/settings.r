@@ -54,6 +54,13 @@ climatepath = "C:/Users/minunno/Documents/research/extarctWeather/inputs/" #### 
 climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.tif"
 # climIDpath <- "/scratch/project_2000994/PREBASruns/metadata/" ####on CSC
 
+
+startYearWeather <- 1971 ###1971 for Finnish weather dataBase
+startingYear <- 2016  #2019
+year2 <- 2019 ###year of the second measurement
+yearEnd <- 2019     #2024
+
+
 ####indicate raster files
 tileX = "34VEQ"
 areaID <- "FI"
@@ -103,10 +110,7 @@ if(exists("tileSettings")){
   }
 }
 
-startYearWeather <- 1971 ###1971 for Finnish weather dataBase
-startingYear <- 2016  #2019
-year2 <- 2019 ###year of the second measurement
-yearEnd <- 2019     #2024
+
 nYears <-  yearEnd - startingYear ## number of simulation years
 domSPrun = 0.
 mgmtmask = F # switch for masking of management
