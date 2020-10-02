@@ -42,11 +42,11 @@ nSeg <- nrow(dataSurMod)  ##200
 # load("stProbMod.rdata")
 # colnames(stProb) <- paste0("pST",1:5)
 # dataSurMod <- cbind(dataSurMod[1:nSeg],stProb[1:nSeg,])
-
-# pMvNorm <- matrix(NA,42,nSeg)
+# pMvn <- matrix(NA,42,nSeg)
 # system.time({
 #   for(i in 1:nSeg){
-#     pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample)
+#     pMvn[,i] <- prForUnc(dataSurMod[i],nSample = nSample,yearUnc=startingYear,
+#                          tileX=tileX)
 #     if (i %% 100 == 0) { print(i) }
 #   }
 # })
