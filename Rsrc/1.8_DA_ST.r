@@ -18,6 +18,7 @@ nSample = 1000 ###number of samples from the error distribution
 if (splitRun) {
   uniqueData_file <- load(paste0("procData/init",startingYear,"/DA",year2,"_split/uniqueData", split_id, ".rdata"))
   uniqueData <- get(uniqueData_file)
+  rm(list = uniqueData_file)
   rm(uniqueData_file)
 } else{
   load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
@@ -119,6 +120,7 @@ if (splitRun) {
     stProbMod <- stProbMod_bind
     dataSurMod <- dataSurMod_bind
     
+    nSeg <- nrow(dataSurMod) # define nSeg again after length of dataSurMod has changed
     
     ###calculate probit2016
     dataSurMod[,st:=st1]
