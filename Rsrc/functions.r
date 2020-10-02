@@ -659,6 +659,9 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
@@ -676,6 +679,9 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
     sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
     sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
     sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX$BAp <- segIDx$BApPer * sampleX$BAtot
+    sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot
+    sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot
     sampleX <- sampleX[H>1.5]
     sampleX <- sampleX[D>0.5]
     sampleX <- sampleX[BAtot>0.045]
