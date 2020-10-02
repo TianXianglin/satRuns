@@ -124,7 +124,7 @@ load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))
     full.modelD <-lm(Dmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.modelD <- stepAIC(full.modelD, direction = "both",
                            trace = FALSE)
-    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st+rootBAp+BAp2,data=dataX)
+    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st+rootBAp,data=dataX)
     step.modelBp <- stepAIC(full.modelBp, direction = "both",
                            trace = FALSE)
     full.modelBsp <-lm(BAspmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
