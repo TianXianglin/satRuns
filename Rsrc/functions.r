@@ -385,6 +385,9 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
@@ -401,6 +404,9 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
     sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
     sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
     sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+    sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+    sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
     sampleX <- sampleX[H>1.5]
     sampleX <- sampleX[D>0.5]
     sampleX <- sampleX[BAtot>0.045]
@@ -519,6 +525,9 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
@@ -535,6 +544,9 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
     sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
     sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
     sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+    sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+    sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
     sampleX <- sampleX[H>1.5]
     sampleX <- sampleX[D>0.5]
     sampleX <- sampleX[BAtot>0.045]
