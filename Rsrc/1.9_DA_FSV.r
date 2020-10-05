@@ -1,8 +1,9 @@
 library(MASS)
+
+# Run settings 
 library(devtools)
-# Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
-source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file in local directory if one exists
+#source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
 # Run functions 
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
@@ -12,7 +13,18 @@ setwd(generalPath)
 
 yearX <- 3
 nSample = 1000 ###number of samples from the error distribution
-load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
+
+# Load unique data.
+# If data is processed in split parts, define to variable split_id which split part to process (in batch job script).
+# If splitRun is not needed, the unique data dataset for the whole tile is loaded.
+if (splitRun) {
+  uniqueData_file <- load(paste0("procData/init",startingYear,"/DA",year2,"_split/uniqueData", split_id, ".rdata"))
+  uniqueData <- get(uniqueData_file)
+  rm(list = uniqueData_file)
+  rm(uniqueData_file)
+} else{
+  load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
+}
 
 ####load error models
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
@@ -49,19 +61,68 @@ nSeg <- nrow(dataSurMod)  ##200
 load("stProbMod.rdata")
 stProb <- data.table(stProb)
 # colnames(stProb) <- paste0("segID","pST",1:5)
-dataSurMod <- merge(dataSurMod[1:nSeg],stProb[1:nSeg,])
+dataSurMod <- merge(dataSurMod,stProb)
 
+pMvNormBASE <- matrix(NA,127,nSeg)
 pMvNorm <- matrix(NA,127,nSeg)
-system.time({
-  for(i in 1:nSeg){
-    pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
-                         year2=year2,tileX=tileX)
-    if (i %% 100 == 0) { print(i) }
-  }
-})
 
-# system.time({
-#  pMvn <- dataSurMod[1:nSeg, pSVDA(.SD,nSample = nSample,year1=startingYear,
-#                               year2=year2,tileX=tileX), by = seq_len(nSeg)]
-# })
-save(pMvn,file="pMvn_FSV.rdata")
+if(parallelRun){
+  
+  system.time({ # PARALLEL PROCESSING
+    # Number of cores used for processing is defined with mc.cores argument (in settings). mc.cores = 1 disables parallel processing.
+    pMvNorm <- mclapply(1:ncol(pMvNorm), function(i){
+      pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
+                          year2=year2,tileX=tileX)
+    },mc.cores = coresN)
+  })
+
+  # Modify the output matrix to correct form 
+  pMvNormDF <- as.data.frame(pMvNorm)
+  colnames(pMvNormDF) <- colnames(pMvNormBASE)
+  pMvNorm <- data.matrix(pMvNormDF)
+
+} else {
+
+  system.time({ # SERIAL PROCESSING
+    for(i in 1:nSeg){
+      pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
+                           year2=year2,tileX=tileX)
+      if (i %% 100 == 0) { print(i) }
+    }
+  })
+
+  # system.time({
+  #  pMvn <- dataSurMod[1:nSeg, pSVDA(.SD,nSample = nSample,year1=startingYear,
+  #                               year2=year2,tileX=tileX), by = seq_len(nSeg)]
+  # })
+}
+
+if(splitRun) {  ##  If run in split parts, output produced with each split part is saved temporarily (as pMvn_FSV_split*split_id*.rdata).
+                ##  Split outputs will be combined and saved to pMvn_FSV.rdata file when the last split part is processed
+  
+  save(pMvNorm, file = paste0("pMvn_FSV_split",split_id,".rdata"))
+  
+  if(split_id==max(splitRange)){
+    
+    List <- list()
+    
+    # Iterate through all split parts of pMvn. 
+    # Bind split parts to a single matrix
+    for (i in 1:max(splitRange)) {
+      pMvn_file <- load(paste0("pMvn_FSV_split",i,".rdata"))
+      pMvn_split <- get(pMvn_file)
+      rm(pMvn_file)
+      
+      List[[i]] <- pMvn_split
+      
+      rm(pMvn_split)
+    }
+
+    pMvNorm <- do.call(cbind,List)
+    save(pMvNorm,file="pMvn_FSV.rdata") # pMvNorm finished for the whole dataset
+
+  } 
+  
+} else {
+save(pMvNorm,file="pMvn_FSV.rdata") # pMvNorm finished for the whole dataset
+}
