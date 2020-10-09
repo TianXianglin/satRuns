@@ -106,7 +106,7 @@ if(exists("tileSettings")){
     pinePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_pine_10M_1CHS_8BITS.tif")
     sprucePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_spruce_10M_1CHS_8BITS.tif")
     blPerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_BLP_10M_1CHS_8BITS.tif")
-    mgmtmaskRast <- paste0(rasterPath, tileX, "_mgmtmask.tif")
+    mgmtmaskRast <- paste0(rasterPath, areaID, "_", tileX, "_mgmtmask.tif")
   }
 }
 
@@ -134,7 +134,7 @@ vNA <- c(65533:65535); vConv <- 1
 hNA <- c(65533:65535); hConv <- 0.1
 pinePerNA <- c(253:255); pinePerConv <- 1
 sprucePerNA <- c(253:255); sprucePerConv <- 1
-siteTypeNA <- c(254:255); siteTypeConv <- 1
+siteTypeNA <- c(253:255); siteTypeConv <- 1
 
 ####settings for sitetype estimation
 stXruns <- TRUE
@@ -145,13 +145,10 @@ siteTypeX <- startingYear #startingYear #year2 #startingYear #1:5
 parallelRun <- FALSE
 coresN <- 20L ### Set number of cores to use in parallel run 
 
-# Set whether to split unique data in 1.1_procData_siteType to smaller parts. If
+# Set whether to split unique data in 1.1 to smaller parts. If
 # TRUE, data is split.
 splitRun <- FALSE
-# Range/number of split parts. NOTICE: Code doesn't adjust number of split parts by merely 
-# adjusting this variable. If number of parts needs to be changed, 1.1_procData_siteType 
-# needs to be modified.
-if(splitRun){
+if(splitRun){    # Range/number of split parts
   splitRange <- 1:10
 }
 
