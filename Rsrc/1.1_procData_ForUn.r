@@ -166,64 +166,36 @@ save(samples,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"/
 save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
 
 
-#### If needed (splitRun = TRUE), unique data is split to ten tables here to enable 
-#    running further processing in multiple sections. 
+#### If needed (splitRun = TRUE), unique data is split to separate tables here to enable 
+#    running further scripts in multiple sections. Number of split parts is defined in splitRange variable (in settings).
 if (splitRun) {
   
-  # Create split_id column which is used in splitting the table. 
-  # NOTICE that all of the parts are not necessarily equal sized.
-  split_length <- ceiling(nrow(uniqueData)/10)
+  # Create split_id column which is used in splitting the table. NOTICE that the last section might be of unequal size compared to the others.
+  split_length <- ceiling(nrow(uniqueData)/length(splitRange))
   uniqueData <- uniqueData[, split_id := NA]
+  
   uniqueData$split_id[1:split_length] <- 1
-  uniqueData$split_id[(split_length+1):(split_length*2)] <- 2
-  uniqueData$split_id[(2*split_length+1):(split_length*3)] <- 3
-  uniqueData$split_id[(3*split_length+1):(split_length*4)] <- 4
-  uniqueData$split_id[(4*split_length+1):(split_length*5)] <- 5
-  uniqueData$split_id[(5*split_length+1):(split_length*6)] <- 6
-  uniqueData$split_id[(6*split_length+1):(split_length*7)] <- 7
-  uniqueData$split_id[(7*split_length+1):(split_length*8)] <- 8
-  uniqueData$split_id[(8*split_length+1):(split_length*9)] <- 9
-  uniqueData$split_id[(9*split_length+1):(nrow(uniqueData))] <- 10
+  for (i in 2:(max(splitRange)-1)) {
+    uniqueData$split_id[((i-1)*split_length+1):(split_length*i)] <- i
+  }
+  uniqueData$split_id[((length(splitRange)-1)*split_length+1):(nrow(uniqueData))] <- length(splitRange)
   
   # Split the table to list of elements. Splitting is done based on the split_id.
   split_list <- split(uniqueData,uniqueData$split_id)
   
-  # Convert the split results to separate data tables
-  uniqueData1 <- as.data.table(split_list[[1]])
-  uniqueData2 <- as.data.table(split_list[[2]])
-  uniqueData3 <- as.data.table(split_list[[3]])
-  uniqueData4 <- as.data.table(split_list[[4]])
-  uniqueData5 <- as.data.table(split_list[[5]])
-  uniqueData6 <- as.data.table(split_list[[6]])
-  uniqueData7 <- as.data.table(split_list[[7]])
-  uniqueData8 <- as.data.table(split_list[[8]])
-  uniqueData9 <- as.data.table(split_list[[9]])
-  uniqueData10 <- as.data.table(split_list[[10]])
-  
-  # Remove split_id column
-  uniqueData1 <- uniqueData1[, split_id:=NULL]
-  uniqueData2 <- uniqueData2[, split_id:=NULL]
-  uniqueData3 <- uniqueData3[, split_id:=NULL]
-  uniqueData4 <- uniqueData4[, split_id:=NULL]
-  uniqueData5 <- uniqueData5[, split_id:=NULL]
-  uniqueData6 <- uniqueData6[, split_id:=NULL]
-  uniqueData7 <- uniqueData7[, split_id:=NULL]
-  uniqueData8 <- uniqueData8[, split_id:=NULL]
-  uniqueData9 <- uniqueData9[, split_id:=NULL]
-  uniqueData10 <- uniqueData10[, split_id:=NULL]
-  
-  # Save splitted tables 
-  save(uniqueData1,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData1.rdata"))  
-  save(uniqueData2,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData2.rdata"))
-  save(uniqueData3,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData3.rdata"))
-  save(uniqueData4,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData4.rdata"))
-  save(uniqueData5,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData5.rdata"))
-  save(uniqueData6,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData6.rdata"))
-  save(uniqueData7,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData7.rdata"))
-  save(uniqueData8,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData8.rdata"))
-  save(uniqueData9,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData9.rdata"))
-  save(uniqueData10,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData10.rdata"))
-  
+  for (i in 1:max(splitRange)) {
+    
+    # Convert the split results to separate data tables
+    uniqueDataSplit <- as.data.table(split_list[[i]])
+    
+    # Remove split_id column
+    uniqueDataSplit <- uniqueDataSplit[, split_id:=NULL]
+    
+    # Save split tables
+    save(uniqueDataSplit,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData",i,".rdata"))  
+    
+    rm(uniqueDataSplit)
+  }
 }
 
 
