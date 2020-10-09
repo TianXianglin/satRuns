@@ -253,7 +253,7 @@ if (splitRun) {
     uniqueDataSplit <- uniqueDataSplit[, split_id:=NULL]
   
     # Save split tables
-    save(uniqueDataSplit,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData",i,"test.rdata"))  
+    save(uniqueDataSplit,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData",i,".rdata"))  
   
     rm(uniqueDataSplit)
   }
