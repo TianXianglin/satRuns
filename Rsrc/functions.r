@@ -584,7 +584,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   # sampleX[,BApPer2:=segIDx$BApPer2]
   # sampleX[,BAspPer2:=segIDx$BAspPer2]
   # sampleX[,BAbPer2:=segIDx$BAbPer2]
-  sampleX[,segID:=segIDx$segID]
+  # sampleX[,segID:=segIDx$segID]
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
   # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
@@ -640,7 +640,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
 
   # return(list(muPrior=mux,muLik=mux2,muPost=as.vector(muPost),
   #             sigPrior=sigmax,sigLik=sigmax2,sigPost=sigmaPost))
-  pars <- c(segIDx$segID,as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
+  pars <- c(as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
   return(pars)
 }
 

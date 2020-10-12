@@ -2,7 +2,7 @@ library(MASS)
 
 # Run settings 
 library(devtools)
-#source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
 if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
 # Run functions 
@@ -71,9 +71,12 @@ if(parallelRun){
   system.time({ # PARALLEL PROCESSING
     # Number of cores used for processing is defined with mc.cores argument (in settings). mc.cores = 1 disables parallel processing.
     pMvNorm <- mclapply(1:ncol(pMvNorm), function(i){
-      pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
-                          year2=year2,tileX=tileX)
-    },mc.cores = coresN)
+      # pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
+      #                     year2=year2,tileX=tileX)
+      pMvNorm <- dataSurMod[, pSVDA(.SD,nSample = nSample,year1=startingYear,
+                                    year2=year2,tileX=tileX), by = segID]
+    
+      },mc.cores = coresN)
   })
 
   # Modify the output matrix to correct form 
@@ -83,18 +86,18 @@ if(parallelRun){
 
 } else {
 
-  system.time({ # SERIAL PROCESSING
-    for(i in 1:nSeg){
-      pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
-                           year2=year2,tileX=tileX)
-      if (i %% 100 == 0) { print(i) }
-    }
-  })
-
-  # system.time({
-  #  pMvn <- dataSurMod[1:nSeg, pSVDA(.SD,nSample = nSample,year1=startingYear,
-  #                               year2=year2,tileX=tileX), by = seq_len(nSeg)]
+  # system.time({ # SERIAL PROCESSING
+  #   for(i in 1:nSeg){
+  #     pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
+  #                          year2=year2,tileX=tileX)
+  #     if (i %% 100 == 0) { print(i) }
+  #   }
   # })
+
+  system.time({
+   pMvNorm <- dataSurMod[, pSVDA(.SD,nSample = nSample,year1=startingYear,
+                                year2=year2,tileX=tileX), by = segID]
+  })
 }
 
 if(splitRun) {  ##  If run in split parts, output produced with each split part is saved temporarily (as pMvn_FSV_split*split_id*.rdata).
