@@ -38,21 +38,23 @@ dataSurMod[,BAspPer:=.(BAsp/sum(BAp,BAsp,BAb)*100),by=segID]
 dataSurMod[,BAbPer:=.(BAb/sum(BAp,BAsp,BAb)*100),by=segID]
 dataSurMod[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 
-nSeg <- nrow(dataSurMod)  ##200
+# nSeg <- nrow(dataSurMod)  ##200
 # load("stProbMod.rdata")
 # colnames(stProb) <- paste0("pST",1:5)
-# dataSurMod <- cbind(dataSurMod[1:nSeg],stProb[1:nSeg,])
-# pMvn <- matrix(NA,42,nSeg)
+# # dataSurMod <- cbind(dataSurMod[1:nSeg],stProb[1:nSeg,])
+# pMvn <- matrix(NA,nSeg,43)
 # system.time({
 #   for(i in 1:nSeg){
-#     pMvn[,i] <- prForUnc(dataSurMod[i],nSample = nSample,yearUnc=startingYear,
+#     pMvn[i,] <- prForUnc(dataSurMod[i],nSample = nSample,yearUnc=startingYear,
 #                          tileX=tileX)
 #     if (i %% 100 == 0) { print(i) }
 #   }
 # })
+# nSeg=100
+# test <- dataSurMod[1:nSeg]
 
 system.time({
- pMvn <- dataSurMod[1:nSeg, prForUnc(.SD,nSample = nSample,yearUnc=startingYear,
-                              tileX=tileX), by = seq_len(nSeg)]
+ pMvn <- test[, dataSurMod(.SD,nSample = nSample,yearUnc=startingYear,
+                              tileX=tileX), by =segID]
 })
 save(pMvn,file="pMvn_ForUnc.rdata")

@@ -725,7 +725,7 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX[,BAsp:=BAspPer*BAtot/100]
   sampleX[,BAb:=BAbPer*BAtot/100]
 
-  sampleX[,segID:=segIDx$segID]
+  # sampleX[,segID:=segIDx$segID]
   
   sampleX[,BAtot:=(BAp+BAsp+BAb)]
   sampleX[,BAh:=BAtot*H]
