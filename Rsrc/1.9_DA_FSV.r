@@ -63,14 +63,16 @@ stProb <- data.table(stProb)
 # colnames(stProb) <- paste0("segID","pST",1:5)
 dataSurMod <- merge(dataSurMod,stProb)
 
-pMvNormBASE <- matrix(NA,127,nSeg)
-pMvNorm <- matrix(NA,127,nSeg)
+#pMvNormBASE <- matrix(NA,127,nSeg)
+#pMvNorm <- matrix(NA,127,nSeg)
+pMvNorm <- data.table()
 
 if(parallelRun){
   
   system.time({ # PARALLEL PROCESSING
     # Number of cores used for processing is defined with mc.cores argument (in settings). mc.cores = 1 disables parallel processing.
-    pMvNorm <- mclapply(1:ncol(pMvNorm), function(i){
+    #pMvNorm <- mclapply(1:ncol(pMvNorm), function(i){
+    pMvNorm <- mclapply(1, function(i){
       # pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
       #                     year2=year2,tileX=tileX)
       pMvNorm <- dataSurMod[, pSVDA(.SD,nSample = nSample,year1=startingYear,
@@ -79,10 +81,11 @@ if(parallelRun){
       },mc.cores = coresN)
   })
 
-  # Modify the output matrix to correct form 
-  pMvNormDF <- as.data.frame(pMvNorm)
-  colnames(pMvNormDF) <- colnames(pMvNormBASE)
-  pMvNorm <- data.matrix(pMvNormDF)
+  # Modify the output to correct form 
+  #pMvNormDF <- as.data.frame(pMvNorm)
+  #colnames(pMvNormDF) <- colnames(pMvNormBASE)
+  #pMvNorm <- data.matrix(pMvNormDF)
+  pMvNorm <- as.data.table(pMvNorm)
 
 } else {
 
@@ -105,26 +108,26 @@ if(splitRun) {  ##  If run in split parts, output produced with each split part 
   
   save(pMvNorm, file = paste0("pMvn_FSV_split",split_id,".rdata"))
   
-  if(split_id==max(splitRange)){
-    
-    List <- list()
-    
-    # Iterate through all split parts of pMvn. 
-    # Bind split parts to a single matrix
-    for (i in 1:max(splitRange)) {
-      pMvn_file <- load(paste0("pMvn_FSV_split",i,".rdata"))
-      pMvn_split <- get(pMvn_file)
-      rm(pMvn_file)
-      
-      List[[i]] <- pMvn_split
-      
-      rm(pMvn_split)
-    }
-
-    pMvNorm <- do.call(cbind,List)
-    save(pMvNorm,file="pMvn_FSV.rdata") # pMvNorm finished for the whole dataset
-
-  } 
+# if(split_id==max(splitRange)){
+#   
+#   List <- list()
+#   
+#   # Iterate through all split parts of pMvn. 
+#   # Bind split parts to a single matrix
+#   for (i in 1:max(splitRange)) {
+#     pMvn_file <- load(paste0("pMvn_FSV_split",i,".rdata"))
+#     pMvn_split <- get(pMvn_file)
+#     rm(pMvn_file)
+#     
+#     List[[i]] <- pMvn_split
+#     
+#     rm(pMvn_split)
+#   }
+#   
+#   pMvNorm <- do.call(cbind,List)
+#   save(pMvNorm,file="pMvn_FSV.rdata") # pMvNorm finished for the whole dataset
+#   
+# } 
   
 } else {
 save(pMvNorm,file="pMvn_FSV.rdata") # pMvNorm finished for the whole dataset
