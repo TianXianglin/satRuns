@@ -12,7 +12,18 @@ setwd(generalPath)
 
 yearX <- 3
 nSample = 1000 ###number of samples from the error distribution
-load(paste0("procData/init",startingYear,"/ForUn",yearEnd,"/uniqueData.rdata"))  
+
+# Load unique data.
+# If data is processed in split parts, define to variable split_id which split part to process (in batch job script).
+# If splitRun is not needed, the unique data dataset for the whole tile is loaded.
+if (splitRun) {
+  uniqueData_file <- load(paste0("procData/init",startingYear,"/ForUn",yearEnd,"_split/uniqueData", split_id, ".rdata"))
+  uniqueData <- get(uniqueData_file)
+  rm(list = uniqueData_file)
+  rm(uniqueData_file)
+} else{
+  load(paste0("procData/init",startingYear,"/ForUn",yearEnd,"/uniqueData.rdata"))  
+}
 
 ####load error models
 load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
@@ -53,8 +64,29 @@ dataSurMod[,BAtot:=.(sum(BAp,BAsp,BAb)),by=segID]
 # nSeg=100
 # test <- dataSurMod[1:nSeg]
 
-system.time({
- pMvn <- test[, dataSurMod(.SD,nSample = nSample,yearUnc=startingYear,
-                              tileX=tileX), by =segID]
-})
-save(pMvn,file="pMvn_ForUnc.rdata")
+pMvn <- data.table()
+
+if(parallelRun){
+  system.time({ # PARALLEL PROCESSING
+    # Number of cores used for processing is defined with mc.cores argument (in settings). mc.cores = 1 disables parallel processing.
+    pMvn <- mclapply(1, function(i){
+      pMvn <- dataSurMod[, prForUnc(.SD,nSample = nSample,yearUnc=startingYear,
+                                    tileX=tileX), by =segID]
+    },mc.cores = coresN)
+  })
+ 
+  pMvn <- as.data.table(pMvn) # convert from list to data table
+  
+} else {
+  system.time({ # SERIAL PROCESSING
+    pMvn <- dataSurMod[, prForUnc(.SD,nSample = nSample,yearUnc=startingYear,
+                                  tileX=tileX), by =segID]
+  })
+}
+
+if(splitRun) { 
+  save(pMvn, file = paste0("pMvn_ForUnc_split",split_id,".rdata")) # save processed split data, combine split parts after processing all parts
+  
+} else {
+  save(pMvn,file="pMvn_ForUnc.rdata") # pMvn finished for the whole dataset
+}
