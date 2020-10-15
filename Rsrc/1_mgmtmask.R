@@ -130,6 +130,6 @@ dv_5x5w.median <- focal(dV, wmatr_5x5_w, fun=median, na.rm=T)
 mgmtmask_rast <- overlay(cc_rast, ts_rast, dV, dv_5x5w.median, v16raw, fun=build_mm_th6_focal)
 
 # saving raster
-writeRaster(mgmtmask_rast, file=paste0(rasterPath, areaID, "_", tileX, "_mgmtmask_ftest"), format="GTiff", overwrite=T)
+writeRaster(mgmtmask_rast, file=paste0(rasterPath, areaID, "_", tileX, "_mgmtmask"), format="GTiff", overwrite=T)
 
 print(paste0("Tile ", areaID, "_", tileX,  ": mgmt mask done, total runtime: ", Sys.time()-start))
