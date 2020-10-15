@@ -385,6 +385,9 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
@@ -401,6 +404,9 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
     sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
     sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
     sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+    sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+    sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
     sampleX <- sampleX[H>1.5]
     sampleX <- sampleX[D>0.5]
     sampleX <- sampleX[BAtot>0.045]
@@ -519,6 +525,9 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
@@ -535,6 +544,9 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
     sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
     sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
     sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+    sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+    sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
     sampleX <- sampleX[H>1.5]
     sampleX <- sampleX[D>0.5]
     sampleX <- sampleX[BAtot>0.045]
@@ -572,7 +584,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   # sampleX[,BApPer2:=segIDx$BApPer2]
   # sampleX[,BAspPer2:=segIDx$BAspPer2]
   # sampleX[,BAbPer2:=segIDx$BAbPer2]
-  sampleX[,segID:=segIDx$segID]
+  # sampleX[,segID:=segIDx$segID]
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
   # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
@@ -628,7 +640,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
 
   # return(list(muPrior=mux,muLik=mux2,muPost=as.vector(muPost),
   #             sigPrior=sigmax,sigLik=sigmax2,sigPost=sigmaPost))
-  pars <- c(segIDx$segID,as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
+  pars <- c(as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
   return(pars)
 }
 
@@ -659,6 +671,9 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
@@ -676,9 +691,13 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
     sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
     sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
     sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+    sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+    sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
     sampleX <- sampleX[H>1.5]
     sampleX <- sampleX[D>0.5]
     sampleX <- sampleX[BAtot>0.045]
+    sampleX[,rootBAp:=BAp^0.5]
     sampleX <- rbind(sample1,sampleX)
     sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   }
@@ -706,7 +725,7 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX[,BAsp:=BAspPer*BAtot/100]
   sampleX[,BAb:=BAbPer*BAtot/100]
 
-  sampleX[,segID:=segIDx$segID]
+  # sampleX[,segID:=segIDx$segID]
   
   sampleX[,BAtot:=(BAp+BAsp+BAb)]
   sampleX[,BAh:=BAtot*H]

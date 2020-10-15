@@ -54,26 +54,11 @@ climatepath = "C:/Users/minunno/Documents/research/extarctWeather/inputs/" #### 
 climIDpath <- "C:/Users/minunno/Documents/research/FinSeg/some stuff/climID10km.tif"
 # climIDpath <- "/scratch/project_2000994/PREBASruns/metadata/" ####on CSC
 
-coresN <- 20L ###Set number of cores to use in parallel run 
 
 startYearWeather <- 1971 ###1971 for Finnish weather dataBase
 startingYear <- 2016  #2019
 year2 <- 2019 ###year of the second measurement
 yearEnd <- 2019     #2024
-nYears <-  yearEnd - startingYear ## number of simulation years
-domSPrun = 0.
-mgmtmask = F # switch for masking of management
-
-
-resX <- 10 ### pixel resolution in meters
-
-### define weather inputs (CurrClim, or climate models)
-weather = "CurrClim"
-
-###set harvests
-defaultThin = 0.
-ClCut = 0.
-harvscen = "NoHarv"
 
 
 ####indicate raster files
@@ -97,19 +82,6 @@ sprucePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_spruce_10M_1C
 blPerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_BLP_10M_1CHS_8BITS.tif")
 mgmtmaskRast <- paste0(rasterPath, areaID, "_", tileX, "_mgmtmask.tif")
 
-####set values for NAs and convert factor for prebas units
-baNA <- c(253:255); baConv<- 1
-blPerNA <- c(253:255); blPerConv<- 1
-dbhNA <- c(253:255); dbhConv <- 1
-vNA <- c(65533:65535); vConv <- 1
-hNA <- c(65533:65535); hConv <- 0.1
-pinePerNA <- c(253:255); pinePerConv <- 1
-sprucePerNA <- c(253:255); sprucePerConv <- 1
-siteTypeNA <- c(254:255); siteTypeConv <- 1
-
-####settings for sitetype estimation
-stXruns <- TRUE
-siteTypeX <- startingYear #startingYear #year2 #startingYear #1:5
 
 # Source of tile-specific settings. Defined in batch job script. When set to TRUE will overwrite the tile-specific 
 # settings in this script (lines: 41-49, 53-56, 72-81) with settings from filepath in mySettings variable.
@@ -134,20 +106,49 @@ if(exists("tileSettings")){
     pinePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_pine_10M_1CHS_8BITS.tif")
     sprucePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_spruce_10M_1CHS_8BITS.tif")
     blPerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_BLP_10M_1CHS_8BITS.tif")
-    mgmtmaskRast <- paste0(rasterPath, tileX, "_mgmtmask.tif")
+    mgmtmaskRast <- paste0(rasterPath, areaID, "_", tileX, "_mgmtmask.tif")
   }
 }
 
+
+nYears <-  yearEnd - startingYear ## number of simulation years
+domSPrun = 0.
+mgmtmask = F # switch for masking of management
+
+
+resX <- 10 ### pixel resolution in meters
+
+### define weather inputs (CurrClim, or climate models)
+weather = "CurrClim"
+
+###set harvests
+defaultThin = 0.
+ClCut = 0.
+harvscen = "NoHarv"
+
+####set values for NAs and convert factor for prebas units
+baNA <- c(253:255); baConv<- 1
+blPerNA <- c(253:255); blPerConv<- 1
+dbhNA <- c(253:255); dbhConv <- 1
+vNA <- c(65533:65535); vConv <- 1
+hNA <- c(65533:65535); hConv <- 0.1
+pinePerNA <- c(253:255); pinePerConv <- 1
+sprucePerNA <- c(253:255); sprucePerConv <- 1
+siteTypeNA <- c(253:255); siteTypeConv <- 1
+
+####settings for sitetype estimation
+stXruns <- TRUE
+siteTypeX <- startingYear #startingYear #year2 #startingYear #1:5
+
+
 # Set TRUE to enable running 1.8_optST, 2_InitPreb and 3_runModel in parallel. Set to FALSE, these scripts run as serial.
 parallelRun <- FALSE
+coresN <- 20L ### Set number of cores to use in parallel run 
 
-# Set whether to split unique data in 1.1_procData_siteType to smaller parts. If
+# Set whether to split unique data in 1.1 to smaller parts. If
 # TRUE, data is split.
 splitRun <- FALSE
-# Range/number of split parts. NOTICE: Code doesn't adjust number of split parts by merely 
-# adjusting this variable. If number of parts needs to be changed, 1.1_procData_siteType 
-# needs to be modified.
-if(splitRun){
+if(splitRun){    # Range/number of split parts
   splitRange <- 1:10
 }
 

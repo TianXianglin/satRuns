@@ -101,7 +101,7 @@ load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))
                      "Hmod","Dmod","BApmod","BAspmod","BAdmod"))
     # if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTypes of the tile are in the sample")
     
-    #### Here we use stepwise regression to construct an emulator for volume prediction
+    #### Here we use stepwise regression to construct an emulator for stand variables prediction
     # dataX$lnVmod<-log(dataX$Vmod)
     # dataX$alpha<-NA
     dataX$st <- factor(dataX$st)
@@ -124,7 +124,7 @@ load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))
     full.modelD <-lm(Dmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.modelD <- stepAIC(full.modelD, direction = "both",
                            trace = FALSE)
-    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st+rootBAp+BAp2,data=dataX)
+    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st+rootBAp,data=dataX)
     step.modelBp <- stepAIC(full.modelBp, direction = "both",
                            trace = FALSE)
     full.modelBsp <-lm(BAspmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
