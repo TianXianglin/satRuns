@@ -11,6 +11,10 @@ if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings fi
 # Run functions 
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
 
+####load error models
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/logisticPureF.rdata"))
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/step.probit.rdata"))
 
 ###set working directory
 setwd(generalPath)
