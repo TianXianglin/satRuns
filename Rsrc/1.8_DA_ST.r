@@ -85,8 +85,27 @@ if(parallelRun){  ### PARALLEL run
 }
 
 if (splitRun) {
-  save(stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
-  save(dataSurMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/dataSurMod",split_id,".rdata"))
+  ###calculate probit2016
+  dataSurMod[,st:=st1]
+  step.probit1 <- step.probit[[paste0("y",startingYear)]][[paste0("t",tileX)]]
+  probit1 <- predict(step.probit1,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+  
+  ###calculate probit2019
+  dataSurMod[,st:=st2]
+  step.probit2 <- step.probit[[paste0("y",year2)]][[paste0("t",tileX)]]
+  probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data
+  
+  stProb <- array(NA, dim=c(nSeg,5,3))
+  stProb[,,1] <- probit1
+  stProb[,,2] <- probit2
+  stProb[,,3] <- as.matrix(stProbMod[,2:6])
+  
+  stProb <- apply(stProb, c(1,2), mean)
+  stProb <- cbind(dataSurMod$segID,stProb)
+  colnames(stProb) <- colnames(stProbMod)
+  
+  save(stProb,probit1,probit2,stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
+  save(stProb,probit1,probit2,dataSurMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/dataSurMod",split_id,".rdata"))
   
   # If split_id is not highest of the range, processing is stopped here. Continue by sending remaining parts of split data to processing
   
