@@ -8,7 +8,12 @@ if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings fi
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
 
 ###check and create output directories
+###check and create output directories
 setwd(generalPath)
+mkfldr <- "posterior/"
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
+}
 
 yearX <- 3
 nSample = 1000 ###number of samples from the error distribution
@@ -85,8 +90,8 @@ if(parallelRun){
 }
 
 if(splitRun) { 
-  save(pMvn, file = paste0("pMvn_ForUnc_split",split_id,".rdata")) # save processed split data, combine split parts after processing all parts
+  save(pMvn, file = paste0("posterior/pMvn_ForUnc_split",split_id,".rdata")) # save processed split data, combine split parts after processing all parts
   
 } else {
-  save(pMvn,file="pMvn_ForUnc.rdata") # pMvn finished for the whole dataset
+  save(pMvn,file="posterior/pMvn_ForUnc.rdata") # pMvn finished for the whole dataset
 }
