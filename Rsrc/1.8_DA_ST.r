@@ -105,7 +105,7 @@ if (splitRun) {
   colnames(stProb) <- colnames(stProbMod)
   
   save(stProb,probit1,probit2,stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
-  save(stProb,probit1,probit2,dataSurMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/dataSurMod",split_id,".rdata"))
+  # save(stProb,probit1,probit2,dataSurMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/dataSurMod",split_id,".rdata"))
   
   # If split_id is not highest of the range, processing is stopped here. Continue by sending remaining parts of split data to processing
   

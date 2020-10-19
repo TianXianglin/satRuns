@@ -22,8 +22,12 @@ if (splitRun) {
   uniqueData <- get(uniqueData_file)
   rm(list = uniqueData_file)
   rm(uniqueData_file)
+  load(paste0("procData/init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
+  stProb <- data.table(stProb)
 } else{
   load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
+  load("stProbMod.rdata")
+  stProb <- data.table(stProb)
 }
 
 ####load error models
@@ -59,16 +63,13 @@ dataSurMod[,BAtot2:=.(sum(BAp2,BAsp2,BAb2)),by=segID]
 
 nSeg <- nrow(dataSurMod)  ##200
 
+dataSurMod <- merge(dataSurMod,stProb)
+
 #pMvNormBASE <- matrix(NA,127,nSeg)
 #pMvNorm <- matrix(NA,127,nSeg)
 pMvNorm <- data.table()
 
 if(parallelRun){
-  
-  load(paste0("procData/init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
-  stProb <- data.table(stProb)
-  # colnames(stProb) <- paste0("segID","pST",1:5)
-  dataSurMod <- merge(dataSurMod,stProb)
 
   system.time({ # PARALLEL PROCESSING
     # Number of cores used for processing is defined with mc.cores argument (in settings). mc.cores = 1 disables parallel processing.
@@ -90,11 +91,6 @@ if(parallelRun){
 
 } else {
 
-  load("stProbMod.rdata")
-  stProb <- data.table(stProb)
-  # colnames(stProb) <- paste0("segID","pST",1:5)
-  dataSurMod <- merge(dataSurMod,stProb)
-  
   # system.time({ # SERIAL PROCESSING
   #   for(i in 1:nSeg){
   #     pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
