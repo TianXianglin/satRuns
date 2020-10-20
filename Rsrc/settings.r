@@ -82,7 +82,6 @@ sprucePerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_P_spruce_10M_1C
 blPerRast2 <- paste0(rasterPath,areaID,"_",tileX,"-",year2,"_BLP_10M_1CHS_8BITS.tif")
 mgmtmaskRast <- paste0(rasterPath, areaID, "_", tileX, "_mgmtmask.tif")
 
-
 # Source of tile-specific settings. Defined in batch job script. When set to TRUE will overwrite the tile-specific 
 # settings in this script (lines: 41-49, 53-56, 72-81) with settings from filepath in mySettings variable.
 if(exists("tileSettings")){
