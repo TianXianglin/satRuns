@@ -147,8 +147,9 @@ coresN <- 20L ### Set number of cores to use in parallel run
 # Set whether to split unique data in 1.1 to smaller parts. If
 # TRUE, data is split.
 splitRun <- FALSE
+nSplit <- 20
 if(splitRun){    # Range/number of split parts
-  splitRange <- 1:10
+  splitRange <- 1:nSplit
 }
 
 ####thresholds for variables to reset stand from plantation
