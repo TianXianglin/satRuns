@@ -9,8 +9,8 @@ source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/
 
 ###check and create output directories
 mkfldr <- paste0(procDataPath,"init",startingYear,"/calST_split/")
-if(!dir.exists(file.path(generalPath, mkfldr))) {
-  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
+if(!dir.exists(file.path(mkfldr))){
+  dir.create(file.path(mkfldr), recursive = TRUE)
 }
 setwd(generalPath)
 
