@@ -44,9 +44,7 @@ for(i in 1:nSplit){
   print(i) 
 }
 
-# save(dataAll, file = "posterior/posteriorProc.rdata")
-load("XYsegID.rdata")
-
+load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/XYsegID.rdata"))  
 
 setkey(XYsegID,segID)
 setkey(dataAll,segID)
