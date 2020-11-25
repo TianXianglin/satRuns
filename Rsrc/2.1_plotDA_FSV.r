@@ -18,7 +18,7 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
 
 vars <- c("H","D","B","perP","perSP","perB")
 
-for(varX in 1:length(vars)){
+for(varX in vars){
 # for(runx in c("prior","2","posterior")){
   runx="post"
   rastX <- raster(paste0("outRast/","init",startingYear,"/DA",year2,"/",varX,runx,".tif"))
