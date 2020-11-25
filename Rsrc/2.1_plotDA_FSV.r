@@ -73,8 +73,28 @@ pperB <- ggplot(perB,
   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
   scale_fill_viridis_c(name = "", option = "C") #+
 
-save(pH,pD,pB,pperB,pperSP,pperP,file = paste0("plots/","init",startingYear,"/DA",year2,"/plots.rdata"))
+# save(pH,pD,pB,pperB,pperSP,pperP,file = paste0("plots/","init",startingYear,"/DA",year2,"/plots.rdata"))
 #     
 #     writeRaster(rastX,filename = rastName,overwrite=T)
 #     print(varX)
 #   }
+# save plot to file without using ggsave
+
+png(paste0("plots/","init",startingYear,"/DA",year2,"/H.png"))
+  print(pH)
+dev.off()
+png(paste0("plots/","init",startingYear,"/DA",year2,"/D.png"))
+print(pD)
+dev.off()
+png(paste0("plots/","init",startingYear,"/DA",year2,"/B.png"))
+print(pB)
+dev.off()
+png(paste0("plots/","init",startingYear,"/DA",year2,"/perP.png"))
+print(pperP)
+dev.off()
+png(paste0("plots/","init",startingYear,"/DA",year2,"/perSP.png"))
+print(pperSP)
+dev.off()
+png(paste0("plots/","init",startingYear,"/DA",year2,"/perB.png"))
+print(pperB)
+dev.off()
