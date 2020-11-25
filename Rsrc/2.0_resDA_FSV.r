@@ -1,34 +1,97 @@
-setwd("C:/Users/minunno/Documents/research/assessCarbon/data/Finland/AC_training_FI_35VLJ/")
-load("pMvn_FSV_split1.rdata")
-pMvNorm <- data.table(pMvNorm)
-pMvNormAll <- pMvNorm
-load("pMvn_FSV_split2.rdata")
-pMvNorm <- data.table(pMvNorm)
-pMvNormAll <- rbind(pMvNormAll,pMvNorm)
+library(devtools)
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
+# Run functions 
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
+
+###check and create output directories
+###check and create output directories
+setwd(generalPath)
+mkfldr <- paste0("outRast/",paste0("init",startingYear,"/DA",year2))
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
+}
+
+yearX <- 3
+nSample = 1000 ###number of samples from the error distribution
+
+# Load unique data.
+# If data is processed in split parts, define to variable split_id which split part to process (in batch job script).
+# If splitRun is not needed, the unique data dataset for the whole tile is loaded.
+if (splitRun) {
+  uniqueData_file <- load(paste0("procData/init",startingYear,"/DA",year2,"_split/uniqueData", split_id, ".rdata"))
+  uniqueData <- get(uniqueData_file)
+  rm(list = uniqueData_file)
+  rm(uniqueData_file)
+  load(paste0("procData/init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
+  stProb <- data.table(stProb)
+} else{
+  load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
+  load("stProbMod.rdata")
+  stProb <- data.table(stProb)
+}
+
+####load error models
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/logisticPureF.rdata"))
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/step.probit.rdata"))
+###load surrMods !!!change name
+load("surErrMods/surMod.rdata")
+
+
+# setwd("C:/Users/minunno/Documents/research/assessCarbon/data/Finland/AC_training_FI_35VLJ/")
+
+###join data
+for(i in 1:nSplit){
+  load(paste0("posterior/pMvn_FSV_split",i,".rdata"))
+  pMvNorm <- data.table(pMvNorm)
+  # pMvNormAll <- pMvNorm
+  # load("pMvn_FSV_split2.rdata")
+  # pMvNorm <- data.table(pMvNorm)
+  # pMvNormAll <- rbind(pMvNormAll,pMvNorm)
+  
+  pMvNorm$varNam <- rep(
+    c("Hprior","Dprior","Bprior","perPprior","perSPprior","perBprior",rep("varcov1",36),
+      "H2","D2","B2","perP2","perSP2","perB2",rep("varcov2",36),
+      "Hpost","Dpost","Bpost","perPpost","perSPpost","perBpost",rep("varcov3",36)),
+    times = nrow(pMvNorm)/126)
+  
+  pMvNorm <- pMvNorm[!(varNam=="varcov1" | varNam=="varcov2" | varNam=="varcov3")]
+  
+  
+  dataX <- data.table(dcast(data = pMvNorm,
+                              formula = segID~varNam,value.var = "V1"))
+  if(i ==  1) dataAll <- dataX
+  if(i>1) dataAll <- rbind(dataAll,dataX)
+  
+  rm(pMvNorm,dataX); gc()
+  print(i) 
+}
+
+# save(dataAll, file = "posterior/posteriorProc.rdata")
 load("XYsegID.rdata")
 
-funx <- function(id,datax){
-  vecX <- as.numeric(c(id,unlist(datax[segID==id,2])))
-  return(vecX)
-}
 
-funx(23,pMvNorm)
-
-ciao <- data.table()
-ix <- 0
-for(i in unique(pMvNorm$segID)){
-  ciao[ix] <- funx(i,pMvNorm)
-  ix=ix+1
-  if(ix %% 1000 == 0) print(ix)
-}
+setkey(XYsegID,segID)
+setkey(dataAll,segID)
+outXY <- merge(XYsegID,dataAll,all = T)
 
 
+crsX <- crs(raster(baRast))
 
-pMvNorm$varNam <- rep(
-  c("H","D","B","perP","perSP","perB",paste0("varcov1_",1:36),
-                      "H2","D2","B2","perP2","perSP2","perB2",paste0("varcov2_",1:36),
-                      "Hpost","Dpost","Bpost","perPpost","perSPpost","perBpost",paste0("varcov3_",1:36)),
-                        times = nrow(pMvNorm)/126)
-ops <- data.table(dcast(data = pMvNorm,
-                formula = segID~varNam,value.var = "V1"))
+  ###remove coordinates NAs
+  outXY <- outXY[!is.na(x)]
+  
+  ###create rasters
+  vars <- names(outXY)
+  vars <- vars[!vars %in% c("x","y","segID")]
+  for(varX in vars){
+    rastX <- rasterFromXYZ(outXY[,c("x","y",varX),with=F])
+    crs(rastX) <- crsX
+    
+    rastName <- paste0("outRast/","init",startingYear,"/DA",year2,"/",varX,".tif")
+    
+    writeRaster(rastX,filename = rastName,overwrite=T)
+    print(varX)
+  }
