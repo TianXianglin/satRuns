@@ -13,34 +13,9 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
-yearX <- 3
-nSample = 1000 ###number of samples from the error distribution
+# yearX <- 3
+# nSample = 1000 ###number of samples from the error distribution
 
-# Load unique data.
-# If data is processed in split parts, define to variable split_id which split part to process (in batch job script).
-# If splitRun is not needed, the unique data dataset for the whole tile is loaded.
-if (splitRun) {
-  uniqueData_file <- load(paste0("procData/init",startingYear,"/DA",year2,"_split/uniqueData", split_id, ".rdata"))
-  uniqueData <- get(uniqueData_file)
-  rm(list = uniqueData_file)
-  rm(uniqueData_file)
-  load(paste0("procData/init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
-  stProb <- data.table(stProb)
-} else{
-  load(paste0("procData/init",startingYear,"/DA",year2,"/uniqueData.rdata"))  
-  load("stProbMod.rdata")
-  stProb <- data.table(stProb)
-}
-
-####load error models
-load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
-load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/logisticPureF.rdata"))
-load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/step.probit.rdata"))
-###load surrMods !!!change name
-load("surErrMods/surMod.rdata")
-
-
-# setwd("C:/Users/minunno/Documents/research/assessCarbon/data/Finland/AC_training_FI_35VLJ/")
 
 ###join data
 for(i in 1:nSplit){
