@@ -31,7 +31,7 @@ rm(data.all); gc()
 
 vars <- c("H","D","B","perP","perSP","perB")
 
-counx <- 0
+countx <- 0
 for(varX in vars){
 # for(runx in c("prior","2","posterior")){
   countx=countx+1
