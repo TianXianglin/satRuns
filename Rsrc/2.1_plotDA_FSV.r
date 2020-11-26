@@ -13,18 +13,6 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
-load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/allData.rdata"))         ### All data
-
-
-startData <- list()
-startData[[1]] <- data.table(value=data.all$h,run="1")
-startData[[2]] <- data.table(value=data.all$dbh,run="1")
-startData[[3]] <- data.table(value=data.all$ba,run="1")
-startData[[4]] <- data.table(value=data.all$pineP,run="1")
-startData[[5]] <- data.table(value=data.all$spruceP,run="1")
-startData[[6]] <- data.table(value=data.all$blp,run="1")
-
-rm(data.all); gc()
 
 # yearX <- 3
 # nSample = 1000 ###number of samples from the error distribution
@@ -47,11 +35,24 @@ for(varX in vars){
   rastX <- raster(paste0("outRast/","init",startingYear,"/DA",year2,"/",varX,runx,".tif"))
   tabX <- data.table(value=getValues(rastX),run=runx)
   tab3 <- tabX[!is.na(value)]
-  assign(varX,rbind(tab1,tab2,tab3,startData[[countx]]))
+  assign(varX,rbind(tab1,tab2,tab3))
   rm(tab1,tab2,tab3);gc()
   print(varX)
 }
        
+load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/allData.rdata"))         ### All data
+
+print(str(data.all))
+
+H <- rbind(H,data.table(value=data.all$h,run="1"))
+print(str(H))
+print(unique(H$run))
+D <- rbind(D,data.table(value=data.all$dbh,run="1"))
+B <- rbind(B,data.table(value=data.all$ba,run="1"))
+perP <- rbind(perP,data.table(value=data.all$pineP,run="1"))
+perSP <- rbind(perSP,data.table(value=data.all$spruceP,run="1"))
+perB <- rbind(perB,data.table(value=data.all$blp,run="1"))
+rm(data.all); gc()
 
 library(ggplot2)
 library(ggridges)
