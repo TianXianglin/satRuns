@@ -54,79 +54,89 @@ perSP <- rbind(perSP,data.table(value=data.all$spruceP,run="1"))
 perB <- rbind(perB,data.table(value=data.all$blp,run="1"))
 rm(data.all); gc()
 
-test <- rbind(H[run=="post"][1:1000],H[run=="prior"][1:1000],H[run=="2"][1:1000],H[run=="1"][1:1000])
-save(test,file="Htest.rdata")
+Hsample <- H[ , sample(.N,2e5),by = run]
+Dsample <- D[ , sample(.N,2e5),by = run]
+Bsample <- B[ , sample(.N,2e5),by = run]
+perPsample <- perP[ , sample(.N,2e5),by = run]
+perSPsample <- perSP[ , sample(.N,2e5),by = run]
+perBsample <- perB[ , sample(.N,2e5),by = run]
+
+# test <- rbind(H[run=="post"][1:1000],H[run=="prior"][1:1000],H[run=="2"][1:1000],H[run=="1"][1:1000])
+# save(test,file="Htest.rdata")
+
+save(Hsample,Dsample,Bsample,perBsample,perSPsample,perPsample,
+     file = paste0("plots/","init",startingYear,"/DA",year2,"/dataForPlots.rdata"))
 print(getwd())
 library(ggplot2)
 library(ggridges)
-
-pH <- ggplot(H, 
-              aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") +
-  labs(title = 'H') 
-pD <- ggplot(D, 
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C")  +
-  labs(title = 'D')
-pB <- ggplot(B, 
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C")  +
-  labs(title = 'B')
-pperP <- ggplot(perP, 
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C")  +
-  labs(title = '%cover pine')
-pperSP <- ggplot(perSP, 
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") +
-  labs(title = '%cover spruce')
-pperB <- ggplot(perB, 
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") +
-  labs(title = '%cover deciduous')
-
-# save(pH,pD,pB,pperB,pperSP,pperP,file = paste0("plots/","init",startingYear,"/DA",year2,"/plots.rdata"))
-#     
-#     writeRaster(rastX,filename = rastName,overwrite=T)
-#     print(varX)
-#   }
-# save plot to file without using ggsave
-
-pH
-pD
-pB
-pperSP
-pperP
-pperB
-
-pdf(paste0("plots/","init",startingYear,"/DA",year2,"/rplots.pdf"))
-pH
-pD
-pB
-pperSP
-pperP
-pperB
-dev.off()
-# ggsave("H.pdf",plot=pH,device="pdf")
-# ggsave("D.pdf",plot=pD,device="pdf")
 # 
-# ggsave("B.pdf",plot=pB,device="pdf")
+# pH <- ggplot(H, 
+#               aes(x = value, y = run, fill = stat(x))
+# ) +
+#   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
+#   scale_fill_viridis_c(name = "", option = "C") +
+#   labs(title = 'H') 
+# pD <- ggplot(D, 
+#              aes(x = value, y = run, fill = stat(x))
+# ) +
+#   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
+#   scale_fill_viridis_c(name = "", option = "C")  +
+#   labs(title = 'D')
+# pB <- ggplot(B, 
+#              aes(x = value, y = run, fill = stat(x))
+# ) +
+#   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
+#   scale_fill_viridis_c(name = "", option = "C")  +
+#   labs(title = 'B')
+# pperP <- ggplot(perP, 
+#              aes(x = value, y = run, fill = stat(x))
+# ) +
+#   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
+#   scale_fill_viridis_c(name = "", option = "C")  +
+#   labs(title = '%cover pine')
+# pperSP <- ggplot(perSP, 
+#              aes(x = value, y = run, fill = stat(x))
+# ) +
+#   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
+#   scale_fill_viridis_c(name = "", option = "C") +
+#   labs(title = '%cover spruce')
+# pperB <- ggplot(perB, 
+#              aes(x = value, y = run, fill = stat(x))
+# ) +
+#   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
+#   scale_fill_viridis_c(name = "", option = "C") +
+#   labs(title = '%cover deciduous')
 # 
-# ggsave("perP.pdf",plot=pperB,device="pdf")
+# # save(pH,pD,pB,pperB,pperSP,pperP,file = paste0("plots/","init",startingYear,"/DA",year2,"/plots.rdata"))
+# #     
+# #     writeRaster(rastX,filename = rastName,overwrite=T)
+# #     print(varX)
+# #   }
+# # save plot to file without using ggsave
 # 
-# ggsave("perSP.pdf",plot=pperSP,device="pdf")
+# pH
+# pD
+# pB
+# pperSP
+# pperP
+# pperB
 # 
-# 
-# ggsave("perB.pdf",plot=pperB,device="pdf")
+# pdf(paste0("plots/","init",startingYear,"/DA",year2,"/rplots.pdf"))
+# pH
+# pD
+# pB
+# pperSP
+# pperP
+# pperB
+# dev.off()
+# # ggsave("H.pdf",plot=pH,device="pdf")
+# # ggsave("D.pdf",plot=pD,device="pdf")
+# # 
+# # ggsave("B.pdf",plot=pB,device="pdf")
+# # 
+# # ggsave("perP.pdf",plot=pperB,device="pdf")
+# # 
+# # ggsave("perSP.pdf",plot=pperSP,device="pdf")
+# # 
+# # 
+# # ggsave("perB.pdf",plot=pperB,device="pdf")
