@@ -13,13 +13,28 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
+load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/allData.rdata"))         ### All data
+
+
+startData <- list()
+startData[[1]] <- data.table(value=data.all$h,run="1")
+startData[[2]] <- data.table(value=data.all$dbh,run="1")
+startData[[3]] <- data.table(value=data.all$ba,run="1")
+startData[[4]] <- data.table(value=data.all$pineP,run="1")
+startData[[5]] <- data.table(value=data.all$spruceP,run="1")
+startData[[6]] <- data.table(value=data.all$blp,run="1")
+
+rm(data.all); gc()
+
 # yearX <- 3
 # nSample = 1000 ###number of samples from the error distribution
 
 vars <- c("H","D","B","perP","perSP","perB")
 
+counx <- 0
 for(varX in vars){
 # for(runx in c("prior","2","posterior")){
+  countx=countx+1
   runx="post"
   rastX <- raster(paste0("outRast/","init",startingYear,"/DA",year2,"/",varX,runx,".tif"))
   tabX <- data.table(value=getValues(rastX),run=runx)
@@ -32,7 +47,7 @@ for(varX in vars){
   rastX <- raster(paste0("outRast/","init",startingYear,"/DA",year2,"/",varX,runx,".tif"))
   tabX <- data.table(value=getValues(rastX),run=runx)
   tab3 <- tabX[!is.na(value)]
-  assign(varX,rbind(tab1,tab2,tab3))
+  assign(varX,rbind(tab1,tab2,tab3,startData[[countx]]))
   rm(tab1,tab2,tab3);gc()
   print(varX)
 }
@@ -45,33 +60,38 @@ pH <- ggplot(H,
               aes(x = value, y = run, fill = stat(x))
 ) +
   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") #+
-  # labs(title = 'Correlation Coefficient distributions') 
+  scale_fill_viridis_c(name = "", option = "C") +
+  labs(title = 'H') 
 pD <- ggplot(D, 
              aes(x = value, y = run, fill = stat(x))
 ) +
   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") #+
+  scale_fill_viridis_c(name = "", option = "C")  +
+  labs(title = 'D')
 pB <- ggplot(B, 
              aes(x = value, y = run, fill = stat(x))
 ) +
   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") #+
+  scale_fill_viridis_c(name = "", option = "C")  +
+  labs(title = 'B')
 pperP <- ggplot(perP, 
              aes(x = value, y = run, fill = stat(x))
 ) +
   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") #+
+  scale_fill_viridis_c(name = "", option = "C")  +
+  labs(title = '%cover pine')
 pperSP <- ggplot(perSP, 
              aes(x = value, y = run, fill = stat(x))
 ) +
   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") #+
+  scale_fill_viridis_c(name = "", option = "C") +
+  labs(title = '%cover spruce')
 pperB <- ggplot(perB, 
              aes(x = value, y = run, fill = stat(x))
 ) +
   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") #+
+  scale_fill_viridis_c(name = "", option = "C") +
+  labs(title = '%cover deciduous')
 
 # save(pH,pD,pB,pperB,pperSP,pperP,file = paste0("plots/","init",startingYear,"/DA",year2,"/plots.rdata"))
 #     
@@ -80,21 +100,22 @@ pperB <- ggplot(perB,
 #   }
 # save plot to file without using ggsave
 
-png(paste0("plots/","init",startingYear,"/DA",year2,"/H.png"))
-  print(pH)
+pdf("rplots.pdf")
+pH
+pD
+pB
+pperSP
+pperP
+pperB
 dev.off()
-png(paste0("plots/","init",startingYear,"/DA",year2,"/D.png"))
-print(pD)
-dev.off()
-png(paste0("plots/","init",startingYear,"/DA",year2,"/B.png"))
-print(pB)
-dev.off()
-png(paste0("plots/","init",startingYear,"/DA",year2,"/perP.png"))
-print(pperP)
-dev.off()
-png(paste0("plots/","init",startingYear,"/DA",year2,"/perSP.png"))
-print(pperSP)
-dev.off()
-png(paste0("plots/","init",startingYear,"/DA",year2,"/perB.png"))
-print(pperB)
-dev.off()
+# ggsave("H.pdf",plot=pH,device="pdf")
+# ggsave("D.pdf",plot=pD,device="pdf")
+# 
+# ggsave("B.pdf",plot=pB,device="pdf")
+# 
+# ggsave("perP.pdf",plot=pperB,device="pdf")
+# 
+# ggsave("perSP.pdf",plot=pperSP,device="pdf")
+# 
+# 
+# ggsave("perB.pdf",plot=pperB,device="pdf")
