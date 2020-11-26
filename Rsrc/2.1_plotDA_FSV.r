@@ -56,6 +56,7 @@ rm(data.all); gc()
 
 test <- rbind(H[run=="post"][1:1000],H[run=="prior"][1:1000],H[run=="2"][1:1000],H[run=="1"][1:1000])
 save(test,file="Htest.rdata")
+print(getwd())
 library(ggplot2)
 library(ggridges)
 
