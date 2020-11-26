@@ -27,9 +27,9 @@ for(i in 1:nSplit){
   # pMvNormAll <- rbind(pMvNormAll,pMvNorm)
   
   pMvNorm$varNam <- rep(
-    c("Hprior","Dprior","Bprior","perPprior","perSPprior","perBprior",rep("varcov1",36),
-      "H2","D2","B2","perP2","perSP2","perB2",rep("varcov2",36),
-      "Hpost","Dpost","Bpost","perPpost","perSPpost","perBpost",rep("varcov3",36)),
+    c("Hm2019","Dm2019","Bm2019","perPm2019","perSPm2019","perBm2019",rep("varcov1",36),
+      "Hs2019","Ds2019","Bs2019","perPs2019","perSPs2019","perBs2019",rep("varcov2",36),
+      "HDA2019","DDA2019","BDA2019","perPDA2019","perSPDA2019","perBDA2019",rep("varcov3",36)),
     times = nrow(pMvNorm)/126)
   
   pMvNorm <- pMvNorm[!(varNam=="varcov1" | varNam=="varcov2" | varNam=="varcov3")]
@@ -43,6 +43,7 @@ for(i in 1:nSplit){
   rm(pMvNorm,dataX); gc()
   print(i) 
 }
+print(range(dataAll$Hm2019))
 
 load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/XYsegID.rdata"))  
 
