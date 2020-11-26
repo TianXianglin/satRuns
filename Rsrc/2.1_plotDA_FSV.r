@@ -104,7 +104,7 @@ pperB <- ggplot(perB,
 #   }
 # save plot to file without using ggsave
 
-pdf("rplots.pdf")
+pdf(paste0("plots/","init",startingYear,"/DA",year2,"/plots.pdf"))
 pH
 pD
 pB
