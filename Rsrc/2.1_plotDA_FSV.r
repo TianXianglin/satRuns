@@ -54,6 +54,8 @@ perSP <- rbind(perSP,data.table(value=data.all$spruceP,run="1"))
 perB <- rbind(perB,data.table(value=data.all$blp,run="1"))
 rm(data.all); gc()
 
+test <- rbind(H[run=="post"][1:1000],H[run=="prior"][1:1000],H[run=="2"][1:1000],H[run=="1"][1:1000])
+save(H,file="Htest.rdata")
 library(ggplot2)
 library(ggridges)
 
