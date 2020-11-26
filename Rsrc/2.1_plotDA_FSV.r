@@ -54,12 +54,12 @@ perSP <- rbind(perSP,data.table(value=data.all$spruceP,run="1"))
 perB <- rbind(perB,data.table(value=data.all$blp,run="1"))
 rm(data.all); gc()
 
-Hsample <- H[ , sample(.N,2e5),by = run]
-Dsample <- D[ , sample(.N,2e5),by = run]
-Bsample <- B[ , sample(.N,2e5),by = run]
-perPsample <- perP[ , sample(.N,2e5),by = run]
-perSPsample <- perSP[ , sample(.N,2e5),by = run]
-perBsample <- perB[ , sample(.N,2e5),by = run]
+Hsample <- H[,.SD[sample(.N, min(2e5,.N))],by = run]
+Dsample <- D[,.SD[sample(.N, min(2e5,.N))],by = run]
+Bsample <- B[,.SD[sample(.N, min(2e5,.N))],by = run]
+perPsample <- perP[,.SD[sample(.N, min(2e5,.N))],by = run]
+perSPsample <- perSP[,.SD[sample(.N, min(2e5,.N))],by = run]
+perBsample <- perB[,.SD[sample(.N, min(2e5,.N))],by = run]
 
 # test <- rbind(H[run=="post"][1:1000],H[run=="prior"][1:1000],H[run=="2"][1:1000],H[run=="1"][1:1000])
 # save(test,file="Htest.rdata")
@@ -70,12 +70,12 @@ print(getwd())
 library(ggplot2)
 library(ggridges)
 # 
-# pH <- ggplot(H, 
-#               aes(x = value, y = run, fill = stat(x))
-# ) +
-#   geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-#   scale_fill_viridis_c(name = "", option = "C") +
-#   labs(title = 'H') 
+pH <- ggplot(Hsample,
+              aes(x = value, y = run, fill = stat(x))
+) +
+  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
+  scale_fill_viridis_c(name = "", option = "C") +
+  labs(title = 'H')
 # pD <- ggplot(D, 
 #              aes(x = value, y = run, fill = stat(x))
 # ) +
