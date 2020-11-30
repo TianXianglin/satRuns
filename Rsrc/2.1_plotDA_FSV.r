@@ -6,142 +6,110 @@ if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings fi
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
 
 ###check and create output directories
-###check and create output directories
+# setwd("~/research/assessCarbon/data/Finland/AC_training_FI_35VLJ")
 setwd(generalPath)
 mkfldr <- paste0("plots/",paste0("init",startingYear,"/DA",year2))
 if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
 
-
 # yearX <- 3
 # nSample = 1000 ###number of samples from the error distribution
 
-vars <- c("H","D","B","perP","perSP","perB")
 
-countx <- 0
-for(varX in vars){
-# for(runx in c("prior","2","posterior")){
-  countx=countx+1
-  runx="DA2019"
-  rastX <- raster(paste0("outRast/","init",startingYear,"/DA",year2,"/",varX,runx,".tif"))
-  tabX <- data.table(value=getValues(rastX),run=runx)
-  tab1 <- tabX[!is.na(value)]
-  runx="m2019"
-  rastX <- raster(paste0("outRast/","init",startingYear,"/DA",year2,"/",varX,runx,".tif"))
-  tabX <- data.table(value=getValues(rastX),run=runx)
-  tab2 <- tabX[!is.na(value)]
-  runx="s2019"
-  rastX <- raster(paste0("outRast/","init",startingYear,"/DA",year2,"/",varX,runx,".tif"))
-  tabX <- data.table(value=getValues(rastX),run=runx)
-  tab3 <- tabX[!is.na(value)]
-  assign(varX,rbind(tab1,tab2,tab3))
-  rm(tab1,tab2,tab3);gc()
-  print(varX)
-}
-       
-load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/allData.rdata"))         ### All data
+###join data
+# for(i in 1:nSplit){
+dataAll <- data.table()
+split_id=3
+# load("pMvn_FSV_split3.rdata")
+load(paste0("posterior/pMvn_FSV_split",split_id,".rdata"))
+pMvNorm <- data.table(pMvNorm)[1:126000]
+# pMvNorm <- data.table(pMvNorm)
+setnames(pMvNorm,"V1","value")
+# pMvNormAll <- pMvNorm
+# load("pMvn_FSV_split2.rdata")
+# pMvNorm <- data.table(pMvNorm)
+# pMvNormAll <- rbind(pMvNormAll,pMvNorm)
 
-print(str(data.all))
+npix <- nrow(pMvNorm)/126
+pMvNorm$run <- rep(c(rep("m2019",42),rep("s2019",42),rep("DA2019",42)),times = npix)
 
-H <- rbind(H,data.table(value=data.all$h,run="s2016"))
-print(str(H))
-print(unique(H$run))
-D <- rbind(D,data.table(value=data.all$dbh,run="s2016"))
-B <- rbind(B,data.table(value=data.all$ba,run="s2016"))
-perP <- rbind(perP,data.table(value=data.all$pineP,run="s2016"))
-perSP <- rbind(perSP,data.table(value=data.all$spruceP,run="s2016"))
-perB <- rbind(perB,data.table(value=data.all$blp,run="s2016"))
-rm(data.all); gc()
+pMvNorm$varNam <- rep(c("H","D","B","pP","pS","pB",paste0("vc_",1:36)),times = npix*3)
 
-Hsample <- H[,.SD[sample(.N, min(2e5,.N))],by = run]
-Dsample <- D[,.SD[sample(.N, min(2e5,.N))],by = run]
-Bsample <- B[,.SD[sample(.N, min(2e5,.N))],by = run]
-perPsample <- perP[,.SD[sample(.N, min(2e5,.N))],by = run]
-perSPsample <- perSP[,.SD[sample(.N, min(2e5,.N))],by = run]
-perBsample <- perB[,.SD[sample(.N, min(2e5,.N))],by = run]
-Hsample$run <- factor(Hsample$run,levels = c("s2016","m2019","s2019","DA2019"))
-Dsample$run <- factor(Dsample$run,levels = c("s2016","m2019","s2019","DA2019"))
-Bsample$run <- factor(Bsample$run,levels = c("s2016","m2019","s2019","DA2019"))
-perPsample$run <- factor(perPsample$run,levels = c("s2016","m2019","s2019","DA2019"))
-perSPsample$run <- factor(perSPsample$run,levels = c("s2016","m2019","s2019","DA2019"))
-perBsample$run <- factor(perBsample$run,levels = c("s2016","m2019","s2019","DA2019"))
-# test <- rbind(H[run=="post"][1:1000],H[run=="prior"][1:1000],H[run=="2"][1:1000],H[run=="1"][1:1000])
-# save(test,file="Htest.rdata")
+vxind <-  c(1,8,15,22,29,36)
+covX <- 1:36
+covX <- covX[-vxind]
+dataAll <- pMvNorm[!varNam %in% paste0("vc_",covX)]
+rm(pMvNorm);gc()
+library(stringr)
+# vrns$varNam <- str_replace(vrns$varNam, "vc", "v")
+dataAll$varNam <- str_replace_all(dataAll$varNam, "vc_15", "vB")
+dataAll$varNam <- str_replace_all(dataAll$varNam, "vc_1", "vH")
+dataAll$varNam <- str_replace_all(dataAll$varNam, "vc_8", "vD")
+dataAll$varNam <- str_replace_all(dataAll$varNam, "vc_22", "vpP")
+dataAll$varNam <- str_replace_all(dataAll$varNam, "vc_29", "vpS")
+dataAll$varNam <- str_replace_all(dataAll$varNam, "vc_36", "vpB")
 
-save(Hsample,Dsample,Bsample,perBsample,perSPsample,perPsample,
-     file = paste0("plots/","init",startingYear,"/DA",year2,"/dataForPlots.rdata"))
-print(getwd())
-library(ggplot2)
-library(ggridges)
 # 
-pH <- ggplot(Hsample,
-              aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") +
-  labs(title = 'H')
-pD <- ggplot(Dsample,
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C")  +
-  labs(title = 'D')
-pB <- ggplot(Bsample,
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C")  +
-  labs(title = 'B')
-pperP <- ggplot(perPsample,
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C")  +
-  labs(title = '%cover pine')
-pperSP <- ggplot(perSPsample,
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") +
-  labs(title = '%cover spruce')
-pperB <- ggplot(perBsample,
-             aes(x = value, y = run, fill = stat(x))
-) +
-  geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "", option = "C") +
-  labs(title = '%cover deciduous')
-# 
-# # save(pH,pD,pB,pperB,pperSP,pperP,file = paste0("plots/","init",startingYear,"/DA",year2,"/plots.rdata"))
-# #     
-# #     writeRaster(rastX,filename = rastName,overwrite=T)
-# #     print(varX)
-# #   }
-# # save plot to file without using ggsave
-# 
-# pH
-# pD
-# pB
-# pperSP
-# pperP
-# pperB
-# 
-pdf(paste0("plots/","init",startingYear,"/DA",year2,"/rplots.pdf"))
-pH
-pD
-pB
-pperSP
-pperP
-pperB
-dev.off()
-# # ggsave("H.pdf",plot=pH,device="pdf")
-# # ggsave("D.pdf",plot=pD,device="pdf")
-# # 
-# # ggsave("B.pdf",plot=pB,device="pdf")
-# # 
-# # ggsave("perP.pdf",plot=pperB,device="pdf")
-# # 
-# # ggsave("perSP.pdf",plot=pperSP,device="pdf")
-# # 
-# # 
-# # ggsave("perB.pdf",plot=pperB,device="pdf")
+# dataX <- data.table(dcast(data = pMvNorm,
+#                           formula = segID~varNam,value.var = "value"))
+# if(i ==  1) dataAll <- dataX
+# if(i>1) dataAll <- rbind(dataAll,dataX)
+# varAll <- data.table(dcast(data = vrns,
+#                            formula = segID~varNam,value.var = "value"))
+# rm(vrns); gc()
+# print(i) 
+# }
+
+
+####load error models
+load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
+# load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
+errData$t35VLJ$sigmaFSVda
+vs2016 <- t(diag(errData$t35VLJ$sigmaFSVda))
+colnames(vs2016) <- c("B","D","H" ,"pP","pS","pB")
+vs2016  <- as.data.table(vs2016)
+
+ops <- dataAll[run=="s2019" & varNam %in% c("vB","vH","vD","vpP","vpS","vpB")]
+ops[,run:="s2016"]
+ops[,value:=NA]
+ops[varNam=="vB",value:=vs2016$B]
+ops[varNam=="vH",value:=vs2016$H]
+ops[varNam=="vD",value:=vs2016$D]
+ops[varNam=="vpP",value:=vs2016$pP]
+ops[varNam=="vpS",value:=vs2016$pS]
+ops[varNam=="vpB",value:=vs2016$pB]
+
+# load("uniqueData3.rdata")
+load(paste0("procData/init",startingYear,"/DA",year2,"_split/uniqueData", split_id, ".rdata"))
+
+data2016 <- uniqueDataSplit[segID %in% unique(ops$segID),.(segID,ba,h,dbh,pineP,spruceP,blp)]
+rm(uniqueDataSplit); gc()
+setnames(data2016,c("segID", "B","H","D" ,"pP","pS","pB"))
+setkey(ops,segID)
+setkey(data2016,segID)
+
+ops <- rbind(ops,data.table(segID=data2016$segID,value=data2016$B,
+                            run="s2016",varNam="B"))
+ops <- rbind(ops,data.table(segID=data2016$segID,value=data2016$H,
+                            run="s2016",varNam="H"))
+ops <- rbind(ops,data.table(segID=data2016$segID,value=data2016$D,
+                            run="s2016",varNam="D"))
+ops <- rbind(ops,data.table(segID=data2016$segID,value=data2016$pP,
+                            run="s2016",varNam="pP"))
+ops <- rbind(ops,data.table(segID=data2016$segID,value=data2016$pS,
+                            run="s2016",varNam="pS"))
+ops <- rbind(ops,data.table(segID=data2016$segID,value=data2016$pB,
+                            run="s2016",varNam="pB"))
+
+
+dataAll <- rbind(dataAll,ops)
+rm(ops);gc()
+
+# load("XYsegID.rdata")
+load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/XYsegID.rdata"))
+setkey(XYsegID,segID)
+setkey(dataAll,segID)
+dataAll <- merge(XYsegID,dataAll)
+dataAll$run <- factor(dataAll$run,levels = c("s2016","m2019","s2019","DA2019"))
+save(dataAll,file = paste0("plots/","init",startingYear,"/DA",year2,"/dataForPlots.rdata"))
