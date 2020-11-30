@@ -138,16 +138,16 @@ for(ij in 1:length(vars)){
 
 # png("plots/init2016/DA2019/fsvPlot.png")
   pFSV <- ggarrange(pX[[1]],pX[[2]],pX[[3]],pX[[4]],pX[[5]],pX[[6]],
-          nrow = 2,ncol=3)
+          nrow = 2,ncol=3,legend = "none")
   # dev.off()
 
   # png("plots/init2016/DA2019/varPlot.png")
   pVar = ggarrange(pX[[7]],pX[[8]],pX[[9]],pX[[10]],pX[[11]],pX[[12]],
-                   nrow = 2,ncol=3)
+                   nrow = 2,ncol=3,legend = "none")
   # dev.off()
   
   ggsave("plots/init2016/DA2019/fsvPlot.pdf",plot = pFSV)
   ggsave("plots/init2016/DA2019/VarfsvPlot.pdf",plot = pVar)
-  ggsave("plots/init2016/DA2019/fsvPlot.png",plot = pFSV)
-  ggsave("plots/init2016/DA2019/VarfsvPlot.png",plot = pVar)
+  ggsave("plots/init2016/DA2019/fsvPlot.eps",plot = pFSV,device = "eps")
+  ggsave("plots/init2016/DA2019/VarfsvPlot.eps",plot = pVar,device = "eps")
   
