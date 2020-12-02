@@ -376,7 +376,7 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muSTda
   sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaSTda
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
+  sampleError <- data.table(mvrnorm(nSample,mu=mu1,Sigma=sigma1))
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
   sampleX$H <- segIDx$H + sampleError$H
@@ -515,7 +515,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   pST <- c(segIDx$pST1,segIDx$pST2,segIDx$pST3,segIDx$pST4,segIDx$pST5)
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
+  sampleError <- data.table(mvrnorm(nSample,mu=mu1,Sigma=sigma1))
 
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
@@ -661,7 +661,7 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=muUnc,Sigma=sigmaUnc))
+  sampleError <- data.table(mvrnorm(nSample,mu=muUnc,Sigma=sigmaUnc))
   
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
