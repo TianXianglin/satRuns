@@ -148,6 +148,6 @@ for(ij in 1:length(vars)){
   
   ggsave("plots/init2016/DA2019/fsvPlot.pdf",plot = pFSV)
   ggsave("plots/init2016/DA2019/VarfsvPlot.pdf",plot = pVar)
-  ggsave("plots/init2016/DA2019/fsvPlot.jpeg",plot = pFSV,device = "jpeg")
-  ggsave("plots/init2016/DA2019/VarfsvPlot.jpeg",plot = pVar,device = "jpeg")
+  # ggsave("plots/init2016/DA2019/fsvPlot.eps",plot = pFSV,device = "eps")
+  # ggsave("plots/init2016/DA2019/VarfsvPlot.eps",plot = pVar,device = "eps")
   
