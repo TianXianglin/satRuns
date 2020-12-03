@@ -388,9 +388,10 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
-  # sampleX[H<=1.3]$H <- 1.3
-  # sampleX[D<=0]$D <- 0.1
-  # sampleX[BAtot<=0]$BAtot <- 0.01
+
+  sampleX[H<=0]$H <- runif(length(sampleX[H<=0]$H),0.1,1.5)
+  sampleX[D<=0]$D <- runif(length(sampleX[D<=0]$D),0.1,0.5)
+  sampleX[BAtot<=0]$BAtot <- runif(length(sampleX[BAtot<=0]$H),0.01,0.04)
   # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   # if(nrow(sampleX)<nSample){
   #   sample1 <- sampleX
@@ -528,9 +529,11 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
-  # sampleX[H<=1.3]$H <- 1.3
-  # sampleX[D<=0]$D <- 0.1
-  # sampleX[BAtot<=0]$BAtot <- 0.01
+
+  sampleX[H<=0]$H <- runif(length(sampleX[H<=0]$H),0.1,1.5)
+  sampleX[D<=0]$D <- runif(length(sampleX[D<=0]$D),0.1,0.5)
+  sampleX[BAtot<=0]$BAtot <- runif(length(sampleX[BAtot<=0]$H),0.01,0.04)
+
   # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   # if(nrow(sampleX)<nSample){
   #   sample1 <- sampleX
@@ -674,9 +677,11 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
-  # sampleX[H<=1.3]$H <- 1.3
-  # sampleX[D<=0]$D <- 0.1
-  # sampleX[BAtot<=0]$BAtot <- 0.01
+
+  sampleX[H<=0]$H <- runif(length(sampleX[H<=0]$H),0.1,1.5)
+  sampleX[D<=0]$D <- runif(length(sampleX[D<=0]$D),0.1,0.5)
+  sampleX[BAtot<=0]$BAtot <- runif(length(sampleX[BAtot<=0]$H),0.01,0.04)
+
   sampleX[,rootBAp:=BAp^0.5]
   # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   # if(nrow(sampleX)<nSample){
