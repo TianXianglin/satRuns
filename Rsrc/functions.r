@@ -461,27 +461,27 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,HsurST1 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   ###estimates for negative values based on average growth  
   dH <- mean(sampleX[-xx]$HsurST1 - sampleX[-xx]$H,na.rm=T)
-  dV <- mean(sampleX[-xx]$VsurST1 - sampleX[-xx]$V,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST1 - segIDx$V,na.rm=T)
   dD <- mean(sampleX[-xx]$DsurST1 - sampleX[-xx]$D,na.rm=T)
   dB <- mean(sampleX[-xx]$BsurST1 - sampleX[-xx]$BAtot,na.rm=T)
   sampleX[xx]$HsurST1 <- sampleX[xx]$H + dH
   sampleX[xx]$DsurST1 <- sampleX[xx]$D + dD
-  sampleX[xx]$VsurST1 <- sampleX[xx]$V + dV
+  sampleX[xx]$VsurST1 <- segIDx$V + dV
   sampleX[xx]$BsurST1 <- sampleX[xx]$BAtot + dB
 
-    sampleX$st <- factor(2)
+  sampleX$st <- factor(2)
   sampleX[,VsurST2 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST2 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST2 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST2 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   ###estimates for negative values based on average growth  
   dH <- mean(sampleX[-xx]$HsurST2 - sampleX[-xx]$H,na.rm=T)
-  dV <- mean(sampleX[-xx]$VsurST2 - sampleX[-xx]$V,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST2 - segIDx$V,na.rm=T)
   dD <- mean(sampleX[-xx]$DsurST2 - sampleX[-xx]$D,na.rm=T)
   dB <- mean(sampleX[-xx]$BsurST2 - sampleX[-xx]$BAtot,na.rm=T)
   sampleX[xx]$HsurST2 <- sampleX[xx]$H + dH
   sampleX[xx]$DsurST2 <- sampleX[xx]$D + dD
-  sampleX[xx]$VsurST2 <- sampleX[xx]$V + dV
+  sampleX[xx]$VsurST2 <- segIDx$V + dV
   sampleX[xx]$BsurST2 <- sampleX[xx]$BAtot + dB
   
   sampleX$st <- factor(3)
@@ -491,12 +491,12 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,HsurST3 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   ###estimates for negative values based on average growth  
   dH <- mean(sampleX[-xx]$HsurST3 - sampleX[-xx]$H,na.rm=T)
-  dV <- mean(sampleX[-xx]$VsurST3 - sampleX[-xx]$V,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST3 - segIDx$V,na.rm=T)
   dD <- mean(sampleX[-xx]$DsurST3 - sampleX[-xx]$D,na.rm=T)
   dB <- mean(sampleX[-xx]$BsurST3 - sampleX[-xx]$BAtot,na.rm=T)
   sampleX[xx]$HsurST3 <- sampleX[xx]$H + dH
   sampleX[xx]$DsurST3 <- sampleX[xx]$D + dD
-  sampleX[xx]$VsurST3 <- sampleX[xx]$V + dV
+  sampleX[xx]$VsurST3 <- segIDx$V + dV
   sampleX[xx]$BsurST3 <- sampleX[xx]$BAtot + dB
   
   sampleX$st <- factor(4)
@@ -506,12 +506,12 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,HsurST4 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   ###estimates for negative values based on average growth  
   dH <- mean(sampleX[-xx]$HsurST4 - sampleX[-xx]$H,na.rm=T)
-  dV <- mean(sampleX[-xx]$VsurST4 - sampleX[-xx]$V,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST4 - segIDx$V,na.rm=T)
   dD <- mean(sampleX[-xx]$DsurST4 - sampleX[-xx]$D,na.rm=T)
   dB <- mean(sampleX[-xx]$BsurST4 - sampleX[-xx]$BAtot,na.rm=T)
   sampleX[xx]$HsurST4 <- sampleX[xx]$H + dH
   sampleX[xx]$DsurST4 <- sampleX[xx]$D + dD
-  sampleX[xx]$VsurST4 <- sampleX[xx]$V + dV
+  sampleX[xx]$VsurST4 <- segIDx$V + dV
   sampleX[xx]$BsurST4 <- sampleX[xx]$BAtot + dB
   
   sampleX$st <- factor(5)
@@ -521,12 +521,12 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,HsurST5 := pmax(0.,predict(step.modelH,newdata=sampleX))]
   ###estimates for negative values based on average growth  
   dH <- mean(sampleX[-xx]$HsurST5 - sampleX[-xx]$H,na.rm=T)
-  dV <- mean(sampleX[-xx]$VsurST5 - sampleX[-xx]$V,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST5 - segIDx$V,na.rm=T)
   dD <- mean(sampleX[-xx]$DsurST5 - sampleX[-xx]$D,na.rm=T)
   dB <- mean(sampleX[-xx]$BsurST5 - sampleX[-xx]$BAtot,na.rm=T)
   sampleX[xx]$HsurST5 <- sampleX[xx]$H + dH
   sampleX[xx]$DsurST5 <- sampleX[xx]$D + dD
-  sampleX[xx]$VsurST5 <- sampleX[xx]$V + dV
+  sampleX[xx]$VsurST5 <- segIDx$V + dV
   sampleX[xx]$BsurST5 <- sampleX[xx]$BAtot + dB
   
   dx1 <- cbind(sampleX$BsurST1 - segIDx$ba2,sampleX$DsurST1 - segIDx$dbh2,

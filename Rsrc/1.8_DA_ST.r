@@ -39,11 +39,12 @@ load("surErrMods/surMod.rdata")
 uniqueData[,BAp:= (ba * pineP/(pineP+spruceP+blp))]
 uniqueData[,BAsp:= (ba * spruceP/(pineP+spruceP+blp))]
 uniqueData[,BAb:= (ba * blp/(pineP+spruceP+blp))]
+uniqueData$V <- uniqueData$v2 - (uniqueData$dVy*nYears)
 
 dataSurMod <- uniqueData[,.(segID,h,dbh,BAp,BAsp,BAb,siteType1,
-                            siteType2,v2,ba2,h2,dbh2)] 
+                            siteType2,v2,ba2,h2,dbh2,V)] 
 setnames(dataSurMod,c("segID","H","D","BAp","BAsp","BAb","st1",
-                      "st2","V2","ba2","h2","dbh2"))
+                      "st2","V2","ba2","h2","dbh2","V"))
 
 
 dataSurMod[,BApPer:=.(BAp/sum(BAp,BAsp,BAb)*100),by=segID]
