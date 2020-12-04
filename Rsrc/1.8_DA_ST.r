@@ -64,6 +64,7 @@ if(parallelRun){  ### PARALLEL run
   # That modification would decrease the need of reorganizing the data afterwards (in 
   # lines 73-82).
   stProbMod <- matrix(mclapply(1:nrow(stProbMod), function(i,stProbMod){
+    print(i)
     stProbMod[i,] <- pSTx(dataSurMod[i],nSample,startingYear,year2,tileX)
   },stProbMod=stProbMod,mc.cores = coresN))
   
