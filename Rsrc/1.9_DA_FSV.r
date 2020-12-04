@@ -27,6 +27,7 @@ if (splitRun) {
   uniqueData <- get(uniqueData_file)
   rm(list = uniqueData_file)
   rm(uniqueData_file)
+  gc()
   load(paste0("procData/init",startingYear,"/calST_split/stProbMod",split_id,".rdata"))
   stProb <- data.table(stProb)
 } else{
@@ -97,11 +98,11 @@ if(parallelRun){
 } else {
 
   # system.time({ # SERIAL PROCESSING
-  #   for(i in 1:nSeg){
-  #     pMvNorm[,i] <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
-  #                          year2=year2,tileX=tileX)
-  #     if (i %% 100 == 0) { print(i) }
-  #   }
+    # for(i in 1:nSeg){
+    #   pMvNorm <- pSVDA(dataSurMod[i],nSample,year1=startingYear,
+    #                        year2=year2,tileX=tileX)
+    #   if (i %% 100 == 0) { print(i) }
+    # }
   # })
 
   system.time({

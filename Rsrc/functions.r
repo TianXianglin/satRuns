@@ -389,9 +389,9 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
 
-  sampleX[H<=0]$H <- runif(length(sampleX[H<=0]$H),0.1,1.5)
-  sampleX[D<=0]$D <- runif(length(sampleX[D<=0]$D),0.1,0.5)
-  sampleX[BAtot<=0]$BAtot <- runif(length(sampleX[BAtot<=0]$H),0.01,0.04)
+  ###filter data
+  minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
+  xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
   # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   # if(nrow(sampleX)<nSample){
   #   sample1 <- sampleX
@@ -459,26 +459,75 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,BsurST1 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST1 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST1 := pmax(0.,predict(step.modelH,newdata=sampleX))]
-  sampleX$st <- factor(2)
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST1 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST1 - sampleX[-xx]$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST1 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST1 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST1 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST1 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST1 <- sampleX[xx]$V + dV
+  sampleX[xx]$BsurST1 <- sampleX[xx]$BAtot + dB
+
+    sampleX$st <- factor(2)
   sampleX[,VsurST2 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST2 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST2 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST2 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST2 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST2 - sampleX[-xx]$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST2 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST2 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST2 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST2 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST2 <- sampleX[xx]$V + dV
+  sampleX[xx]$BsurST2 <- sampleX[xx]$BAtot + dB
+  
   sampleX$st <- factor(3)
   sampleX[,VsurST3 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST3 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST3 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST3 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST3 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST3 - sampleX[-xx]$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST3 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST3 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST3 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST3 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST3 <- sampleX[xx]$V + dV
+  sampleX[xx]$BsurST3 <- sampleX[xx]$BAtot + dB
+  
   sampleX$st <- factor(4)
   sampleX[,VsurST4 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST4 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST4 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST4 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST4 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST4 - sampleX[-xx]$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST4 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST4 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST4 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST4 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST4 <- sampleX[xx]$V + dV
+  sampleX[xx]$BsurST4 <- sampleX[xx]$BAtot + dB
+  
   sampleX$st <- factor(5)
   sampleX[,VsurST5 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST5 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST5 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST5 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST5 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST5 - sampleX[-xx]$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST5 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST5 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST5 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST5 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST5 <- sampleX[xx]$V + dV
+  sampleX[xx]$BsurST5 <- sampleX[xx]$BAtot + dB
   
   dx1 <- cbind(sampleX$BsurST1 - segIDx$ba2,sampleX$DsurST1 - segIDx$dbh2,
                sampleX$HsurST1 - segIDx$h2,sampleX$VsurST1 - segIDx$V2)
@@ -530,10 +579,13 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
 
-  sampleX[H<=0]$H <- runif(length(sampleX[H<=0]$H),0.1,1.5)
-  sampleX[D<=0]$D <- runif(length(sampleX[D<=0]$D),0.1,0.5)
-  sampleX[BAtot<=0]$BAtot <- runif(length(sampleX[BAtot<=0]$H),0.01,0.04)
-
+  
+  ###filter data
+  minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
+  xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
+  # sampleX[H<=1.3]$H <- 1.3
+  # sampleX[D<=0]$D <- 0.1
+  # sampleX[BAtot<=0]$BAtot <- 0.01
   # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   # if(nrow(sampleX)<nSample){
   #   sample1 <- sampleX
@@ -615,9 +667,20 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
-  sampleX[,rootBAp:=BAp^0.5]
+  # sampleX[,rootBAp:=BAp^0.5]
+
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$Hx - sampleX[-xx]$H,na.rm=T)
+  dD <- mean(sampleX[-xx]$Dx - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$Bx - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$Hx <- sampleX[xx]$H + dH
+  sampleX[xx]$Dx <- sampleX[xx]$D + dD
+  sampleX[xx]$Bx <- sampleX[xx]$BAtot + dB
+  sampleX[xx]$BpPerx <- sampleX[xx]$BApPer
+  sampleX[xx]$BspPerx <- sampleX[xx]$BAspPer
+  sampleX[xx]$BdPerx <- sampleX[xx]$BAbPer
   
-  nax <- unique(which(is.na(sampleX),arr.ind = T)[,1])
+  nax <- unique(which(is.na(sampleX[,.(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx)]),arr.ind = T)[,1])
   if(length(nax)>0) sampleX <- sampleX[-nax]
   mux <- sampleX[,colMeans(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
   sigmax <- sampleX[,cov(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
@@ -677,11 +740,9 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
-
-  sampleX[H<=0]$H <- runif(length(sampleX[H<=0]$H),0.1,1.5)
-  sampleX[D<=0]$D <- runif(length(sampleX[D<=0]$D),0.1,0.5)
-  sampleX[BAtot<=0]$BAtot <- runif(length(sampleX[BAtot<=0]$H),0.01,0.04)
-
+  ###filter data
+  minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
+  xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
   sampleX[,rootBAp:=BAp^0.5]
   # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   # if(nrow(sampleX)<nSample){
@@ -749,6 +810,17 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
+
+  ##estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$Hx - sampleX[-xx]$H,na.rm=T)
+  dD <- mean(sampleX[-xx]$Dx - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$Bx - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$Hx <- sampleX[xx]$H + dH
+  sampleX[xx]$Dx <- sampleX[xx]$D + dD
+  sampleX[xx]$Bx <- sampleX[xx]$BAtot + dB
+  sampleX[xx]$BpPerx <- sampleX[xx]$BApPer
+  sampleX[xx]$BspPerx <- sampleX[xx]$BAspPer
+  sampleX[xx]$BdPerx <- sampleX[xx]$BAbPer
   
   nax <- unique(which(is.na(sampleX),arr.ind = T)[,1])
   if(length(nax)>0) sampleX <- sampleX[-nax]
