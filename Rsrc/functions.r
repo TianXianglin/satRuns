@@ -376,15 +376,22 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muSTda
   sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaSTda
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
-  # segIDx <- dataSurV[segID==2]
-  sampleX <- data.table()
-  sampleX$H <- segIDx$H + sampleError$H
-  sampleX$D <- segIDx$D + sampleError$D
-  sampleX$BAtot <- segIDx$BAtot + sampleError$G
-  sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-  sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-  sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  # sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
+  # # segIDx <- dataSurV[segID==2]
+  # sampleX <- data.table()
+  # sampleX$H <- segIDx$H + sampleError$H
+  # sampleX$D <- segIDx$D + sampleError$D
+  # sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  # sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  # sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  # sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  
+  abc<-Fweibull.v(mu1,diag(sigma1))
+  shd<-data.frame(shape=abc$c,decay=abc$b^(-abc$c))
+  rho<-cov2cor(sigma1)
+  sampleX <- data.table(rmvweisd(nSample*2, shd$shape, shd$decay, rho))
+  colnames(sampleX)<-c('BAtot','D','H','BApPer','BAspPer','BAbPer')
+  
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
@@ -392,15 +399,24 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   if(nrow(sampleX)<nSample){
     sample1 <- sampleX
     set.seed(1234)
-    sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
-    # segIDx <- dataSurV[segID==2]
+    
+    # sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
+    # # segIDx <- dataSurV[segID==2]
+    # sampleX <- data.table()
+    # sampleX$H <- segIDx$H + sampleError$H
+    # sampleX$D <- segIDx$D + sampleError$D
+    # sampleX$BAtot <- segIDx$BAtot + sampleError$G
+    # sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+    # sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+    # sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    
+    abc<-Fweibull.v(mu1,diag(sigma1))
+    shd<-data.frame(shape=abc$c,decay=abc$b^(-abc$c))
+    rho<-cov2cor(sigma1)
     sampleX <- data.table()
-    sampleX$H <- segIDx$H + sampleError$H
-    sampleX$D <- segIDx$D + sampleError$D
-    sampleX$BAtot <- segIDx$BAtot + sampleError$G
-    sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-    sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-    sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    sampleX<-rmvweisd(nSample*2, shd$shape, shd$decay, rho)
+    colnames(sampleX)<-c('BAtot','D','H','BApPer','BAspPer','BAbPer')
+    
     sampleX <- sampleX[H>1.5]
     sampleX <- sampleX[D>0.5]
     sampleX <- sampleX[BAtot>0.045]
@@ -505,16 +521,22 @@ pSVDA <- function(segIDx,nSample){
   pST <- c(segIDx$pST1,segIDx$pST2,segIDx$pST3,segIDx$pST4,segIDx$pST5)
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
-
-  # segIDx <- dataSurV[segID==2]
-  sampleX <- data.table()
-  sampleX$H <- segIDx$H + sampleError$H
-  sampleX$D <- segIDx$D + sampleError$D
-  sampleX$BAtot <- segIDx$BAtot + sampleError$G
-  sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-  sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-  sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  # sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+  # # segIDx <- dataSurV[segID==2]
+  # sampleX <- data.table()
+  # sampleX$H <- segIDx$H + sampleError$H
+  # sampleX$D <- segIDx$D + sampleError$D
+  # sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  # sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  # sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  # sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  
+  abc<-Fweibull.v(errData$all$mu,diag(errData$all$sigma))
+  shd<-data.frame(shape=abc$c,decay=abc$b^(-abc$c))
+  rho<-cov2cor(errData$all$sigma)
+  sampleX<-data.table(rmvweisd(nSample*2, shd$shape, shd$decay, rho))
+  colnames(sampleX)<-c('BAtot','D','H','BApPer','BAspPer','BAbPer')
+  
   sampleX <- sampleX[H>1.5]
   sampleX <- sampleX[D>0.5]
   sampleX <- sampleX[BAtot>0.045]
@@ -522,15 +544,22 @@ pSVDA <- function(segIDx,nSample){
   if(nrow(sampleX)<nSample){
     sample1 <- sampleX
     set.seed(1234)
-    sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
-    # segIDx <- dataSurV[segID==2]
-    sampleX <- data.table()
-    sampleX$H <- segIDx$H + sampleError$H
-    sampleX$D <- segIDx$D + sampleError$D
-    sampleX$BAtot <- segIDx$BAtot + sampleError$G
-    sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-    sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-    sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    # sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+    # # segIDx <- dataSurV[segID==2]
+    # sampleX <- data.table()
+    # sampleX$H <- segIDx$H + sampleError$H
+    # sampleX$D <- segIDx$D + sampleError$D
+    # sampleX$BAtot <- segIDx$BAtot + sampleError$G
+    # sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+    # sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+    # sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+    
+    abc<-Fweibull.v(errData$all$mu,diag(errData$all$sigma))
+    shd<-data.frame(shape=abc$c,decay=abc$b^(-abc$c))
+    rho<-cov2cor(errData$all$sigma)
+    sampleX <- data.table(rmvweisd(nSample*2, shd$shape, shd$decay, rho))
+    colnames(sampleX)<-c('BAtot','D','H','BApPer','BAspPer','BAbPer')
+    
     sampleX <- sampleX[H>1.5]
     sampleX <- sampleX[D>0.5]
     sampleX <- sampleX[BAtot>0.045]
