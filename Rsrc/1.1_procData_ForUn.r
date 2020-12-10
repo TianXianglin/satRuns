@@ -1,15 +1,26 @@
-# Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
+# Run settings 
+library(devtools)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(modifiedSettings) {
-  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
+
 
 if(startingYear!= siteTypeX){
   siteTypeX = startingYear
   warning("siteTypeX changed to startingYear")
 } 
+
 setwd(generalPath)
-mkfldr <- paste0("procData/",paste0("init",startingYear,"/st",siteTypeX))
+
+if (splitRun) {
+  # If output is set to be split to smaller parts (splitRun = TRUE), create separate
+  # folder for the split data tables.
+  mkfldr_split <- paste0("procData/",paste0("init",startingYear,"/ForUn",yearEnd,"_split"))
+  if(!dir.exists(file.path(generalPath, mkfldr_split))) {
+    dir.create(file.path(generalPath, mkfldr_split), recursive = TRUE)
+  }
+}
+
+mkfldr <- paste0("procData/",paste0("init",startingYear,"/ForUn",yearEnd))
 if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
@@ -26,24 +37,19 @@ if(testRun){
 }
 
 climID <- raster(climIDpath)
-# climIDx <- crop(climID,rastX)
-# plot(climIDx)
-# plot(rastX,add=T)
-# climIDs <- resample(climIDx,rastX,method="ngb")
-# writeRaster(climIDs,paste0(rasterPath,"climIDs.tif"),overwrite=T)
-# climIDs <- raster(paste0(rastersPath,"climIDs.tif"))
+
 rm(rastX)
 gc()
 
 
 fileNames <- c(baRast,
-                blPerRast,
-                dbhRast,
-                vRast,
-                hRast,
-                pinePerRast,
-                sprucePerRast,
-                siteTypeRast)
+               blPerRast,
+               dbhRast,
+               vRast,
+               hRast,
+               pinePerRast,
+               sprucePerRast,
+               siteTypeRast)
 
 for(i in 1:length(fileNames)){
   rastX <- raster(fileNames[i])
@@ -115,12 +121,12 @@ data.all[, npix:=.N, segID]
 
 # uniqueData <- data.table()
 ####find unique initial conditions
-uniqueData <- unique(data.all[clCut==0,.(ba,blp,dbh,h,pineP,spruceP,siteType,N,climID,segID,npix)])
+uniqueData <- unique(data.all[clCut==0,.(segID,npix,ba,blp,dbh,h,pineP,spruceP,siteType,N,climID,segID,npix)])
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
-# uniqueData[,N:=ba/(pi*(dbh/200)^2)]
-range(uniqueData$N)
-uniqueData[,area:=npix*resX^2/10000]
+uniqueData[,N:=ba/(pi*(dbh/200)^2)]
+# range(uniqueData$N)
+# uniqueData[,area:=npix*resX^2/10000]
 
 ###assign ID to similar pixels
 XYsegID <- data.all[,.(x,y,segID)]
@@ -136,7 +142,7 @@ XYsegID <- data.all[,.(x,y,segID)]
 #   sampleX[,area := N*resX^2/10000]
 #   # sampleX[,id:=climID]
 # }
-  
+
 
 nSamples <- ceiling(dim(uniqueData)[1]/maxSitesRun)
 set.seed(1)
@@ -154,10 +160,43 @@ for(i in 1:nSamples){
 }
 
 
-save(data.all,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/allData.rdata"))         ### All data
-save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
-save(samples,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
-save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
+save(data.all,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"/allData.rdata"))         ### All data
+save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
+save(samples,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
+save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
+
+
+#### If needed (splitRun = TRUE), unique data is split to separate tables here to enable 
+#    running further scripts in multiple sections. Number of split parts is defined in splitRange variable (in settings).
+if (splitRun) {
+  
+  # Create split_id column which is used in splitting the table. NOTICE that the last section might be of unequal size compared to the others.
+  split_length <- ceiling(nrow(uniqueData)/length(splitRange))
+  uniqueData <- uniqueData[, split_id := NA]
+  
+  uniqueData$split_id[1:split_length] <- 1
+  for (i in 2:(max(splitRange)-1)) {
+    uniqueData$split_id[((i-1)*split_length+1):(split_length*i)] <- i
+  }
+  uniqueData$split_id[((length(splitRange)-1)*split_length+1):(nrow(uniqueData))] <- length(splitRange)
+  
+  # Split the table to list of elements. Splitting is done based on the split_id.
+  split_list <- split(uniqueData,uniqueData$split_id)
+  
+  for (i in 1:max(splitRange)) {
+    
+    # Convert the split results to separate data tables
+    uniqueDataSplit <- as.data.table(split_list[[i]])
+    
+    # Remove split_id column
+    uniqueDataSplit <- uniqueDataSplit[, split_id:=NULL]
+    
+    # Save split tables
+    save(uniqueDataSplit,file=paste0(procDataPath,"init",startingYear,"/","ForUn",yearEnd,"_split/uniqueData",i,".rdata"))  
+    
+    rm(uniqueDataSplit)
+  }
+}
 
 
 

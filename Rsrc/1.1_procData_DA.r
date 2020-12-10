@@ -1,12 +1,9 @@
-library(devtools)
-tileSettings = F
-modifiedSettings = F
 
-# Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
+# Run settings 
+library(devtools)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(modifiedSettings) {
-  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
+
 
 # Create folders for outputs.
 setwd(generalPath)
@@ -14,16 +11,17 @@ setwd(generalPath)
 if (splitRun) {
   # If output is set to be split to smaller parts (splitRun = TRUE), create separate
   # folder for the split data tables.
-  mkfldr_split <- paste0("procData/",paste0("init",startingYear,"/calST_split"))
+  mkfldr_split <- paste0("procData/",paste0("init",startingYear,"/DA",year2,"_split"))
   if(!dir.exists(file.path(generalPath, mkfldr_split))) {
     dir.create(file.path(generalPath, mkfldr_split), recursive = TRUE)
   }
-} else {
-  mkfldr <- paste0("procData/",paste0("init",startingYear,"/calST"))
-  if(!dir.exists(file.path(generalPath, mkfldr))) {
-    dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
-  }
+} 
+  
+mkfldr <- paste0("procData/",paste0("init",startingYear,"/DA",year2))
+if(!dir.exists(file.path(generalPath, mkfldr))) {
+  dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
+
 
 
 ###extract CurrClim IDs
@@ -37,12 +35,7 @@ if(testRun){
 }
 
 climID <- raster(climIDpath)
-# climIDx <- crop(climID,rastX)
-# plot(climIDx)
-# plot(rastX,add=T)
-# climIDs <- resample(climIDx,rastX,method="ngb")
-# writeRaster(climIDs,paste0(rasterPath,"climIDs.tif"),overwrite=T)
-# climIDs <- raster(paste0(rastersPath,"climIDs.tif"))
+
 rm(rastX)
 gc()
 
@@ -59,7 +52,12 @@ fileNames <- c(baRast,
                vRast2,
                baRast2,
                dbhRast2,
-               hRast2)
+               hRast2,
+               pinePerRast2,
+               sprucePerRast2,
+               blPerRast2,
+               if (mgmtmask==T) mgmtmaskRast)
+
 
 for(i in 1:length(fileNames)){
   rastX <- raster(fileNames[i])
@@ -73,16 +71,21 @@ for(i in 1:length(fileNames)){
   print(fileNames[i])
 }
 
+
 ###attach weather ID
 data.all$climID <- extract(climID,data.all[,.(x,y)])
 # dataX <- data.table(rasterToPoints(climIDs))
 # data.all <- merge(data.all,dataX)
-setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP","siteType1","siteType2","v2","ba2","dbh2","h2","climID"))
+setnames(data.all,c("x","y","ba","blp","dbh","v","h","pineP","spruceP",
+                    "siteType1","siteType2","v2","ba2","dbh2","h2",
+                    "pineP2","spruceP2","blp2", if (mgmtmask==T) "mgmtmask","climID"))
 
 ##filter data 
+if (mgmtmask==T) data.all <- data.all[mgmtmask == 0]
 data.all <- data.all[!ba %in% baNA]
 data.all <- data.all[!ba2 %in% baNA]
 data.all <- data.all[!blp %in% blPerNA]
+data.all <- data.all[!blp2 %in% blPerNA]
 data.all <- data.all[!dbh %in% dbhNA]
 data.all <- data.all[!dbh2 %in% dbhNA]
 data.all <- data.all[!v %in% vNA]
@@ -91,6 +94,8 @@ data.all <- data.all[!h %in% hNA]
 data.all <- data.all[!h2 %in% hNA]
 data.all <- data.all[!pineP %in% pinePerNA]
 data.all <- data.all[!spruceP %in% sprucePerNA]
+data.all <- data.all[!pineP2 %in% pinePerNA]
+data.all <- data.all[!spruceP2 %in% sprucePerNA]
 data.all <- data.all[!siteType1 %in% siteTypeNA]
 data.all <- data.all[!siteType2 %in% siteTypeNA]
 
@@ -108,6 +113,9 @@ data.all <- data.all[, pineP := pineP * pinePerConv]
 data.all <- data.all[, spruceP := spruceP * sprucePerConv]
 data.all <- data.all[, siteType1 := siteType1 * siteTypeConv]
 data.all <- data.all[, siteType2 := siteType2 * siteTypeConv]
+data.all <- data.all[, pineP2 := pineP2 * pinePerConv]
+data.all <- data.all[, spruceP2 := spruceP2 * sprucePerConv]
+data.all <- data.all[, blp2 := blp2 * blPerConv]
 
 if(siteTypeX==year2){
   data.all[,siteType:=siteType2]  
@@ -133,7 +141,7 @@ data.all[clCut==0,N:=ba/(pi*(dbh/200)^2)]
 smallH <- intersect(which(data.all$h < initH), which(data.all$clCut==0))
 data.all[smallH, h:=initH]
 
-###check where density is too high and replase stand variables with initial conditions
+###check where density is too high and replace stand variables with initial conditions
 tooDens <- intersect(which(data.all$N> maxDens), which(data.all$clCut==0))
 data.all[tooDens,h:=initH]
 data.all[tooDens,ba:=initBA]
@@ -160,22 +168,23 @@ data.all[,dDBHy := (dbh2-dbh)/(year2 - startingYear)]
 ####group pixels by same values
 data.all[, segID := .GRP, by = .(ba, blp,dbh, h, pineP, spruceP, 
                                  siteType1,siteType2, climID,dVy,v2,
-                                 dBAy,ba2,dHy,h2,dDBHy,dbh2)]
-# data.all[clCut==1 ,hist(dVy)]
-
+                                 dBAy,ba2,dHy,h2,dDBHy,dbh2,
+                                 pineP2, spruceP2,blp2)]
 
 ####Count segID pix
 data.all[, npix:=.N, segID]
 
 # uniqueData <- data.table()
 ####find unique initial conditions
-uniqueData <- unique(data.all[clCut==0 & dVy >0,.(ba,blp,dbh,h,pineP,spruceP,siteType1,
-                                                  siteType2,N,climID,segID,npix,dVy,v2,
-                                                  dBAy,ba2,dHy,h2,dDBHy,dbh2)])
+uniqueData <- unique(data.all[clCut==0,.(segID,npix,climID,ba,blp,dbh,h,pineP,spruceP,
+                                         siteType1,siteType2,dBAy,ba2,dVy,v2,
+                                         dHy,h2,dDBHy,dbh2,pineP2, spruceP2,blp2)])
+
 uniqueData[,uniqueKey:=1:nrow(uniqueData)]
 setkey(uniqueData, uniqueKey)
 # uniqueData[,N:=ba/(pi*(dbh/200)^2)]
-range(uniqueData$N)
+# range(uniqueData$N)
+
 uniqueData[,area:=npix*resX^2/10000]
 
 ###assign ID to similar pixels
@@ -210,70 +219,42 @@ for(i in 1:nSamples){
   segID <- c(segID,sampleX$segID)
 }
 
-save(data.all,file=paste0(procDataPath,"init",startingYear,"/calST/allData.rdata"))         ### All data
-save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/calST/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
-save(samples,file=paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))    ### unique pixel combination to run in PREBAS
-save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/calST/XYsegID.rdata"))    ### Coordinates and segID of all pixels
+save(data.all,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/allData.rdata"))         ### All data
+save(uniqueData,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/uniqueData.rdata"))    ### unique pixel combination to run in PREBAS
+save(samples,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))    ### unique pixel combination to run in PREBAS
+save(XYsegID,segID,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"/XYsegID.rdata"))    ### Coordinates and segID of all pixels
 
-#### If needed (splitRun = TRUE), unique data is split to ten tables here to enable 
-#    running 1.9_optST in multiple sections. Running in multiple sections will reduce 
-#    total processing time of 1.9_optST.
+#### If needed (splitRun = TRUE), unique data is split to separate tables here to enable 
+#    running further scripts in multiple sections. Number of split parts is defined in splitRange variable (in settings).
+#    Running in multiple sections reduces processing time
+
 if (splitRun) {
   
-  # Create split_id column which is used in splitting the table. Here the data is split to
-  # x amount of parts. NOTICE that the parts are not necessarily equal sized: all but the last on
-  # are equal sized but the last one is either equal or few observations smaller depending 
-  # on the amount of rows in the original data.
-  split_length <- ceiling(nrow(uniqueData)/10)
+  # Create split_id column which is used in splitting the table. NOTICE that the last section might be of unequal size compared to the others.
+  split_length <- ceiling(nrow(uniqueData)/length(splitRange))
   uniqueData <- uniqueData[, split_id := NA]
+
+
   uniqueData$split_id[1:split_length] <- 1
-  uniqueData$split_id[(split_length+1):(split_length*2)] <- 2
-  uniqueData$split_id[(2*split_length+1):(split_length*3)] <- 3
-  uniqueData$split_id[(3*split_length+1):(split_length*4)] <- 4
-  uniqueData$split_id[(4*split_length+1):(split_length*5)] <- 5
-  uniqueData$split_id[(5*split_length+1):(split_length*6)] <- 6
-  uniqueData$split_id[(6*split_length+1):(split_length*7)] <- 7
-  uniqueData$split_id[(7*split_length+1):(split_length*8)] <- 8
-  uniqueData$split_id[(8*split_length+1):(split_length*9)] <- 9
-  uniqueData$split_id[(9*split_length+1):(nrow(uniqueData))] <- 10
-  
-  # Split the table to list of defined amount of elements. Splitting is done based on the split_id.
+  for (i in 2:(max(splitRange)-1)) {
+    uniqueData$split_id[((i-1)*split_length+1):(split_length*i)] <- i
+  }
+  uniqueData$split_id[((length(splitRange)-1)*split_length+1):(nrow(uniqueData))] <- length(splitRange)
+
+  # Split the table to list of elements. Splitting is done based on the split_id.
   split_list <- split(uniqueData,uniqueData$split_id)
+
+  for (i in 1:max(splitRange)) {
   
-  # Convert the split results to separate data tables
-  uniqueData1 <- as.data.table(split_list[[1]])
-  uniqueData2 <- as.data.table(split_list[[2]])
-  uniqueData3 <- as.data.table(split_list[[3]])
-  uniqueData4 <- as.data.table(split_list[[4]])
-  uniqueData5 <- as.data.table(split_list[[5]])
-  uniqueData6 <- as.data.table(split_list[[6]])
-  uniqueData7 <- as.data.table(split_list[[7]])
-  uniqueData8 <- as.data.table(split_list[[8]])
-  uniqueData9 <- as.data.table(split_list[[9]])
-  uniqueData10 <- as.data.table(split_list[[10]])
+    # Convert the split results to separate data tables
+    uniqueDataSplit <- as.data.table(split_list[[i]])
   
-  # Remove split_id column
-  uniqueData1 <- uniqueData1[, split_id:=NULL]
-  uniqueData2 <- uniqueData2[, split_id:=NULL]
-  uniqueData3 <- uniqueData3[, split_id:=NULL]
-  uniqueData4 <- uniqueData4[, split_id:=NULL]
-  uniqueData5 <- uniqueData5[, split_id:=NULL]
-  uniqueData6 <- uniqueData6[, split_id:=NULL]
-  uniqueData7 <- uniqueData7[, split_id:=NULL]
-  uniqueData8 <- uniqueData8[, split_id:=NULL]
-  uniqueData9 <- uniqueData9[, split_id:=NULL]
-  uniqueData10 <- uniqueData10[, split_id:=NULL]
+    # Remove split_id column
+    uniqueDataSplit <- uniqueDataSplit[, split_id:=NULL]
   
-  # Save splitted tables 
-  save(uniqueData1,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData1.rdata"))  
-  save(uniqueData2,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData2.rdata"))
-  save(uniqueData3,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData3.rdata"))
-  save(uniqueData4,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData4.rdata"))
-  save(uniqueData5,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData5.rdata"))
-  save(uniqueData6,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData6.rdata"))
-  save(uniqueData7,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData7.rdata"))
-  save(uniqueData8,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData8.rdata"))
-  save(uniqueData9,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData9.rdata"))
-  save(uniqueData10,file=paste0(procDataPath,"init",startingYear,"/calST_split/uniqueData10.rdata"))
+    # Save split tables
+    save(uniqueDataSplit,file=paste0(procDataPath,"init",startingYear,"/DA",year2,"_split/uniqueData",i,".rdata"))  
   
+    rm(uniqueDataSplit)
+  }
 }

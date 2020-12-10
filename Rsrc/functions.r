@@ -376,7 +376,7 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muSTda
   sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaSTda
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
+  sampleError <- data.table(mvrnorm(nSample,mu=mu1,Sigma=sigma1))
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
   sampleX$H <- segIDx$H + sampleError$H
@@ -385,28 +385,35 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-  sampleX <- sampleX[H>1.5]
-  sampleX <- sampleX[D>0.5]
-  sampleX <- sampleX[BAtot>0.045]
-  sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  if(nrow(sampleX)<nSample){
-    sample1 <- sampleX
-    set.seed(1234)
-    sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
-    # segIDx <- dataSurV[segID==2]
-    sampleX <- data.table()
-    sampleX$H <- segIDx$H + sampleError$H
-    sampleX$D <- segIDx$D + sampleError$D
-    sampleX$BAtot <- segIDx$BAtot + sampleError$G
-    sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-    sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-    sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-    sampleX <- sampleX[H>1.5]
-    sampleX <- sampleX[D>0.5]
-    sampleX <- sampleX[BAtot>0.045]
-    sampleX <- rbind(sample1,sampleX)
-    sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  }
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
+
+  ###filter data
+  minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
+  xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
+  # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  # if(nrow(sampleX)<nSample){
+  #   sample1 <- sampleX
+  #   set.seed(1234)
+  #   sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
+  #   # segIDx <- dataSurV[segID==2]
+  #   sampleX <- data.table()
+  #   sampleX$H <- segIDx$H + sampleError$H
+  #   sampleX$D <- segIDx$D + sampleError$D
+  #   sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  #   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  #   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  #   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  #   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  #   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  #   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
+  #   sampleX <- sampleX[H>1.5]
+  #   sampleX <- sampleX[D>0.5]
+  #   sampleX <- sampleX[BAtot>0.045]
+  #   sampleX <- rbind(sample1,sampleX)
+  #   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  # }
   
   sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
             as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
@@ -452,26 +459,75 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,BsurST1 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST1 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST1 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST1 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST1 - segIDx$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST1 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST1 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST1 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST1 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST1 <- segIDx$V + dV
+  sampleX[xx]$BsurST1 <- sampleX[xx]$BAtot + dB
+
   sampleX$st <- factor(2)
   sampleX[,VsurST2 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST2 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST2 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST2 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST2 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST2 - segIDx$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST2 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST2 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST2 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST2 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST2 <- segIDx$V + dV
+  sampleX[xx]$BsurST2 <- sampleX[xx]$BAtot + dB
+  
   sampleX$st <- factor(3)
   sampleX[,VsurST3 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST3 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST3 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST3 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST3 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST3 - segIDx$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST3 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST3 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST3 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST3 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST3 <- segIDx$V + dV
+  sampleX[xx]$BsurST3 <- sampleX[xx]$BAtot + dB
+  
   sampleX$st <- factor(4)
   sampleX[,VsurST4 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST4 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST4 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST4 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST4 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST4 - segIDx$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST4 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST4 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST4 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST4 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST4 <- segIDx$V + dV
+  sampleX[xx]$BsurST4 <- sampleX[xx]$BAtot + dB
+  
   sampleX$st <- factor(5)
   sampleX[,VsurST5 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST5 := pmax(0.,predict(step.modelB,newdata=sampleX))]
   sampleX[,DsurST5 := pmax(0.,predict(step.modelD,newdata=sampleX))]
   sampleX[,HsurST5 := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$HsurST5 - sampleX[-xx]$H,na.rm=T)
+  dV <- mean(sampleX[-xx]$VsurST5 - segIDx$V,na.rm=T)
+  dD <- mean(sampleX[-xx]$DsurST5 - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$BsurST5 - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$HsurST5 <- sampleX[xx]$H + dH
+  sampleX[xx]$DsurST5 <- sampleX[xx]$D + dD
+  sampleX[xx]$VsurST5 <- segIDx$V + dV
+  sampleX[xx]$BsurST5 <- sampleX[xx]$BAtot + dB
   
   dx1 <- cbind(sampleX$BsurST1 - segIDx$ba2,sampleX$DsurST1 - segIDx$dbh2,
                sampleX$HsurST1 - segIDx$h2,sampleX$VsurST1 - segIDx$V2)
@@ -495,17 +551,21 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   pst3 <- pst3/psum
   pst4 <- pst4/psum
   pst5 <- pst5/psum
-  return(pST=c(pst1,pst2,pst3,pst4,pst5)) 
+  return(pST=c(segIDx$segID,pst1,pst2,pst3,pst4,pst5)) 
 }
 
 
 ###function for structural variables data assimilation 
-pSVDA <- function(segIDx,nSample){
+pSVDA <- function(segIDx,nSample,year1,year2,tileX){
+  mu1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$muFSVda
+  sigma1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$sigmaFSVda
+  mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muFSVda
+  sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaFSVda
   
   pST <- c(segIDx$pST1,segIDx$pST2,segIDx$pST3,segIDx$pST4,segIDx$pST5)
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
   set.seed(1234)
-  sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
+  sampleError <- data.table(mvrnorm(nSample,mu=mu1,Sigma=sigma1))
 
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
@@ -515,28 +575,39 @@ pSVDA <- function(segIDx,nSample){
   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-  sampleX <- sampleX[H>1.5]
-  sampleX <- sampleX[D>0.5]
-  sampleX <- sampleX[BAtot>0.045]
-  sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  if(nrow(sampleX)<nSample){
-    sample1 <- sampleX
-    set.seed(1234)
-    sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
-    # segIDx <- dataSurV[segID==2]
-    sampleX <- data.table()
-    sampleX$H <- segIDx$H + sampleError$H
-    sampleX$D <- segIDx$D + sampleError$D
-    sampleX$BAtot <- segIDx$BAtot + sampleError$G
-    sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-    sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-    sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-    sampleX <- sampleX[H>1.5]
-    sampleX <- sampleX[D>0.5]
-    sampleX <- sampleX[BAtot>0.045]
-    sampleX <- rbind(sample1,sampleX)
-    sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  }
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
+
+  
+  ###filter data
+  minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
+  xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
+  # sampleX[H<=1.3]$H <- 1.3
+  # sampleX[D<=0]$D <- 0.1
+  # sampleX[BAtot<=0]$BAtot <- 0.01
+  # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  # if(nrow(sampleX)<nSample){
+  #   sample1 <- sampleX
+  #   set.seed(123)
+  #   sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
+  #   # segIDx <- dataSurV[segID==2]
+  #   sampleX <- data.table()
+  #   sampleX$H <- segIDx$H + sampleError$H
+  #   sampleX$D <- segIDx$D + sampleError$D
+  #   sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  #   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  #   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  #   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  #   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  #   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  #   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
+  #   sampleX <- sampleX[H>1.5]
+  #   sampleX <- sampleX[D>0.5]
+  #   sampleX <- sampleX[BAtot>0.045]
+  #   sampleX <- rbind(sample1,sampleX)
+  #   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  # }
 
   sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
             as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
@@ -544,7 +615,13 @@ pSVDA <- function(segIDx,nSample){
   
   max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
   segIDx$max.pro.est=max.pro.est
-
+  
+  if(year1=="all" & tileX=="all"){
+    logistic.model <- logisticPureF$all
+  }else{
+    logistic.model <- logisticPureF[[paste0("y",year1)]][[paste0("t",tileX)]]
+  }
+  
   set.seed(1234)
   sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
   if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
@@ -556,7 +633,13 @@ pSVDA <- function(segIDx,nSample){
   sampleX[,BAb:=BAbPer*BAtot/100]
   # sampleX[,st:=segIDx$st]
   sampleX[,V2:=segIDx$V2]
-  sampleX[,segID:=segIDx$segID]
+  sampleX[,ba2:=segIDx$ba2]
+  sampleX[,h2:=segIDx$h2]
+  sampleX[,dbh2:=segIDx$dbh2]
+  # sampleX[,BApPer2:=segIDx$BApPer2]
+  # sampleX[,BAspPer2:=segIDx$BAspPer2]
+  # sampleX[,BAbPer2:=segIDx$BAbPer2]
+  # sampleX[,segID:=segIDx$segID]
   
   # sampleX$lnVmod<-log(sampleX$Vmod)
   # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
@@ -567,6 +650,11 @@ pSVDA <- function(segIDx,nSample){
   b = -1.605 ###coefficient of Reineke
   sampleX[,SDI:=N *(D/10)^b]
   sampleX$st <- st
+  sampleX[,rootBAp:=BAp^0.5]
+  sampleX[,BAp2:=ba2*BApPer/100]
+  sampleX[,BAsp2:=ba2*BAspPer/100]
+  sampleX[,BAb2:=ba2*BAbPer/100]
+  
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
   sampleX$st <- factor(sampleX$st)
   sampleX[,Hx := pmax(0.,predict(step.modelH,newdata=sampleX))]
@@ -576,13 +664,173 @@ pSVDA <- function(segIDx,nSample){
   sampleX[,Bpx := pmax(0.,predict(step.modelBp,newdata=sampleX))]
   sampleX[,Bspx := pmax(0.,predict(step.modelBsp,newdata=sampleX))]
   sampleX[,Bdx := pmax(0.,predict(step.modelBd,newdata=sampleX))]
-  
-  mux <- sampleX[,colMeans(cbind(Hx,Dx,Bx,Bpx,Bspx,Bdx))]
-  covMat <- sampleX[,cov(cbind(Hx,Dx,Bx,Bpx,Bspx,Bdx))]
-  
-  pMvnorm <- c(mux,as.vector(covMat))
+  sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
+  # sampleX[,rootBAp:=BAp^0.5]
 
-    
-  return(pMvnorm=pMvnorm) 
+  ###estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$Hx - sampleX[-xx]$H,na.rm=T)
+  dD <- mean(sampleX[-xx]$Dx - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$Bx - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$Hx <- sampleX[xx]$H + dH
+  sampleX[xx]$Dx <- sampleX[xx]$D + dD
+  sampleX[xx]$Bx <- sampleX[xx]$BAtot + dB
+  sampleX[xx]$BpPerx <- sampleX[xx]$BApPer
+  sampleX[xx]$BspPerx <- sampleX[xx]$BAspPer
+  sampleX[xx]$BdPerx <- sampleX[xx]$BAbPer
+  
+  nax <- unique(which(is.na(sampleX[,.(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx)]),arr.ind = T)[,1])
+  if(length(nax)>0) sampleX <- sampleX[-nax]
+  mux <- sampleX[,colMeans(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
+  sigmax <- sampleX[,cov(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
+  
+  pMvnormx <- c(mux,as.vector(sigmax))
+
+###sample from second measurement
+  mux2 <- c(segIDx$h2 + mu2[3],segIDx$dbh2 + mu2[2],segIDx$BAtot2 + mu2[1],
+            segIDx$BApPer2 + mu2[4],segIDx$BAspPer2 + mu2[5],segIDx$BAbPer2 + mu2[6])
+  sigmax2 <- sigma2[c(3,2,1,4:6),c(3,2,1,4:6)]
+  
+  pMvnormx2 <- c(mux2,as.vector(sigmax2))
+
+  
+  LL <- solve(sigmax + sigmax2,tol=1e-20)
+  sigmaPost <- sigmax %*% LL %*% sigmax2
+  muPost <- sigmax2 %*% LL %*% mux + 
+    sigmax %*% LL %*% mux2
+  
+  pMvnormPost <- c(muPost,as.vector(sigmaPost))
+  # ss= inv(inv(sigmax)+inv(sigmax2))
+  # ff <- sigmaPost %*% (sigmax %^%(-1)) %*% mux + sigmaPost %*% (sigmax2 %^%(-1)) %*% mux2
+
+  # return(list(muPrior=mux,muLik=mux2,muPost=as.vector(muPost),
+  #             sigPrior=sigmax,sigLik=sigmax2,sigPost=sigmaPost))
+  pars <- c(as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
+  return(pars)
+}
+
+
+###function for structural variables forcast and uncertainty 
+prForUnc <- function(segIDx,nSample,yearUnc,tileX){
+  if(yearUnc=="all"){
+    muUnc <- errData$all$muFSVda
+    sigmaUnc <- errData$all$sigmaFSVda
+    step.probitX <- step.probit$all
+  }else{
+    muUnc <- errData[[paste0("y",yearUnc)]][[paste0("t",tileX)]]$muFSVda
+    sigmaUnc <- errData[[paste0("y",yearUnc)]][[paste0("t",tileX)]]$sigmaFSVda
+    step.probitX <- step.probit[[paste0("y",yearUnc)]][[paste0("t",tileX)]]
+  }
+
+  pST <- predict(step.probitX,type='p',segIDx)   ### needs to be changed . We need to calculate with 2016 and 2019 data
+  
+  st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
+  set.seed(1234)
+  sampleError <- data.table(mvrnorm(nSample,mu=muUnc,Sigma=sigmaUnc))
+  
+  # segIDx <- dataSurV[segID==2]
+  sampleX <- data.table()
+  sampleX$H <- segIDx$H + sampleError$H
+  sampleX$D <- segIDx$D + sampleError$D
+  sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
+  ###filter data
+  minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
+  xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
+  sampleX[,rootBAp:=BAp^0.5]
+  # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  # if(nrow(sampleX)<nSample){
+  #   sample1 <- sampleX
+  #   set.seed(123)
+  #   sampleError <- data.table(mvrnorm(nSample*2,mu=muUnc,Sigma=sigmaUnc))
+  #   # segIDx <- dataSurV[segID==2]
+  #   sampleX <- data.table()
+  #   sampleX$H <- segIDx$H + sampleError$H
+  #   sampleX$D <- segIDx$D + sampleError$D
+  #   sampleX$BAtot <- segIDx$BAtot + sampleError$G
+  #   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
+  #   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
+  #   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
+  #   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
+  #   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
+  #   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
+  #   sampleX[H<1.3]$H <- 1.3
+  #   sampleX[D<0]$D <- 0.1
+  #   sampleX[BAtot<0]$BAtot <- 0.01
+  #   sampleX[,rootBAp:=BAp^0.5]
+  #   sampleX <- rbind(sample1,sampleX)
+  #   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
+  # }
+  
+  sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
+            as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
+          by = seq_len(nrow(sampleX))]
+  
+  max.pro.est<-apply(segIDx[, c('BApPer','BAspPer','BAbPer')], 1, which.max)
+  segIDx$max.pro.est=max.pro.est
+  
+  if(yearUnc=="all"){
+    logistic.model <- logisticPureF$all
+  }else{
+    logistic.model <- logisticPureF[[paste0("y",yearUnc)]][[paste0("t",tileX)]]
+  }
+  
+  set.seed(1234)
+  sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
+  if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
+  if(max.pro.est==2) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,100,0)]
+  if(max.pro.est==3) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,0,100)]
+  
+  sampleX[,BAp:=BApPer*BAtot/100]
+  sampleX[,BAsp:=BAspPer*BAtot/100]
+  sampleX[,BAb:=BAbPer*BAtot/100]
+
+  # sampleX[,segID:=segIDx$segID]
+  
+  sampleX[,BAtot:=(BAp+BAsp+BAb)]
+  sampleX[,BAh:=BAtot*H]
+  sampleX[,N:=BAtot/(pi*(D/200)^2)]
+  b = -1.605 ###coefficient of Reineke
+  sampleX[,SDI:=N *(D/10)^b]
+  sampleX$st <- st
+  
+  sampleX$st <- factor(sampleX$st)
+  sampleX[,Hx := pmax(0.,predict(step.modelH,newdata=sampleX))]
+  sampleX[,Dx := pmax(0.,predict(step.modelD,newdata=sampleX))]
+  sampleX[,Bx := pmax(0.,predict(step.modelB,newdata=sampleX))]
+  sampleX[,Bpx := pmax(0.,predict(step.modelBp,newdata=sampleX))]
+  sampleX[,Bspx := pmax(0.,predict(step.modelBsp,newdata=sampleX))]
+  sampleX[,Bdx := pmax(0.,predict(step.modelBd,newdata=sampleX))]
+  sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
+  sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
+
+  ##estimates for negative values based on average growth  
+  dH <- mean(sampleX[-xx]$Hx - sampleX[-xx]$H,na.rm=T)
+  dD <- mean(sampleX[-xx]$Dx - sampleX[-xx]$D,na.rm=T)
+  dB <- mean(sampleX[-xx]$Bx - sampleX[-xx]$BAtot,na.rm=T)
+  sampleX[xx]$Hx <- sampleX[xx]$H + dH
+  sampleX[xx]$Dx <- sampleX[xx]$D + dD
+  sampleX[xx]$Bx <- sampleX[xx]$BAtot + dB
+  sampleX[xx]$BpPerx <- sampleX[xx]$BApPer
+  sampleX[xx]$BspPerx <- sampleX[xx]$BAspPer
+  sampleX[xx]$BdPerx <- sampleX[xx]$BAbPer
+  
+  nax <- unique(which(is.na(sampleX),arr.ind = T)[,1])
+  if(length(nax)>0) sampleX <- sampleX[-nax]
+  mux <- sampleX[,colMeans(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
+  sigmax <- sampleX[,cov(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
+  
+  pMvnormx <- c(mux,as.vector(sigmax))
+  
+  ###sample from second measurement
+  pars <- as.vector(pMvnormx)
+  return(pars)
 }
 

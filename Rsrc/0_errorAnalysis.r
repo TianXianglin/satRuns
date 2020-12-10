@@ -1,10 +1,7 @@
 library(devtools)
-# tileSettings = F
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(modifiedSettings) {
-  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings in local directory if one exists
 
 
 ### Check and create output directories
@@ -113,9 +110,9 @@ step.probit$y2019$t35VLJ <- calProbit(dataAll,yearX=2019,tileX="35VLJ")
 step.probit$y2019$t35VNL <- calProbit(dataAll,yearX=2019,tileX="35VNL")
 step.probit$y2016$t34VEQ <- calProbit(dataAll,yearX=2016,tileX="34VEQ")
 step.probit$y2019$t34VEQ <- calProbit(dataAll,yearX=2019,tileX="34VEQ")
-step.probit$t35WMN <- calProbit(dataAll,yearX="all",tileX="35WMN")
+step.probit$y2019$t35WMN <- calProbit(dataAll,yearX="all",tileX="35WMN")
 
-save(step.probit,file = paste0(generalPath,'surErrMods/stProbit.rdata'))
+# save(step.probit,file = paste0(generalPath,'surErrMods/stProbit.rdata'))
 if(CSCrun){
   save(step.probit,file="/scratch/project_2000994/PREBASruns/assessCarbon/data/step.probit.rdata") # in CSC
 }else{

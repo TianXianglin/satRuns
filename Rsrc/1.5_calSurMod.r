@@ -1,11 +1,8 @@
 library(devtools)
-tileSettings = F
-modifiedSettings = F
 # Run settings (if modifiedSettings is not set to TRUE in batch job script, default settings from Github will be used)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
-if(modifiedSettings) {
-  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-}
+if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings in local directory if one exists
+
 # Run functions 
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/functions.r")
 
@@ -19,8 +16,8 @@ if(!dir.exists(file.path(generalPath, mkfldr))) {
 
 yearX <- 3
 
-load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))  
-
+####needs to be changed for ForUnc runs
+load(paste0(procDataPath,"init",startingYear,"/DA",year2,"/samples.rdata"))  
   
   sampleID <- 10
   rcpfile="CurrClim"
@@ -89,7 +86,7 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     ### Run settings & functions
 
     # load("C:/Users/minunno/GitHub/satRuns/data/inputUncer.rdata")
-    load("/scratch/project_2000994/PREBASruns/assessCarbon/data/inputUncer.rdata") # in CSC
+    load(url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/data/inputUncer.rdata"))
     # load(paste0(procDataPath,"init",startingYear,"/","st",siteTypeX,"/XYsegID.rdata"))  
     # load(paste0("output/init",startingYear,"/","st",siteTypeX,"/CurrClim_sample1.rdata"))  
     # load(paste0("procData/init",startingYear,"/","st",siteTypeX,"/uniqueData.rdata"))  
@@ -104,7 +101,7 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
                      "Hmod","Dmod","BApmod","BAspmod","BAdmod"))
     # if(!all(unique(dataX$st) %in% unique(uniqueData$siteType))) stop("not all siteTypes of the tile are in the sample")
     
-    #### Here we use stepwise regression to construct an emulator for volume prediction
+    #### Here we use stepwise regression to construct an emulator for stand variables prediction
     # dataX$lnVmod<-log(dataX$Vmod)
     # dataX$alpha<-NA
     dataX$st <- factor(dataX$st)
@@ -113,6 +110,8 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     dataX[,N:=BAtot/(pi*(D/200)^2)]
     b = -1.605 ###coefficient of Reineke
     dataX[,SDI:=N *(D/10)^b]
+    dataX[,rootBAp:=BAp^0.5]
+    dataX[,BAp2:=BAp^(2)]
     full.modelV <-lm(Vmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.modelV <- stepAIC(full.modelV, direction = "both",
                           trace = FALSE)
@@ -125,7 +124,7 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     full.modelD <-lm(Dmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
     step.modelD <- stepAIC(full.modelD, direction = "both",
                            trace = FALSE)
-    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
+    full.modelBp <-lm(BApmod~H+D+SDI+BAh+BAp+BAsp+BAb+st+rootBAp,data=dataX)
     step.modelBp <- stepAIC(full.modelBp, direction = "both",
                            trace = FALSE)
     full.modelBsp <-lm(BAspmod~H+D+SDI+BAh+BAp+BAsp+BAb+st,data=dataX)
@@ -177,5 +176,5 @@ load(paste0(procDataPath,"init",startingYear,"/calST/samples.rdata"))
     # summary(step.model)
     save(step.modelV,step.modelB,step.modelD,step.modelH,
          step.modelBp,step.modelBsp,step.modelBd,
-         file="surErrMods/surMod.rdata")
+         file="surErrMods/surMod.rdata") ###needs to be changed update name
     
