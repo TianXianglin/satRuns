@@ -2,8 +2,17 @@
 # Run settings 
 library(devtools)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
+<<<<<<< HEAD:Rsrc/1.1_procData_DA.r
 if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
+=======
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/rmvweisd.r")
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/Fweibull_Arithmetic Mean and Variance.R")
+
+if(modifiedSettings) {
+  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
+}
+>>>>>>> ca58874717858b9cf57a0ee1cdeb48fd5ea9f6ac:Rsrc/1.1_procData_siteType.r
 
 # Create folders for outputs.
 setwd(generalPath)
