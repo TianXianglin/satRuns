@@ -52,7 +52,7 @@ create_prebas_input.f = function(r_no, clim, data.sample, nYears, startingYear=0
     initVar[,5,1] <- as.numeric(data.sample[,(ba * pineP/(pineP+spruceP+blp))])
     initVar[,5,2] <- as.numeric(data.sample[,(ba * spruceP/(pineP+spruceP+blp))])
     initVar[,5,3] <- as.numeric(data.sample[,(ba * blp/(pineP+spruceP+blp))])
-
+    
     if(varHD){ #### if true will vary H and D of pine and spruce using siteType
       ###increase spruceP dbh 10% for spruceP sitetype 1:2
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP > baP,X:=(ba-1.1*baSP-baB)/baP]
@@ -60,40 +60,40 @@ create_prebas_input.f = function(r_no, clim, data.sample, nYears, startingYear=0
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP > baP,dbhSP:=1.1*dbh]
       data.sample[pineP>0. & spruceP >0. & siteType<2.5  & baSP > baP & dbhP<0.5,dbhSP:=((ba-(0.5/dbh)*baP-baB)/baSP)*dbh]
       data.sample[pineP>0. & spruceP >0. & siteType<2.5  & baSP > baP & dbhP<0.5,dbhP:=0.5]
-
+      
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP <= baP,dbhSP:=dbh * (ba - 0.9*baP - baB)/baSP]
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP <= baP,dbhP:=pmax(0.9*dbh,0.3)]
-
+      
       ####increase spruceP h 10% for spruceP sitetype 1:2
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP > baP,X:=(ba-1.1*baSP-baB)/baP]
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP > baP,hP:=X*h]
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP > baP,hSP:=1.1*h]
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP > baP & hP<1.5,hSP:=((ba-(1.5/h)*baP-baB)/baSP)*h]
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP > baP & hP<1.5,hP:=1.5]
-
+      
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP <= baP,hSP:=h * (ba - 0.9*baP - baB)/baSP]
       data.sample[pineP>0. & spruceP >0. & siteType<2.5 & baSP <= baP,hP:=pmax(0.9*h,1.3)]
-
+      
       ####increase spruceP dbh 5% for spruceP sitetype 3
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP > baP,X:=(ba-1.05*baSP-baB)/baP]
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP > baP,dbhP:=X*dbh]
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP > baP,dbhSP:=1.05*dbh]
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP > baP & dbhP<0.5,dbhSP:=((ba-(0.5/dbh)*baP-baB)/baSP)*dbh]
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP > baP & dbhP<0.5,dbhP:=0.5]
-
+      
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP <= baP,dbhSP:=dbh * (ba - 0.95*baP - baB)/baSP]
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP <= baP,dbhP:=pmax(0.95*dbh,0.3)]
-
+      
       ####increase spruceP h 5% for spruceP sitetype 3
       data.sample[pineP>0. & spruceP >0. & siteType==3,X:=(ba-1.05*baSP-baB)/baP]
       data.sample[pineP>0. & spruceP >0. & siteType==3,hP:=X*h]
       data.sample[pineP>0. & spruceP >0. & siteType==3,hSP:=1.05*h]
       data.sample[pineP>0. & spruceP >0. & siteType==3 & hP<1.5,hSP:=((ba-(1.5/h)*baP-baB)/baSP)*h]
       data.sample[pineP>0. & spruceP >0. & siteType==3 & hP<1.5,hP:=1.5]
-
+      
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP <= baP,hSP:=h * (ba - 0.95*baP - baB)/baSP]
       data.sample[pineP>0. & spruceP >0. & siteType==3 & baSP <= baP,hP:=pmax(0.95*h,1.3)]
-
+      
       ####increase pineP dbh 10% for sitetype >= 4
       data.sample[pineP>0. & spruceP >0. & siteType>3.5 & baP > baSP,X:=(ba-1.1*baP-baB)/baSP]
       data.sample[pineP>0. & spruceP >0. & siteType>3.5 & baP > baSP,dbhSP:=X*dbh]
@@ -116,7 +116,7 @@ create_prebas_input.f = function(r_no, clim, data.sample, nYears, startingYear=0
       initVar[,4,2] <- as.numeric(data.sample[,dbhSP])
       
     }
-
+    
   }
   
   # initVar[,6,] <- as.numeric(data.sample[,hc])
@@ -129,7 +129,7 @@ create_prebas_input.f = function(r_no, clim, data.sample, nYears, startingYear=0
   siteInfo[NoPine,8:9] <- siteInfo[NoPine,8:9] - 1
   siteInfo[NoSpruce,8:9] <- siteInfo[NoSpruce,8:9] - 1
   siteInfo[NoDecid,8:9] <- siteInfo[NoDecid,8:9] - 1
-
+  
   #siteInfo[NoPine,4] <- siteInfo[NoPine,4] - 1
   #siteInfo[NoSpruce,4] <- siteInfo[NoSpruce,4] - 1
   #siteInfo[NoDecid,4] <- siteInfo[NoDecid,4] - 1
@@ -236,13 +236,13 @@ prep.climate.f = function(dat, data.sample, startingYear, nYears,startYearWeathe
       setorder(dat,climID,Year,DOY)
       dat[,rday:=1:(365*nYears),by=climID]
     }
-
+    
   }else{
-  dat[, pvm:= as.Date('1980-01-01') - 1 + rday ]
-  dat[, DOY:= as.numeric(format(pvm, "%j"))]
-  dat[, Year:= as.numeric(format(pvm, "%Y"))]
-  dat = dat[Year >= startingYear]
-  dat[DOY==366, DOY:=365]
+    dat[, pvm:= as.Date('1980-01-01') - 1 + rday ]
+    dat[, DOY:= as.numeric(format(pvm, "%j"))]
+    dat[, Year:= as.numeric(format(pvm, "%Y"))]
+    dat = dat[Year >= startingYear]
+    dat[DOY==366, DOY:=365]
   }
   climID = dat[,unique(climID)]
   PARtran = t( dcast(dat[, list(climID, rday, PAR)], rday ~ climID,
@@ -268,7 +268,7 @@ createDT <- function(climate, management,variable, layer,startingYear,funX,siteT
   files <- list.files(path= loadFolder)#,pattern = paste0("year",startingYear,"_"))
   startV <- data.table()
   for (ij in variable) assign(varNames[ij],data.table())
-
+  
   for(i in 1:length(files)){
     sampleID <- paste0("sample",i,".")
     
@@ -285,14 +285,14 @@ createDT <- function(climate, management,variable, layer,startingYear,funX,siteT
         if(varNames[ij] %in% dimnames(out)$varX){
           varX <- which(dimnames(out)$varX==varNames[ij])
           if(funX[ijX]=="sum") assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
-                                               apply(out[,,varX,],margin,sum,na.rm=T))))
+                                                                    apply(out[,,varX,],margin,sum,na.rm=T))))
           
           if(funX[ijX]=="mean"){
             BAind <- which(saveVars==13)
             if(length(BAind)<1){
               print(paste("BA not saved!! for",varNames[saveVars[varX]],"aritmetic mean was used."))
-                    assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
-                               apply(out[,,varX,],margin,mean,na.rm=T))))
+              assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
+                                                   apply(out[,,varX,],margin,mean,na.rm=T))))
             }else{
               sumBA <- apply(out[,,BAind,],1:2,sum,na.rm=T)
               sumBAs <- array(sumBA,dim = dim(out[,,BAind,]))
@@ -300,7 +300,7 @@ createDT <- function(climate, management,variable, layer,startingYear,funX,siteT
               wgdVar <- out[,,varX,] * fracBA
               assign(varNames[ij],data.table(rbind(eval(parse(text = varNames[ij])),
                                                    apply(wgdVar,margin,sum,na.rm=T))))
-          } }
+            } }
         }else{
           print(paste(varNames[ij],"not saved"))
         }
@@ -376,7 +376,6 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muSTda
   sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaSTda
   set.seed(1234)
-<<<<<<< HEAD
   sampleError <- data.table(mvrnorm(nSample,mu=mu1,Sigma=sigma1))
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
@@ -389,7 +388,7 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
-
+  
   ###filter data
   minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
   xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
@@ -415,55 +414,6 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   #   sampleX <- rbind(sample1,sampleX)
   #   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   # }
-=======
-  # sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
-  # # segIDx <- dataSurV[segID==2]
-  # sampleX <- data.table()
-  # sampleX$H <- segIDx$H + sampleError$H
-  # sampleX$D <- segIDx$D + sampleError$D
-  # sampleX$BAtot <- segIDx$BAtot + sampleError$G
-  # sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-  # sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-  # sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-  
-  abc<-Fweibull.v(mu1,diag(sigma1))
-  shd<-data.frame(shape=abc$c,decay=abc$b^(-abc$c))
-  rho<-cov2cor(sigma1)
-  sampleX <- data.table(rmvweisd(nSample*2, shd$shape, shd$decay, rho))
-  colnames(sampleX)<-c('BAtot','D','H','BApPer','BAspPer','BAbPer')
-  
-  sampleX <- sampleX[H>1.5]
-  sampleX <- sampleX[D>0.5]
-  sampleX <- sampleX[BAtot>0.045]
-  sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  if(nrow(sampleX)<nSample){
-    sample1 <- sampleX
-    set.seed(1234)
-    
-    # sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
-    # # segIDx <- dataSurV[segID==2]
-    # sampleX <- data.table()
-    # sampleX$H <- segIDx$H + sampleError$H
-    # sampleX$D <- segIDx$D + sampleError$D
-    # sampleX$BAtot <- segIDx$BAtot + sampleError$G
-    # sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-    # sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-    # sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-    
-    abc<-Fweibull.v(mu1,diag(sigma1))
-    shd<-data.frame(shape=abc$c,decay=abc$b^(-abc$c))
-    rho<-cov2cor(sigma1)
-    sampleX <- data.table()
-    sampleX<-rmvweisd(nSample*2, shd$shape, shd$decay, rho)
-    colnames(sampleX)<-c('BAtot','D','H','BApPer','BAspPer','BAbPer')
-    
-    sampleX <- sampleX[H>1.5]
-    sampleX <- sampleX[D>0.5]
-    sampleX <- sampleX[BAtot>0.045]
-    sampleX <- rbind(sample1,sampleX)
-    sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  }
->>>>>>> ca58874717858b9cf57a0ee1cdeb48fd5ea9f6ac
   
   sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
             as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
@@ -518,7 +468,7 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[xx]$DsurST1 <- sampleX[xx]$D + dD
   sampleX[xx]$VsurST1 <- segIDx$V + dV
   sampleX[xx]$BsurST1 <- sampleX[xx]$BAtot + dB
-
+  
   sampleX$st <- factor(2)
   sampleX[,VsurST2 := pmax(0.,predict(step.modelV,newdata=sampleX))]
   sampleX[,BsurST2 := pmax(0.,predict(step.modelB,newdata=sampleX))]
@@ -615,9 +565,8 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   pST <- c(segIDx$pST1,segIDx$pST2,segIDx$pST3,segIDx$pST4,segIDx$pST5)
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
   set.seed(1234)
-<<<<<<< HEAD
   sampleError <- data.table(mvrnorm(nSample,mu=mu1,Sigma=sigma1))
-
+  
   # segIDx <- dataSurV[segID==2]
   sampleX <- data.table()
   sampleX$H <- segIDx$H + sampleError$H
@@ -629,7 +578,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
-
+  
   
   ###filter data
   minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
@@ -659,54 +608,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   #   sampleX <- rbind(sample1,sampleX)
   #   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
   # }
-=======
-  # sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
-  # # segIDx <- dataSurV[segID==2]
-  # sampleX <- data.table()
-  # sampleX$H <- segIDx$H + sampleError$H
-  # sampleX$D <- segIDx$D + sampleError$D
-  # sampleX$BAtot <- segIDx$BAtot + sampleError$G
-  # sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-  # sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-  # sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
   
-  abc<-Fweibull.v(errData$all$mu,diag(errData$all$sigma))
-  shd<-data.frame(shape=abc$c,decay=abc$b^(-abc$c))
-  rho<-cov2cor(errData$all$sigma)
-  sampleX<-data.table(rmvweisd(nSample*2, shd$shape, shd$decay, rho))
-  colnames(sampleX)<-c('BAtot','D','H','BApPer','BAspPer','BAbPer')
-  
-  sampleX <- sampleX[H>1.5]
-  sampleX <- sampleX[D>0.5]
-  sampleX <- sampleX[BAtot>0.045]
-  sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  if(nrow(sampleX)<nSample){
-    sample1 <- sampleX
-    set.seed(1234)
-    # sampleError <- data.table(mvrnorm(nSample*2,mu=errData$all$mu,Sigma=errData$all$sigma))
-    # # segIDx <- dataSurV[segID==2]
-    # sampleX <- data.table()
-    # sampleX$H <- segIDx$H + sampleError$H
-    # sampleX$D <- segIDx$D + sampleError$D
-    # sampleX$BAtot <- segIDx$BAtot + sampleError$G
-    # sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-    # sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-    # sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-    
-    abc<-Fweibull.v(errData$all$mu,diag(errData$all$sigma))
-    shd<-data.frame(shape=abc$c,decay=abc$b^(-abc$c))
-    rho<-cov2cor(errData$all$sigma)
-    sampleX <- data.table(rmvweisd(nSample*2, shd$shape, shd$decay, rho))
-    colnames(sampleX)<-c('BAtot','D','H','BApPer','BAspPer','BAbPer')
-    
-    sampleX <- sampleX[H>1.5]
-    sampleX <- sampleX[D>0.5]
-    sampleX <- sampleX[BAtot>0.045]
-    sampleX <- rbind(sample1,sampleX)
-    sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  }
->>>>>>> ca58874717858b9cf57a0ee1cdeb48fd5ea9f6ac
-
   sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
             as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
           by = seq_len(nrow(sampleX))]
@@ -766,7 +668,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
   # sampleX[,rootBAp:=BAp^0.5]
-
+  
   ###estimates for negative values based on average growth  
   dH <- mean(sampleX[-xx]$Hx - sampleX[-xx]$H,na.rm=T)
   dD <- mean(sampleX[-xx]$Dx - sampleX[-xx]$D,na.rm=T)
@@ -784,14 +686,14 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   sigmax <- sampleX[,cov(cbind(Hx,Dx,Bx,BpPerx,BspPerx,BdPerx))]
   
   pMvnormx <- c(mux,as.vector(sigmax))
-
-###sample from second measurement
+  
+  ###sample from second measurement
   mux2 <- c(segIDx$h2 + mu2[3],segIDx$dbh2 + mu2[2],segIDx$BAtot2 + mu2[1],
             segIDx$BApPer2 + mu2[4],segIDx$BAspPer2 + mu2[5],segIDx$BAbPer2 + mu2[6])
   sigmax2 <- sigma2[c(3,2,1,4:6),c(3,2,1,4:6)]
   
   pMvnormx2 <- c(mux2,as.vector(sigmax2))
-
+  
   
   LL <- solve(sigmax + sigmax2,tol=1e-20)
   sigmaPost <- sigmax %*% LL %*% sigmax2
@@ -801,7 +703,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   pMvnormPost <- c(muPost,as.vector(sigmaPost))
   # ss= inv(inv(sigmax)+inv(sigmax2))
   # ff <- sigmaPost %*% (sigmax %^%(-1)) %*% mux + sigmaPost %*% (sigmax2 %^%(-1)) %*% mux2
-
+  
   # return(list(muPrior=mux,muLik=mux2,muPost=as.vector(muPost),
   #             sigPrior=sigmax,sigLik=sigmax2,sigPost=sigmaPost))
   pars <- c(as.vector(pMvnormx),as.vector(pMvnormx2),as.vector(pMvnormPost))
@@ -820,7 +722,7 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
     sigmaUnc <- errData[[paste0("y",yearUnc)]][[paste0("t",tileX)]]$sigmaFSVda
     step.probitX <- step.probit[[paste0("y",yearUnc)]][[paste0("t",tileX)]]
   }
-
+  
   pST <- predict(step.probitX,type='p',segIDx)   ### needs to be changed . We need to calculate with 2016 and 2019 data
   
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
@@ -888,7 +790,7 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX[,BAp:=BApPer*BAtot/100]
   sampleX[,BAsp:=BAspPer*BAtot/100]
   sampleX[,BAb:=BAbPer*BAtot/100]
-
+  
   # sampleX[,segID:=segIDx$segID]
   
   sampleX[,BAtot:=(BAp+BAsp+BAb)]
@@ -908,7 +810,7 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   sampleX[,BpPerx := Bpx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BspPerx := Bspx/(Bpx+Bspx+Bdx)*100]
   sampleX[,BdPerx := Bdx/(Bpx+Bspx+Bdx)*100]
-
+  
   ##estimates for negative values based on average growth  
   dH <- mean(sampleX[-xx]$Hx - sampleX[-xx]$H,na.rm=T)
   dD <- mean(sampleX[-xx]$Dx - sampleX[-xx]$D,na.rm=T)
@@ -931,4 +833,3 @@ prForUnc <- function(segIDx,nSample,yearUnc,tileX){
   pars <- as.vector(pMvnormx)
   return(pars)
 }
-
