@@ -329,7 +329,7 @@ createDT <- function(climate, management,variable, layer,startingYear,funX,siteT
 
 
 # this function create raster in tif format from data.tables selecting one year or the average of a time priod if yearOut is a vector of years
-createTifFromDT <- function(climate, management, yearOut, varX, layerDT, stYear,XYsegID,crsX=NA){
+createTifFromDT <- function(yearOut, varX, stYear,XYsegID,crsX=NA){
   simYear <- yearOut - stYear
   fileDT=paste0("outDT/","init",startingYear,"/st",siteTypeX,"/",varNames[varX],"_",management,"_",climate,
                 "layer",layerDT,".rdata")

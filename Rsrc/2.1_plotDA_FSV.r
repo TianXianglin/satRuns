@@ -124,16 +124,17 @@ load("plots/init2016/DA2019/dataForPlots.rdata")
 
 vars <- unique(dataAll$varNam)
 pX <- list()
-
+units <- c("H (m)","D (cm)","BA (m2)", "cover (%)", "cover (%)", "cover (%)",
+           "variance (m)","variance (cm)","variance (m2)",
+           "variance (%)", "variance (%)", "variance (%)")
 for(ij in 1:length(vars)){
   varX <- vars[ij]
   pX[[ij]] <- ggplot(dataAll[varNam==varX],
                      aes(x = value, y = run, fill = stat(x))
-  ) +
+  ) + 
     geom_density_ridges_gradient(scale = 3, size = 0.3, rel_min_height = 0.01) +
     scale_fill_viridis_c(name = "", option = "C") +
-    labs(title = varX)
-  
+    labs(title = varX)+ xlab(units[ij])+ ylab(NULL)
 }
 
 # png("plots/init2016/DA2019/fsvPlot.png")
@@ -145,9 +146,14 @@ for(ij in 1:length(vars)){
   pVar = ggarrange(pX[[7]],pX[[8]],pX[[9]],pX[[10]],pX[[11]],pX[[12]],
                    nrow = 2,ncol=3,legend = "none")
   # dev.off()
-  
+  p1 <-  pFSV <- ggarrange(pX[[1]],pX[[2]],pX[[3]],pX[[7]],pX[[8]],pX[[9]],
+                           nrow = 2,ncol=3,legend = "none")
+  p2 <-  pFSV <- ggarrange(pX[[4]],pX[[5]],pX[[6]],pX[[10]],pX[[11]],pX[[12]],
+                           nrow = 2,ncol=3,legend = "none")
   ggsave("plots/init2016/DA2019/fsvPlot.pdf",plot = pFSV)
   ggsave("plots/init2016/DA2019/VarfsvPlot.pdf",plot = pVar)
+  ggsave("plots/HDBPlot.png",plot = p1)
+  ggsave("plots/coverPlot.png",plot = p2)
   # ggsave("plots/init2016/DA2019/fsvPlot.eps",plot = pFSV,device = "eps")
   # ggsave("plots/init2016/DA2019/VarfsvPlot.eps",plot = pVar,device = "eps")
   
