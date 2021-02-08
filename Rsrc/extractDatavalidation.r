@@ -3,7 +3,8 @@ library(raster)
 load("/scratch/project_2000994/PREBASruns/assessCarbon/data/traningSites.rdata")
 # load("/scratch/project_2000994/PREBASruns/assessCarbon/data/")
 
-setwd("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_35VLJ/")
+tileX <- "35VLJ"
+setwd(paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/"))
 load("procData/init2016/DA2019/XYsegID.rdata") 
 rastX <- rasterFromXYZ(XYsegID)
   

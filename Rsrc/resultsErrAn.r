@@ -4,7 +4,8 @@ library(devtools)
 library(data.table)
 devtools::source_url("https://raw.githubusercontent.com/ForModLabUHel/utilStuff/master/ErrorDecomposition/ErrorDecomposition.R")
 
-load("~/research/assessCarbon/data2019res_34VEQ.rdata")
+tileX <- "35VLJ"
+load(paste0("~/research/assessCarbon/data2019res_",tileX,".rdata"))
 data2019res
 plot(data2019res$G.est,data2019res$G.mea)
 points(data2019res$BDA2019,data2019res$G.mea,col=2,pch=20)
