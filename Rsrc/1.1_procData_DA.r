@@ -4,8 +4,8 @@ library(devtools)
 source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/settings.r")
 if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings file from local directory if one exists
 
-# source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/rmvweisd.r")
-# source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/Fweibull_Arithmetic Mean and Variance.R")
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/rmvweisd.r")
+source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/Fweibull_Arithmetic Mean and Variance.R")
 
 if(modifiedSettings) {
   source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
