@@ -44,7 +44,7 @@ sampleX <- rbind(sampleX,data.table(value=rnorm(nSample,mean=subsetX[run==runX &
 
 # ,""
 sampleX$run <- factor(sampleX$run,levels = c("s2016","m2019","s2019","DA2019"))
-pB <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
+pB1 <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
   geom_vridgeline(stat="ydensity", trim=FALSE, alpha = 0.3, scale = 2)+
   ylab(paste(varX,unitX)) + xlab("year") + scale_fill_manual(values=colX)
 
@@ -78,7 +78,7 @@ sampleX <- rbind(sampleX,data.table(value=rnorm(nSample,mean=subsetX[run==runX &
                                     run=runX,year=yearX))
 
 sampleX$run <- factor(sampleX$run,levels = c("s2016","m2019","s2019","DA2019"))
-pH <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
+pH1 <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
   geom_vridgeline(stat="ydensity", trim=FALSE, alpha = 0.3, scale = 2)+
   ylab(paste(varX,unitX)) + xlab("year")+ scale_fill_manual(values=colX)
 
@@ -111,7 +111,7 @@ sampleX <- rbind(sampleX,data.table(value=rnorm(nSample,mean=subsetX[run==runX &
                                     run=runX,year=yearX))
 
 sampleX$run <- factor(sampleX$run,levels = c("s2016","m2019","s2019","DA2019"))
-pD <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
+pD1 <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
   geom_vridgeline(stat="ydensity", trim=FALSE, alpha = 0.3, scale = 2)+
   ylab(paste(varX,unitX)) + xlab("year")+ scale_fill_manual(values=colX)
 
@@ -148,8 +148,8 @@ pSC <- ggplot(data=xy, aes(x=siteClass, y=prob, fill=run)) +
   geom_bar(stat="identity", color="black", position=position_dodge()) +
   scale_fill_manual(values=alpha(colX,.3))
 
-pSite1 <- ggarrange(pB,pH,pD,pSC,common.legend = T)
-pSite1
+# pSite1 <- ggarrange(pB,pH,pD,common.legend = T,nrow=1)
+# pSite1
 
 #############site2
 nX <- 123
@@ -186,7 +186,7 @@ sampleX <- rbind(sampleX,data.table(value=rnorm(nSample,mean=subsetX[run==runX &
 colX <- c("#66ffd9","#80e5ff","#e6e600","#ff8533")
 # ,""
 sampleX$run <- factor(sampleX$run,levels = c("s2016","m2019","s2019","DA2019"))
-pB <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
+pB2 <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
   geom_vridgeline(stat="ydensity", trim=FALSE, alpha = 0.3, scale = 2)+
   ylab(paste(varX,unitX)) + xlab("year") + scale_fill_manual(values=colX)
 
@@ -220,7 +220,7 @@ sampleX <- rbind(sampleX,data.table(value=rnorm(nSample,mean=subsetX[run==runX &
                                     run=runX,year=yearX))
 
 sampleX$run <- factor(sampleX$run,levels = c("s2016","m2019","s2019","DA2019"))
-pH <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
+pH2 <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
   geom_vridgeline(stat="ydensity", trim=FALSE, alpha = 0.3, scale = 2)+
   ylab(paste(varX,unitX)) + xlab("year")+ scale_fill_manual(values=colX)
 
@@ -253,7 +253,7 @@ sampleX <- rbind(sampleX,data.table(value=rnorm(nSample,mean=subsetX[run==runX &
                                     run=runX,year=yearX))
 
 sampleX$run <- factor(sampleX$run,levels = c("s2016","m2019","s2019","DA2019"))
-pD <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
+pD2 <- ggplot(sampleX, aes(x=as.factor(year), y=value, width = ..density.., fill=run)) +
   geom_vridgeline(stat="ydensity", trim=FALSE, alpha = 0.3, scale = 2)+
   ylab(paste(varX,unitX)) + xlab("year")+ scale_fill_manual(values=colX)
 
@@ -284,8 +284,9 @@ pSC <- ggplot(data=xy, aes(x=siteClass, y=prob, fill=run)) +
   geom_bar(stat="identity", color="black", position=position_dodge()) +
   scale_fill_manual(values=alpha(colX,.3))
 
-pSite2 <- ggarrange(pB,pH,pD,pSC,common.legend = T)
-pSite2
+# pSite2 <- ggarrange(pB,pH,pD,pSC,common.legend = T)
+# pSite2 <- ggarrange(pB,pH,pD,common.legend = T,nrow=1)
+# pSite2
 
 
  
@@ -311,9 +312,9 @@ xyAll$run <- factor(xyAll$run,levels = c("s2016","m2019","s2019","DA2019"))
 setnames(xyAll,"Var2","siteClass")
 xyAll$siteClass <- factor(xyAll$siteClass)
 
-pAllST <- ggplot(xyAll, aes(x=siteClass, y=value, fill=run)) +
-  geom_boxplot() + scale_fill_manual(values=alpha(colX,.3))
-
+pAllST <- ggplot(xyAll, aes(x=siteClass, y=value, fill=run,color=run)) +
+  geom_boxplot() + scale_fill_manual(values=alpha(colX,.3)) +
+  scale_color_manual(values=colX) + ggtitle("Tile distribution")
 
 
 
@@ -328,11 +329,14 @@ pDev <- ggarrange(Bhist,Hhist,Dhist)
 
 
 # savePlots
-ggsave("site1.jpeg",pSite1,device = "jpeg")
-ggsave("site2.jpeg",pSite2,device = "jpeg")
+pSite <- ggarrange(pB1,pD1,pH1,pB2,pD2,pH2,nrow=2,ncol=3,common.legend=T)
+ggsave("pSite.jpeg",pSite,device = "jpeg")
+# ggsave("site2.jpeg",pSite2,device = "jpeg")
 ggsave("pDev.jpeg",pDev,device = "jpeg")
 ggsave("pAllST.jpeg",pAllST,device = "jpeg")
 
-
-
-
+pSC <- pSC + ggtitle("Pixel calculation (example)")
+pST <- plot_grid(pSC, pAllST, labels=c("A", "B"), ncol = 2, nrow = 1)
+# pST <- ggarrange(pSC,pAllST)
+ggsave("pSC.jpeg",pST,device = "jpeg")
+  
