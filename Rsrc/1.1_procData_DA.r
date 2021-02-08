@@ -7,9 +7,9 @@ if(file.exists("localSettings.r")) {source("localSettings.r")} # use settings fi
 # source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/rmvweisd.r")
 # source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/Fweibull_Arithmetic Mean and Variance.R")
 
-if(modifiedSettings) {
-  source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
-}
+# if(modifiedSettings) {
+#   source("/scratch/project_2000994/PREBASruns/assessCarbon/Rsrc/mainSettings.r") # in CSC
+# }
 
 # Create folders for outputs.
 setwd(generalPath)
