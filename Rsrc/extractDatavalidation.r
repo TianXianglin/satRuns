@@ -28,18 +28,28 @@ for(i in 1:nSplit){
 
   dataX <- data2019x[segID %in% unique(pMvNorm$segID)]
   # if (i==13) 
-    dataX <- dataX[!duplicated(segID)]
+    # dataX <- dataX[!duplicated(segID)]
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Bm2019"]$V1
+  dataX$Bm2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Bs2019"]$V1
+  dataX$Bs2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Bm2019"]$V1
+  dataX$BDA2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
 
-  dataX$Bm2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Bm2019"]$V1
-  dataX$Bs2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Bs2019"]$V1
-  dataX$BDA2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "BDA2019"]$V1
-  dataX$Dm2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Dm2019"]$V1
-  dataX$Ds2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Ds2019"]$V1
-  dataX$DDA2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "DDA2019"]$V1
-  dataX$Hm2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Hm2019"]$V1
-  dataX$Hs2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Hs2019"]$V1
-  dataX$HDA2019 <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "HDA2019"]$V1
-  
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Dm2019"]$V1
+  dataX$Dm2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Ds2019"]$V1
+  dataX$Ds2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "DDA2019"]$V1
+  dataX$DDA2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
+
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Hm2019"]$V1
+  dataX$Hm2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Hs2019"]$V1
+  dataX$Hs2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "HDA2019"]$V1
+  dataX$HDA2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
+
   data2019res <- rbind(data2019res,dataX)
   rm(pMvNorm,dataX); gc()
   print(i) 
