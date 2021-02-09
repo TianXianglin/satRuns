@@ -34,6 +34,7 @@ library(MASS)
 library(minpack.lm)
 library(sf)
 library(fasterize)
+library(abind)
 
 
 ###check prebas version and install if needed
