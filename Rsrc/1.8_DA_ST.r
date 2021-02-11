@@ -64,10 +64,8 @@ if(parallelRun){  ### PARALLEL run
   # later on to produce a matrix where the 5 values are places in separate columns right away. 
   # That modification would decrease the need of reorganizing the data afterwards (in 
   # lines 73-82).
-  nRowStPm <- nrow(stProbMod)
-  # stProbMod <- matrix(mclapply(1:nrow(stProbMod), function(i,stProbMod){
-  stProbMod <- matrix(mclapply(1:nRowStPm, function(i,stProbMod){
-      stProbMod[i,] <- pSTx(dataSurMod[i],nSample,startingYear,year2,tileX)
+  stProbMod <- matrix(mclapply(1:nrow(stProbMod), function(i,stProbMod){
+    stProbMod[i,] <- pSTx(dataSurMod[i],nSample,startingYear,year2,tileX)
   },stProbMod=stProbMod,mc.cores = coresN))
   
   #Clean and convert the matrix to data table
