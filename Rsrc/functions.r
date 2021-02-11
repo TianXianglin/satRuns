@@ -371,6 +371,7 @@ fixBAper <- function(BApers){
 
 ###function for site type data assimilation
 pSTx <- function(segIDx,nSample,year1,year2,tileX){
+  print(sedIDx$segID)
   mu1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$muFSVda
   sigma1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$sigmaFSVda
   mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muSTda
