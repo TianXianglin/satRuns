@@ -98,7 +98,7 @@ if (splitRun) {
   tryCatch(expr = {
     probit1 <- predict(step.probit1,type='p',dataSurMod[1:nSeg,])
     },### needs to be changed . We need to calculate with 2016 and 2019 data  },
-  error=function(e){cat("ERROR probit1:",print(segIDx), "\n")})
+  error=function(e){cat("ERROR :",print("probit1"), "\n")})
   
   
   ###calculate probit2019
@@ -107,7 +107,7 @@ if (splitRun) {
   tryCatch(expr = {
     probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data  },### needs to be changed . We need to calculate with 2016 and 2019 data  },
   },
-  error=function(e){cat("ERROR probit2:",print(segIDx), "\n")})
+  error=function(e){cat("ERROR :",print("probit2"), "\n")})
 
   
   stProb <- array(NA, dim=c(nSeg,5,3))
