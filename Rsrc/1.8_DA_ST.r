@@ -89,7 +89,7 @@ if(parallelRun){  ### PARALLEL run
   stProbMod <- data.table(stProbMod)
 }
 print("I'm here")
-save(stProb,stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod_TEST_",split_id,".rdata"))
+save(stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod_TEST_",split_id,".rdata"))
 if (splitRun) {
   ###calculate probit2016
   
