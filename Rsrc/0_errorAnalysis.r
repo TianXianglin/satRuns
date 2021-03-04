@@ -104,6 +104,8 @@ calProbit <- function(dataX, yearX="all", tileX="all"){
 
 step.probit <- list()
 step.probit$all <- calProbit(dataAll)
+step.probit$y2016$all <- calProbit(dataAll,yearX=2016)
+step.probit$y2019$all <- calProbit(dataAll,yearX=2019)
 step.probit$y2016$t35VLJ <- calProbit(dataAll,yearX=2016,tileX="35VLJ")
 step.probit$y2019$t35VLJ <- calProbit(dataAll,yearX=2019,tileX="35VLJ")
 # step.probit$y2016$t35VNL <- calProbit(dataAll,yearX=2016,tileX="35VNL")
