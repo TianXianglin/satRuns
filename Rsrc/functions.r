@@ -428,10 +428,10 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
     logistic.model <- logisticPureF[[paste0("y",year1)]][[paste0("t",tileX)]]
   }
 
-  tryCatch({
+  # tryCatch({
     set.seed(1234)
     sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
-  }, error=function(e){cat("ERROR logisticPureF:",print(segIDx), "\n")})
+  # }, error=function(e){cat("ERROR logisticPureF:",print(segIDx), "\n")})
 
   if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
   if(max.pro.est==2) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(0,100,0)]
@@ -457,14 +457,14 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,SDI:=N *(D/10)^b]
   
   # full.model<-lm(lnVmod~H+D+lnBAp+lnBAsp+lnBAb+st,data=dataX)
-  tryCatch(expr = {
+  # tryCatch(expr = {
     sampleX$st <- factor(1)
     sampleX[,VsurST1 := pmax(0.,predict(step.modelV,newdata=sampleX))]
     sampleX[,BsurST1 := pmax(0.,predict(step.modelB,newdata=sampleX))]
     sampleX[,DsurST1 := pmax(0.,predict(step.modelD,newdata=sampleX))]
     sampleX[,HsurST1 := pmax(0.,predict(step.modelH,newdata=sampleX))]
-  },
-  error=function(e){cat("ERROR ST1:",print(segIDx), "\n")})
+  # },
+  # error=function(e){cat("ERROR ST1:",print(segIDx), "\n")})
   
   ###estimates for negative values based on average growth  
   dH <- mean(sampleX[-xx]$HsurST1 - sampleX[-xx]$H,na.rm=T)

@@ -89,27 +89,24 @@ if(parallelRun){  ### PARALLEL run
   stProbMod <- data.table(stProbMod)
 }
 print("I'm here")
-save(stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod_TEST_",split_id,".rdata"))
+# save(stProbMod, file = paste0(procDataPath,"init",startingYear,"/calST_split/stProbMod_TEST_",split_id,".rdata"))
 if (splitRun) {
   ###calculate probit2016
   
   dataSurMod[,st:=st1]
+  
   step.probit1 <- step.probit[[paste0("y",startingYear)]][[paste0("t",tileX)]]
-  tryCatch(expr = {
-    probit1 <- predict(step.probit1,type='p',dataSurMod[1:nSeg,])
-    },### needs to be changed . We need to calculate with 2016 and 2019 data  },
-  error=function(e){cat("ERROR :",print("probit1"), "\n")})
-  
-  
+  if(is.null(step.probit1)) step.probit1 <- step.probit[[paste0("y",startingYear)]][["all"]]
+  if(is.null(step.probit1)) step.probit1 <- step.probit[["all"]]
+  probit1 <- predict(step.probit1,type='p',dataSurMod[1:nSeg,])
+
   ###calculate probit2019
   dataSurMod[,st:=st2]
   step.probit2 <- step.probit[[paste0("y",year2)]][[paste0("t",tileX)]]
-  tryCatch(expr = {
-    probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data  },### needs to be changed . We need to calculate with 2016 and 2019 data  },
-  },
-  error=function(e){cat("ERROR :",print("probit2"), "\n")})
+  if(is.null(step.probit2)) step.probit2 <- step.probit[[paste0("y",year2)]][["all"]]
+  if(is.null(step.probit2)) step.probit2 <- step.probit[["all"]]
+  probit2 <- predict(step.probit2,type='p',dataSurMod[1:nSeg,])   ### needs to be changed . We need to calculate with 2016 and 2019 data  },### needs to be changed . We need to calculate with 2016 and 2019 data  },
 
-  
   stProb <- array(NA, dim=c(nSeg,5,3))
   stProb[,,1] <- probit1
   stProb[,,2] <- probit2
