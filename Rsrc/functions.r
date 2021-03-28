@@ -372,9 +372,13 @@ fixBAper <- function(BApers){
 ###function for site type data assimilation
 pSTx <- function(segIDx,nSample,year1,year2,tileX){
   mu1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$muFSVda
+  if(is.null(mu1)) mu1 <- errData[[paste0("y",year1)]]$all$muFSVda
   sigma1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$sigmaFSVda
+  if(is.null(sigma1)) sigma1 <- errData[[paste0("y",year1)]]$all$sigmaFSVda
   mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muSTda
+  if(is.null(mu2)) mu2 <- errData[[paste0("y",year2)]]$all$muSTda
   sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaSTda
+  if(is.null(sigma2)) sigma2 <- errData[[paste0("y",year2)]]$all$sigmaSTda
   set.seed(1234)
   sampleError <- data.table(mvrnorm(nSample,mu=mu1,Sigma=sigma1))
   # segIDx <- dataSurV[segID==2]
@@ -392,29 +396,7 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   ###filter data
   minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
   xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
-  # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  # if(nrow(sampleX)<nSample){
-  #   sample1 <- sampleX
-  #   set.seed(1234)
-  #   sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
-  #   # segIDx <- dataSurV[segID==2]
-  #   sampleX <- data.table()
-  #   sampleX$H <- segIDx$H + sampleError$H
-  #   sampleX$D <- segIDx$D + sampleError$D
-  #   sampleX$BAtot <- segIDx$BAtot + sampleError$G
-  #   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-  #   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-  #   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-  #   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
-  #   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
-  #   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
-  #   sampleX <- sampleX[H>1.5]
-  #   sampleX <- sampleX[D>0.5]
-  #   sampleX <- sampleX[BAtot>0.045]
-  #   sampleX <- rbind(sample1,sampleX)
-  #   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  # }
-  
+ 
   sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
             as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
           by = seq_len(nrow(sampleX))]
@@ -426,6 +408,8 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
     logistic.model <- logisticPureF$all
   }else{
     logistic.model <- logisticPureF[[paste0("y",year1)]][[paste0("t",tileX)]]
+    # if(is.null(logistic.model)) logistic.model<- logisticPureF[[paste0("y",year1)]]$all
+    if(is.null(logistic.model)) logistic.model<- logisticPureF$all
   }
 
   # tryCatch({
@@ -447,9 +431,6 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
   sampleX[,dbh2:=segIDx$dbh2]
   sampleX[,segID:=segIDx$segID]
   
-  # sampleX$lnVmod<-log(sampleX$Vmod)
-  # sampleX$st<-factor(sampleX$st,levels = 1:5)     ##!!!!Xianglin
-  # sampleX$st <- factor(sampleX$st)
   sampleX[,BAtot:=(BAp+BAsp+BAb)]
   sampleX[,BAh:=BAtot*H]
   sampleX[,N:=BAtot/(pi*(D/200)^2)]
