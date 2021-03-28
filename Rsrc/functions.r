@@ -571,32 +571,7 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   ###filter data
   minH <- 1.5; minD <- 0.5; minB <- pi*(minD/2)^2/10000*2200
   xx <- unique(c(which(sampleX$H< minH),which(sampleX$D< minD),which(sampleX$BAtot< minB)))
-  # sampleX[H<=1.3]$H <- 1.3
-  # sampleX[D<=0]$D <- 0.1
-  # sampleX[BAtot<=0]$BAtot <- 0.01
-  # sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  # if(nrow(sampleX)<nSample){
-  #   sample1 <- sampleX
-  #   set.seed(123)
-  #   sampleError <- data.table(mvrnorm(nSample*2,mu=mu1,Sigma=sigma1))
-  #   # segIDx <- dataSurV[segID==2]
-  #   sampleX <- data.table()
-  #   sampleX$H <- segIDx$H + sampleError$H
-  #   sampleX$D <- segIDx$D + sampleError$D
-  #   sampleX$BAtot <- segIDx$BAtot + sampleError$G
-  #   sampleX$BApPer <- segIDx$BApPer + sampleError$BAp
-  #   sampleX$BAspPer <- segIDx$BAspPer + sampleError$BAsp
-  #   sampleX$BAbPer <- segIDx$BAbPer + sampleError$BAb
-  #   sampleX$BAp <- segIDx$BApPer * sampleX$BAtot/100
-  #   sampleX$BAsp <- segIDx$BAspPer * sampleX$BAtot/100
-  #   sampleX$BAb <- segIDx$BAbPer * sampleX$BAtot/100
-  #   sampleX <- sampleX[H>1.5]
-  #   sampleX <- sampleX[D>0.5]
-  #   sampleX <- sampleX[BAtot>0.045]
-  #   sampleX <- rbind(sample1,sampleX)
-  #   sampleX <- sampleX[1:min(nSample,nrow(sampleX))]
-  # }
-  
+
   sampleX[, c("BApPer", "BAspPer", "BAbPer"):=
             as.list(fixBAper(unlist(.(BApPer,BAspPer,BAbPer)))), 
           by = seq_len(nrow(sampleX))]
