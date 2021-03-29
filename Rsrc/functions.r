@@ -546,9 +546,13 @@ pSTx <- function(segIDx,nSample,year1,year2,tileX){
 ###function for structural variables data assimilation 
 pSVDA <- function(segIDx,nSample,year1,year2,tileX){
   mu1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$muFSVda
+  if(is.null(mu1)) mu1 <- errData[[paste0("y",year1)]]$all$muFSVda
   sigma1 <- errData[[paste0("y",year1)]][[paste0("t",tileX)]]$sigmaFSVda
+  if(is.null(sigma1)) sigma1 <- errData[[paste0("y",year1)]]$all$sigmaFSVda
   mu2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$muFSVda
+  if(is.null(mu2)) mu2 <- errData[[paste0("y",year2)]]$all$muFSVda
   sigma2 <- errData[[paste0("y",year2)]][[paste0("t",tileX)]]$sigmaFSVda
+  if(is.null(sigma2)) sigma2 <- errData[[paste0("y",year2)]]$all$sigmaFSVda
   
   pST <- c(segIDx$pST1,segIDx$pST2,segIDx$pST3,segIDx$pST4,segIDx$pST5)
   st <- sample(rep(1:5,round(nSample*pST)),nSample,replace = T)
@@ -583,8 +587,10 @@ pSVDA <- function(segIDx,nSample,year1,year2,tileX){
     logistic.model <- logisticPureF$all
   }else{
     logistic.model <- logisticPureF[[paste0("y",year1)]][[paste0("t",tileX)]]
+    # if(is.null(logistic.model)) logistic.model<- logisticPureF[[paste0("y",year1)]]$all
+    if(is.null(logistic.model)) logistic.model<- logisticPureF$all
   }
-  
+
   set.seed(1234)
   sampleX$pureF <- runif(min(nSample,nrow(sampleX)),0,1)<predict(logistic.model,type="response",newdata = segIDx)
   if(max.pro.est==1) sampleX[which(pureF),c("BApPer","BAspPer","BAbPer"):=list(100,0,0)]
