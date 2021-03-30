@@ -3,8 +3,9 @@ library(ggplot2)
 library(devtools)
 library(data.table)
 devtools::source_url("https://raw.githubusercontent.com/ForModLabUHel/utilStuff/master/ErrorDecomposition/ErrorDecomposition.R")
-
-tileX <- "35VLJ"
+# source("runSettings.r")
+print("define tileX. example: tileX <- '35VLJ'")
+# tileX <- "35VLJ"
 load(paste0("~/research/assessCarbon/data2019res_",tileX,".rdata"))
 data2019res
 plot(data2019res$G.est,data2019res$G.mea)
