@@ -41,7 +41,24 @@ pMvNorm$varNam <- rep(
 oo <- merge(data2019, pMvNorm[varNam=="Hm2019",1:2], by.x = "segID", 
       by.y = "segID", all.x = TRUE, all.y = FALSE)
 
-for(i in 10:20){
+setkey(XYsegID,segID)
+  Dda2019 <- Dm2019 <- Ds2019 <- 
+  Hda2019 <- Hm2019 <- Hs2019 <- 
+  Bda2019 <- Bm2019 <- Bs2019 <- data.table()
+for(i in 1:20){
+  load(paste0("posterior/pMvn_FSV_split",i,".rdata"))
+  setkey(pMvNorm,segID)
+  Dda2019 <- rbind(Dda2019,merge(XYsegID,pMvNorm[varNam=="DDA2019"]))
+  Dm2019 <- rbind(Dm2019,merge(XYsegID,pMvNorm[varNam=="Dm2019"]))
+  Ds2019 <- rbind(Ds2019,merge(XYsegID,pMvNorm[varNam=="Ds2019"]))
+  Hda2019 <- rbind(Hda2019,merge(XYsegID,pMvNorm[varNam=="HDA2019"]))
+  Hm2019 <- rbind(Hm2019,merge(XYsegID,pMvNorm[varNam=="Hm2019"]))
+  Hs2019 <- rbind(Hs2019,merge(XYsegID,pMvNorm[varNam=="Hs2019"]))
+  Bda2019 <- rbind(Bda2019,merge(XYsegID,pMvNorm[varNam=="BDA2019"]))
+  Bm2019 <- rbind(Bm2019,merge(XYsegID,pMvNorm[varNam=="Bm2019"]))
+  Bs2019 <- rbind(Bs2019,merge(XYsegID,pMvNorm[varNam=="Bs2019"]))
+}
+for(i in 2:20){
   load(paste0("posterior/pMvn_FSV_split",i,".rdata"))
   setkey(oo,segID)
   setkey(pMvNorm,segID)
