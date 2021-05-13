@@ -8,7 +8,7 @@ source_url("https://raw.githubusercontent.com/ForModLabUHel/satRuns/master/Rsrc/
 
 # Check and create output directories
 setwd(generalPath)
-mkfldr <- paste0("outRast/","init",startingYear,"/st",siteTypeX)
+mkfldr <- paste0("outRast/","init",startingYear)
 if(!dir.exists(file.path(generalPath, mkfldr))) {
   dir.create(file.path(generalPath, mkfldr), recursive = TRUE)
 }
