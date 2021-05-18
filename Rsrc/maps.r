@@ -18,7 +18,7 @@ pathX <- "~/research/assessCarbon/results/"
 # if(CSCrun==TRUE){
 #   pathX <- "/scratch/project_2000994/PREBASruns/assessCarbon/"
 # }
-coresN <- 3
+coresN <- 2
 MSEall <- data.table()
 stAll <- data.table()
 pRMSE <- list()
