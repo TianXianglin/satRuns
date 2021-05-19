@@ -90,8 +90,8 @@ createMaps <- function(rastDA,rastS,rastM,varX,unitsX){
 # }
 # },mc.cores = coresN)
 # 
-
-mapXs <- c("mapsD","mapsH","mapsB")
+fileNames <- c("mapsD","mapsH","mapsB")
+mapXs <- c("mapD","mapH","mapB")
 # mclapply(1:3,function(jx){
   for(jx in 1:3){
     
@@ -102,7 +102,7 @@ for(i in 1:length(tiles)){
   pathLap <- paste0("C:/Users/checcomi/Documents/research/assessCarbon/results/",tileX,"/rasters/")
   pathCSC <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/outRast/init2016/")
   pathX <- pathCSC
-  load(paste0(pathX,mapXs[jx],".rdata"))
+  load(paste0(pathX,fileNames[jx],".rdata"))
   mapX[[tileX]] <- get(mapXs[jx])
 }
 plotX <- ggarrange(mapX[[tiles[1]]]$map,
