@@ -56,36 +56,40 @@ createMaps <- function(rastDA,rastS,rastM,varX,unitsX){
 
 # 
 # mclapply(1:length(tiles),function(i){
-#   tileX <- tiles[i]
-#   pathLap <- paste0("C:/Users/checcomi/Documents/research/assessCarbon/results/",tileX,"/rasters/")
-#   pathCSC <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/outRast/init2016/")
-#   pathX <- pathCSC
-#   
-#   Dda <- raster(paste0(pathX,"Dda2019.tif"))
-#   Dm <- raster(paste0(pathX,"Dm2019.tif"))
-#   Ds <- raster(paste0(pathX,"Ds2019.tif"))
-#   Bda <- raster(paste0(pathX,"Bda2019.tif"))
-#   Bm <- raster(paste0(pathX,"Bm2019.tif"))
-#   Bs <- raster(paste0(pathX,"Bs2019.tif"))
-#   Hda <- raster(paste0(pathX,"Hda2019.tif"))
-#   Hm <- raster(paste0(pathX,"Hm2019.tif"))
-#   Hs <- raster(paste0(pathX,"Hs2019.tif"))
-#   
-#   mapD <- createMaps(Dda,Ds,Dm,"D","(cm)")
-#   mapH <- createMaps(Dda,Ds,Dm,"H","(m)")
-#   mapB <- createMaps(Dda,Ds,Dm,"B","(m2/ha)")
-#   
-#   save(mapD,file = paste0(pathX,"/mapsD.rdata"))
-#   save(mapH,file = paste0(pathX,"/mapsH.rdata"))
-#   save(mapB,file = paste0(pathX,"/mapsB.rdata"))
-#   # ggsave(mapH,filename = paste0(pathX,"/mapH.png"),device = "png")
-#   # ggsave(mapB,filename = paste0(pathX,"/mapB.png"),device = "png")
-#   print(tileX)
+for(i in 1:length(tiles)){
+  tileX <- tiles[i]
+  pathLap <- paste0("C:/Users/checcomi/Documents/research/assessCarbon/results/",tileX,"/rasters/")
+  pathCSC <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/outRast/init2016/")
+  pathX <- pathCSC
+
+  Dda <- raster(paste0(pathX,"Dda2019.tif"))
+  Dm <- raster(paste0(pathX,"Dm2019.tif"))
+  Ds <- raster(paste0(pathX,"Ds2019.tif"))
+  Bda <- raster(paste0(pathX,"Bda2019.tif"))
+  Bm <- raster(paste0(pathX,"Bm2019.tif"))
+  Bs <- raster(paste0(pathX,"Bs2019.tif"))
+  Hda <- raster(paste0(pathX,"Hda2019.tif"))
+  Hm <- raster(paste0(pathX,"Hm2019.tif"))
+  Hs <- raster(paste0(pathX,"Hs2019.tif"))
+
+  mapD <- createMaps(Dda,Ds,Dm,"D","(cm)")
+  mapH <- createMaps(Dda,Ds,Dm,"H","(m)")
+  mapB <- createMaps(Dda,Ds,Dm,"B","(m2/ha)")
+
+  save(mapD,file = paste0(pathX,"/mapsD.rdata"))
+  save(mapH,file = paste0(pathX,"/mapsH.rdata"))
+  save(mapB,file = paste0(pathX,"/mapsB.rdata"))
+  # ggsave(mapH,filename = paste0(pathX,"/mapH.png"),device = "png")
+  # ggsave(mapB,filename = paste0(pathX,"/mapB.png"),device = "png")
+  print(tileX)
+}
 # },mc.cores = coresN)
 # 
 
 mapXs <- c("mapsD","mapsH","mapsB")
-mclapply(1:3,function(jx){
+# mclapply(1:3,function(jx){
+  for(jx in 1:3){
+    
   
 mapX <- list()
 for(i in 1:length(tiles)){
@@ -105,4 +109,5 @@ plotX <- ggarrange(mapX[[tiles[1]]]$map,
           ncol=3,nrow=2
           )
  ggsave(plotX,filename = paste0("/scratch/project_2000994/PREBASruns/assessCarbon/",mapXs[jx],".png"),device = "png")
-},mc.cores = coresN)
+# },mc.cores = coresN)
+  }
