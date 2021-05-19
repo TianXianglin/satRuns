@@ -113,7 +113,7 @@ plotX <- ggarrange(mapX[[tiles[1]]]$map,
           mapX[[tiles[3]]]$hist,
           ncol=3,nrow=2
           )
-save(plotX,file = paste0("/scratch/project_2000994/PREBASruns/assessCarbon/",mapXs[jx],".rdata"))
- # ggsave(plotX,filename = paste0("/scratch/project_2000994/PREBASruns/assessCarbon/",mapXs[jx],".png"),device = "png")
+# save(plotX,file = paste0("/scratch/project_2000994/PREBASruns/assessCarbon/",mapXs[jx],".rdata"))
+ ggsave(plotX,filename = paste0("/scratch/project_2000994/PREBASruns/assessCarbon/",mapXs[jx],".pdf"),device = "pdf")
 # },mc.cores = coresN)
   }
