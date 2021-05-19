@@ -73,9 +73,12 @@ for(i in 1:length(tiles)){
   Hs <- raster(paste0(pathX,"Hs2019.tif"))
 
   mapD <- createMaps(Dda,Ds,Dm,"D","(cm)")
-  mapH <- createMaps(Dda,Ds,Dm,"H","(m)")
-  mapB <- createMaps(Dda,Ds,Dm,"B","(m2/ha)")
-
+  print("mapD")
+  mapH <- createMaps(Hda,Hs,Hm,"H","(m)")
+  print("mapH")
+  mapB <- createMaps(Bda,Bs,Bm,"B","(m2/ha)")
+  print("mapB")
+  
   save(mapD,file = paste0(pathX,"/mapsD.rdata"))
   save(mapH,file = paste0(pathX,"/mapsH.rdata"))
   save(mapB,file = paste0(pathX,"/mapsB.rdata"))
