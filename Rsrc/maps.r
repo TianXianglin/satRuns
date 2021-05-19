@@ -56,38 +56,38 @@ createMaps <- function(rastDA,rastS,rastM,varX,unitsX){
 
 # 
 # # mclapply(1:length(tiles),function(i){
-# for(i in 1:length(tiles)){
-#   tileX <- tiles[i]
-#   pathLap <- paste0("C:/Users/checcomi/Documents/research/assessCarbon/results/",tileX,"/rasters/")
-#   pathCSC <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/outRast/init2016/")
-#   pathX <- pathCSC
-# 
-#   Dda <- raster(paste0(pathX,"Dda2019.tif"))
-#   Dm <- raster(paste0(pathX,"Dm2019.tif"))
-#   Ds <- raster(paste0(pathX,"Ds2019.tif"))
-#   mapD <- createMaps(Dda,Ds,Dm,"D","(cm)")
-#   save(mapD,file = paste0(pathX,"/mapsD.rdata"))
-# rm(Dda,Dm,Ds,mapD);gc()
-#   print("mapD")
-#   Bda <- raster(paste0(pathX,"Bda2019.tif"))
-#   Bm <- raster(paste0(pathX,"Bm2019.tif"))
-#   Bs <- raster(paste0(pathX,"Bs2019.tif"))
-#   mapB <- createMaps(Bda,Bs,Bm,"B","(m2/ha)")
-#   save(mapB,file = paste0(pathX,"/mapsB.rdata"))
-#   print("mapB")
-# rm(Bda,Bm,Bs,mapB);gc()
-#   Hda <- raster(paste0(pathX,"Hda2019.tif"))
-#   Hm <- raster(paste0(pathX,"Hm2019.tif"))
-#   Hs <- raster(paste0(pathX,"Hs2019.tif"))
-#   mapH <- createMaps(Hda,Hs,Hm,"H","(m)")
-#   save(mapH,file = paste0(pathX,"/mapsH.rdata"))
-#   print("mapH")
-# rm(Hda,Hm,Hs,mapH);gc()
-#   
-#   # ggsave(mapH,filename = paste0(pathX,"/mapH.png"),device = "png")
-#   # ggsave(mapB,filename = paste0(pathX,"/mapB.png"),device = "png")
-#   print(tileX)
-# }
+for(i in 1:length(tiles)){
+  tileX <- tiles[i]
+  pathLap <- paste0("C:/Users/checcomi/Documents/research/assessCarbon/results/",tileX,"/rasters/")
+  pathCSC <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/outRast/init2016/")
+  pathX <- pathCSC
+
+  Dda <- raster(paste0(pathX,"Dda2019.tif"))
+  Dm <- raster(paste0(pathX,"Dm2019.tif"))
+  Ds <- raster(paste0(pathX,"Ds2019.tif"))
+  mapD <- createMaps(Dda,Ds,Dm,"D","(cm)")
+  save(mapD,file = paste0(pathX,"/mapsD.rdata"))
+rm(Dda,Dm,Ds,mapD);gc()
+  print("mapD")
+  Bda <- raster(paste0(pathX,"Bda2019.tif"))
+  Bm <- raster(paste0(pathX,"Bm2019.tif"))
+  Bs <- raster(paste0(pathX,"Bs2019.tif"))
+  mapB <- createMaps(Bda,Bs,Bm,"B","(m2/ha)")
+  save(mapB,file = paste0(pathX,"/mapsB.rdata"))
+  print("mapB")
+rm(Bda,Bm,Bs,mapB);gc()
+  Hda <- raster(paste0(pathX,"Hda2019.tif"))
+  Hm <- raster(paste0(pathX,"Hm2019.tif"))
+  Hs <- raster(paste0(pathX,"Hs2019.tif"))
+  mapH <- createMaps(Hda,Hs,Hm,"H","(m)")
+  save(mapH,file = paste0(pathX,"/mapsH.rdata"))
+  print("mapH")
+rm(Hda,Hm,Hs,mapH);gc()
+
+  # ggsave(mapH,filename = paste0(pathX,"/mapH.png"),device = "png")
+  # ggsave(mapB,filename = paste0(pathX,"/mapB.png"),device = "png")
+  print(tileX)
+}
 # },mc.cores = coresN)
 # 
 fileNames <- c("mapsD","mapsH","mapsB")
