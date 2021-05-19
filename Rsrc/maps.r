@@ -91,7 +91,7 @@ createMaps <- function(rastDA,rastS,rastM,varX,unitsX){
 # },mc.cores = coresN)
 # 
 
-mapXs <- c("mapsD","mapsH","mapsB")
+mapXs <- c("mapD","mapH","mapB")
 # mclapply(1:3,function(jx){
   for(jx in 1:3){
     
