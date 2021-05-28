@@ -12,7 +12,7 @@ library(parallel)
 devtools::source_url("https://raw.githubusercontent.com/ForModLabUHel/utilStuff/master/ErrorDecomposition/ErrorDecomposition.R")
 # source("runSettings.r")
 print("define tileX. example: tileX <- '35VLJ'")
-tiles <- c("35VLJ", "34VEQ", "35WMN")
+tileXs <- c("35VLJ", "34VEQ", "35WMN")
 pathX <- "~/research/assessCarbon/results/"
 # CSCrun=TRUE
 # if(CSCrun==TRUE){
@@ -55,9 +55,9 @@ createMaps <- function(rastDA,rastS,rastM,varX,unitsX){
 }
 
 # 
-# # mclapply(1:length(tiles),function(i){
-for(i in 1:length(tiles)){
-  tileX <- tiles[i]
+# # mclapply(1:length(tileXs),function(i){
+for(i in 1:length(tileXs)){
+  tileX <- tileXs[i]
   pathLap <- paste0("C:/Users/checcomi/Documents/research/assessCarbon/results/",tileX,"/rasters/")
   pathCSC <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/outRast/init2016/")
   pathX <- pathCSC
@@ -97,23 +97,135 @@ mapXs <- c("mapD","mapH","mapB")
     
   
 mapX <- list()
-for(i in 1:length(tiles)){
-  tileX <- tiles[i]
+for(i in 1:length(tileXs)){
+  tileX <- tileXs[i]
   pathLap <- paste0("C:/Users/checcomi/Documents/research/assessCarbon/results/",tileX,"/rasters/")
   pathCSC <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/outRast/init2016/")
   pathX <- pathCSC
   load(paste0(pathX,fileNames[jx],".rdata"))
   mapX[[tileX]] <- get(mapXs[jx])
 }
-plotX <- ggarrange(mapX[[tiles[1]]]$map,
-          mapX[[tiles[2]]]$map,
-          mapX[[tiles[3]]]$map,
-          mapX[[tiles[1]]]$hist,
-          mapX[[tiles[2]]]$hist,
-          mapX[[tiles[3]]]$hist,
+ggsave(get(mapXs[jx])$map,filename = 
+         paste0(pathX,fileNames[jx],".pdf"),device = "pdf")
+ggsave(get(mapXs[jx])$hist,filename = 
+         paste0(pathX,fileNames[jx],"_hist.pdf"),device = "pdf")
+
+plotX <- ggarrange(mapX[[tileXs[1]]]$map,
+          mapX[[tileXs[2]]]$map,
+          mapX[[tileXs[3]]]$map,
+          mapX[[tileXs[1]]]$hist,
+          mapX[[tileXs[2]]]$hist,
+          mapX[[tileXs[3]]]$hist,
           ncol=3,nrow=2
           )
 # save(plotX,file = paste0("/scratch/project_2000994/PREBASruns/assessCarbon/",mapXs[jx],".rdata"))
  ggsave(plotX,filename = paste0("/scratch/project_2000994/PREBASruns/assessCarbon/",mapXs[jx],".pdf"),device = "pdf")
 # },mc.cores = coresN)
   }
+
+
+
+
+r <- raster(system.file("external/test.grd", package="raster"))
+
+s1 <- stack(r, r*2)
+names(s2) <- c('meuse', 'meuse x 2')
+
+library(ggplot2)
+
+figX <- list()
+maps <- list()
+dev <- list()
+varXs <- c("D","H","B")
+unitsX <- c("(cm)","(m)","(m2/ha)")
+maxpixels <- 1000000
+histX <- list()
+pMap <-
+# ## With raster
+# for(i in 1:3){
+#   maps[[i]] <- raster(paste0(pathX,varXs[i],"da2019.tif"))
+#   dev$m2019 <- raster(paste0(pathX,varXs[i],"m2019.tif")) - raster(paste0(pathX,varXs[i],"da2019.tif"))
+#   dev$s2019 <- raster(paste0(pathX,varXs[i],"s2019.tif")) - raster(paste0(pathX,varXs[i],"da2019.tif"))
+# 
+#   f1 <- getValues(dev$m2019)
+#   f2 <- getValues(dev$s2019)
+#   dat1 <- data.table(counts= f1,difX="f1")
+#   dat2 <- data.table(counts= f2,difX="f2")
+#   dat <- rbind(dat1,dat2)
+#   dat$difX <- as.factor(dat$difX)
+# 
+#   histX[[i]] <- ggplot(dat[sample(1:nrow(dat),1e5)], aes(x=counts, fill=difX)) + 
+#    geom_histogram() + ylab(NULL) + xlab(paste0(varXs[i]," offSet ",unitsX[i]))
+# 
+#   # maps[[i]] <- gplot(ciao,maxpixels=1000000) + geom_tile(aes(fill = value)) +
+#   #   facet_wrap(~ varXs[i]) +
+#   #   scale_fill_gradient(low = 'white', high = 'blue') +
+#   #   coord_equal()
+#   print(i)
+# }
+# 
+# 
+# maps <- list()
+# dev <- list()
+# varXs <- c("D","H","B")
+# unitsX <- c("cm","m","m2/ha")
+for(jx in 1:3){ #loop variables
+  for(i in 1:length(tileXs)){ #loop tiles
+    tileX <- tileXs[i]
+    pathLap <- paste0("C:/Users/checcomi/Documents/research/assessCarbon/results/",tileX,"/rasters/")
+    pathCSC <- paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/outRast/init2016/")
+    pathX <- pathCSC
+    maps[[i]] <- raster(paste0(pathX,varXs[jx],"da2019.tif"))
+    dev$m2019 <- raster(paste0(pathX,varXs[jx],"m2019.tif")) - raster(paste0(pathX,varXs[jx],"da2019.tif"))
+    dev$s2019 <- raster(paste0(pathX,varXs[jx],"s2019.tif")) - raster(paste0(pathX,varXs[jx],"da2019.tif"))
+    
+    f1 <- getValues(dev$m2019)
+    f2 <- getValues(dev$s2019)
+    dat1 <- data.table(counts= f1,difX="f1")
+    dat2 <- data.table(counts= f2,difX="f2")
+    dat <- rbind(dat1,dat2)
+    dat$difX <- as.factor(dat$difX)
+    
+    histX[[i]] <- ggplot(dat[sample(1:nrow(dat),1e5)], aes(x=counts, fill=difX)) + 
+      geom_histogram(aes(y=..density..)) + ylab(NULL) + xlab(paste0(varXs[jx]," offSet ",unitsX[jx])) +
+      theme(axis.title.y=element_blank(),
+             axis.text.y=element_blank(),
+             axis.ticks.y=element_blank(),
+             legend.title = element_blank())+
+      scale_fill_discrete(labels = c("m2019-DA2019", "s2019-DA2019"))
+    print(tileX)
+    pMap[[i]] <- gplot(maps[[i]],maxpixels=maxpixels) + geom_tile(aes(fill = value)) +
+      # facet_wrap(~ names) +
+      # annotate(geom = 'text', x=1, y=1, label=tileX) + theme_void() +
+      scale_fill_gradient(low = 'white', high = 'dark green',name = paste(varXs[jx],unitsX[jx])) +
+      scale_alpha(range = c(0.15, 0.65), guide = "none") +
+      coord_equal()+  theme(axis.title=element_blank(),
+                            axis.text=element_blank(),
+                            axis.ticks=element_blank()) +
+      ggtitle(tileX) +
+      theme(legend.position="top") + 
+      ylab(NULL) + xlab(NULL)
+  } #end loop tiles
+  
+  figX[[jx]] <- ggarrange(ggarrange(pMap[[1]], pMap[[2]],pMap[[3]],
+                    ncol = 3, common.legend=T,label.x=tileXs), # first row with box and dot plots
+                    ggarrange(histX[[1]], histX[[2]],histX[[3]],
+                              ncol = 3, common.legend=T), # Second row with box and dot plots
+                    nrow = 2) 
+  
+} #end loop variables
+setwd("/scratch/project_2000994/PREBASruns/assessCarbon/")
+save(figX,file = "maps.rdata")
+
+####on laptop
+setwd("~/research/assessCarbon/")
+load("maps.rdata")
+ggsave(figX[[1]],filename="D.png",device="png")
+ggsave(figX[[2]],filename="H.png",device="png")
+ggsave(figX[[3]],filename="B.png",device="png")
+# 
+mapAll <- ggarrange(figX[[1]],figX[[2]],figX[[3]],
+                nrow = 3)
+# 
+ggsave(mapAll, width = 20, height = 30,device="png",
+filename="~/research/assessCarbon/allMaps1.png")
