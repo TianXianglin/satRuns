@@ -4,7 +4,7 @@ source("runSettings.r")
 load("/scratch/project_2000994/PREBASruns/assessCarbon/data/traningSites.rdata")
 # load("/scratch/project_2000994/PREBASruns/assessCarbon/data/")
 
-#tileX <- "35VLJ"
+tileX <- "35WMN"
 setwd(paste0("/scratch/project_2000994/PREBASruns/assessCarbon/rasters/Finland/AC_training_FI_",tileX,"/"))
 load("procData/init2016/DA2019/XYsegID.rdata") 
 rastX <- rasterFromXYZ(XYsegID)
@@ -34,7 +34,7 @@ for(i in 1:nSplit){
   dataX$Bm2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
   xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Bs2019"]$V1
   dataX$Bs2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
-  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Bm2019"]$V1
+  xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "BDA2019"]$V1
   dataX$BDA2019 <- xxx[match(dataX$segID,unique(dataX$segID))] 
 
   xxx <- pMvNorm[segID %in% dataX$segID & pMvNorm$varNam == "Dm2019"]$V1

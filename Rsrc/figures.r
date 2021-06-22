@@ -7,6 +7,7 @@ library(ggplot2)
 library(devtools)
 library(data.table)
 library(ggridges)
+library(Metrics)
 devtools::source_url("https://raw.githubusercontent.com/ForModLabUHel/utilStuff/master/ErrorDecomposition/ErrorDecomposition.R")
 # source("runSettings.r")
 print("define tileX. example: tileX <- '35VLJ'")
@@ -16,15 +17,28 @@ pathX <- "~/research/assessCarbon/results/"
 # if(CSCrun==TRUE){
 #   pathX <- "/scratch/project_2000994/PREBASruns/assessCarbon/"
 # }
+namesTab <- c(paste0("B",c("m2019","s2019","DA2019")),
+              paste0("H",c("m2019","s2019","DA2019")),
+              paste0("D",c("m2019","s2019","DA2019")))
+tabPrmse <- tabPbias <- matrix(NA,9,3,dimnames = list(namesTab,tiles))
+tabRmse <- tabBias <- matrix(NA,9,3,dimnames = list(namesTab,tiles))
+
+p_rmse <- function(sim,obs) sqrt( mean( (obs-sim)^2) ) / ( max(obs)-min(obs) )*100
+p_bias <- function(sim,obs) mean( (obs-sim))/(max(obs)-min(obs) )*100
+# msex <- function(sim,obs)  mean( (sim-obs)^2)
+# rmsex <- function(sim,obs) sqrt( mean( (sim-obs)^2) )
+# biasx <- function(sim,obs) mean( (sim-obs))
+
 
 MSEall <- data.table()
 stAll <- data.table()
 pRMSE <- list()
 nSample <- 100000
 colX <- c("#0E95A5","#28B209","#DFB021","#ff8533")
+
+
 for(i in 1:length(tiles)){
   tileX <- tiles[i]
-  
   #####Figure 1 reseults 
   load(paste0(pathX,"data2019res_",tileX,".rdata"))
   data2019res
@@ -33,8 +47,60 @@ for(i in 1:length(tiles)){
   points(data2019res$Bs2019,data2019res$G.mea,col=3,pch=20)
   points(data2019res$Bm2019,data2019res$G.mea,col=4,pch=20)
   abline(0,1)
-  p_rmse <- function(sim,obs) sqrt( mean( (sim-obs)^2) ) / ( max(obs)-min(obs) )*100
   
+  tabPrmse[1,i] <- p_rmse(data2019res$Bm2019,data2019res$G.mea)
+  tabPrmse[2,i] <- p_rmse(data2019res$Bs2019,data2019res$G.mea)
+  tabPrmse[3,i] <- p_rmse(data2019res$BDA2019,data2019res$G.mea)
+  tabPbias[1,i] <- p_bias(data2019res$Bm2019,data2019res$G.mea)
+  tabPbias[2,i] <- p_bias(data2019res$Bs2019,data2019res$G.mea)
+  tabPbias[3,i] <- p_bias(data2019res$BDA2019,data2019res$G.mea)
+  
+  tabRmse[1,i] <- rmse(data2019res$Bm2019,data2019res$G.mea)
+  tabRmse[2,i] <- rmse(data2019res$Bs2019,data2019res$G.mea)
+  tabRmse[3,i] <- rmse(data2019res$BDA2019,data2019res$G.mea)
+  tabBias[1,i] <- bias(data2019res$Bm2019,data2019res$G.mea)
+  tabBias[2,i] <- bias(data2019res$Bs2019,data2019res$G.mea)
+  tabBias[3,i] <- bias(data2019res$BDA2019,data2019res$G.mea)
+
+  tabPrmse[4,i] <- p_rmse(data2019res$Hm2019,data2019res$H.mea/10)
+  tabPrmse[5,i] <- p_rmse(data2019res$Hs2019,data2019res$H.mea/10)
+  tabPrmse[6,i] <- p_rmse(data2019res$HDA2019,data2019res$H.mea/10)
+  tabPbias[4,i] <- p_bias(data2019res$Hm2019,data2019res$H.mea/10)
+  tabPbias[5,i] <- p_bias(data2019res$Hs2019,data2019res$H.mea/10)
+  tabPbias[6,i] <- p_bias(data2019res$HDA2019,data2019res$H.mea/10)
+  
+  tabRmse[4,i] <- rmse(data2019res$Hm2019,data2019res$H.mea/10)
+  tabRmse[5,i] <- rmse(data2019res$Hs2019,data2019res$H.mea/10)
+  tabRmse[6,i] <- rmse(data2019res$HDA2019,data2019res$H.mea/10)
+  tabBias[4,i] <- bias(data2019res$Hm2019,data2019res$H.mea/10)
+  tabBias[5,i] <- bias(data2019res$Hs2019,data2019res$H.mea/10)
+  tabBias[6,i] <- bias(data2019res$HDA2019,data2019res$H.mea/10)
+  
+  tabPrmse[7,i] <- p_rmse(data2019res$Dm2019,data2019res$D.mea)
+  tabPrmse[8,i] <- p_rmse(data2019res$Ds2019,data2019res$D.mea)
+  tabPrmse[9,i] <- p_rmse(data2019res$DDA2019,data2019res$D.mea)
+  tabPbias[7,i] <- p_bias(data2019res$Dm2019,data2019res$D.mea)
+  tabPbias[8,i] <- p_bias(data2019res$Ds2019,data2019res$D.mea)
+  tabPbias[9,i] <- p_bias(data2019res$DDA2019,data2019res$D.mea)
+  
+  tabRmse[7,i] <- rmse(data2019res$Dm2019,data2019res$D.mea)
+  tabRmse[8,i] <- rmse(data2019res$Ds2019,data2019res$D.mea)
+  tabRmse[9,i] <- rmse(data2019res$DDA2019,data2019res$D.mea)
+  tabBias[7,i] <- bias(data2019res$Dm2019,data2019res$D.mea)
+  tabBias[8,i] <- bias(data2019res$Ds2019,data2019res$D.mea)
+  tabBias[9,i] <- bias(data2019res$DDA2019,data2019res$D.mea)
+}
+
+write.csv(t(rbind(tabPrmse,tabPbias)),file="~/research/assessCarbon/tab1_a.csv")
+write.csv(t(rbind(tabRmse,tabBias)),file="~/research/assessCarbon/tab1_b.csv")
+
+for(i in 1:length(tiles)){
+  tileX <- tiles[i]
+  
+  #####Figure 1 reseults 
+  load(paste0(pathX,"data2019res_",tileX,".rdata"))
+  data2019res
+
   MSEs <- data.table(value=as.numeric(unlist(MSEdec("B_est", data2019res$G.est,data2019res$G.mea,method=1))[2:5]),
                      run="est",variable="B",components=c("sb","sdsd","lc","mse"),
                      rangeObs = max(data2019res$G.mea,na.rm=T)-min(data2019res$G.mea,na.rm=T))
@@ -47,7 +113,7 @@ for(i in 1:length(tiles)){
   MSEs <- rbind(MSEs,data.table(value=as.numeric(unlist(MSEdec("B", data2019res$BDA2019,data2019res$G.mea,method=1))[2:5]),
                                 run="DA2019",variable="B",components=c("sb","sdsd","lc","mse"),
                                 rangeObs = max(data2019res$G.mea,na.rm=T)-min(data2019res$G.mea,na.rm=T)))
-  
+
   MSEs <- rbind(MSEs,data.table(value=as.numeric(unlist(MSEdec("D", data2019res$D.est,data2019res$D.mea,method=1))[2:5]),
                                 run="est",variable="D",components=c("sb","sdsd","lc","mse"),
                                 rangeObs = max(data2019res$D.mea,na.rm=T)-min(data2019res$D.mea,na.rm=T)))
@@ -142,6 +208,7 @@ for(i in 1:length(tiles)){
 }
 
 
+
 pRMSE <- ggplot(MSEall[!components %in% "mse"& !run %in% "est"], 
                 aes(x=run, y=pRMSE, fill=components)) +
   geom_bar(stat="identity")#, position = position_dodge(0.9)) +
@@ -150,14 +217,22 @@ RMSE <- ggplot(MSEall[!components %in% "mse"& !run %in% "est"],
                aes(x=run, y=RMSE, fill=components)) +
   geom_bar(stat="identity")#, position = position_dodge(0.9)) +
 # p + facet_grid(rows = vars(variable))
+MSE <- ggplot(MSEall[!components %in% "mse"& !run %in% "est"], 
+               aes(x=run, y=value, fill=components)) +
+  geom_bar(stat="identity")#, position = position_dodge(0.9)) +
 figRes1a <- pRMSE + facet_grid(rows = vars(variable), cols = vars(Tile)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 figRes1b <- RMSE + facet_grid(rows = vars(variable), cols = vars(Tile)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-resFig1 <- ggarrange(figRes1a,figRes1b)
+figRes1c <- MSE + facet_grid(rows = vars(variable), cols = vars(Tile)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+figRes1c
+
+resFig1 <- figRes1c#ggarrange(figRes1a,figRes1b)
 ggsave(resFig1,filename = paste0(pathX,"/figures/resFig1.png"),device = "png")
-ggsave(figRes1a,filename = paste0(pathX,"/figures/resFig1a.png"),device = "png")
-ggsave(figRes2b,filename = paste0(pathX,"/figures/resFig1b.png"),device = "png")
+ggsave(figRes1a,filename = paste0(pathX,"/figures/resFig1pRMSE.png"),device = "png")
+ggsave(figRes1b,filename = paste0(pathX,"/figures/resFig1rmse.png"),device = "png")
+ggsave(figRes1c,filename = paste0(pathX,"/figures/resFig1mse.png"),device = "png")
 
 
 
