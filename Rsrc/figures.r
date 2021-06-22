@@ -428,3 +428,5 @@ plotX <- ggarrange(mapX[[tiles[1]]]$map,
           mapX[[tiles[3]]]$hist,ncol=3,nrow=3
           ) 
  ggsave(Dx,filename = "/scratch/project_2000994/PREBASruns/assessCarbon/Dmaps.png",device = "png")
+
+ 
